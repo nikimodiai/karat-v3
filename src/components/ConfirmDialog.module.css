@@ -1,0 +1,33 @@
+.box {
+  background: #fff;
+  border-radius: 14px;
+  padding: 32px 28px;
+  width: 100%;
+  max-width: 380px;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(0,0,0,.25);
+}
+
+.icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: rgba(192,57,43,.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.msg {
+  font-size: 15px;
+  color: var(--ink);
+  margin-bottom: 24px;
+  line-height: 1.55;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}

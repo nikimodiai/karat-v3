@@ -1,0 +1,80 @@
+/* ── UpgradeBanner (inline) ─── */
+.banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  background: linear-gradient(105deg, rgba(201,168,76,.10) 0%, rgba(201,168,76,.04) 70%);
+  border: 1px solid rgba(201,168,76,.28);
+  border-radius: 12px;
+  position: relative;
+}
+.bannerIcon {
+  width: 36px; height: 36px; border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(201,168,76,.18); color: #8B6914;
+  flex-shrink: 0;
+}
+.bannerBody { flex: 1; min-width: 0; }
+.bannerTitle {
+  font-size: 13px; font-weight: 600; color: var(--navy);
+  font-family: var(--font-display); display: flex; gap: 6px; align-items: center;
+}
+.bannerMsg { font-size: 12px; color: var(--ink-mid); margin-top: 2px; line-height: 1.5; }
+.bannerCta {
+  background: linear-gradient(135deg,#E8CC7A 0%, #C9A84C 55%, #8B6914 100%);
+  color: #0B1829; border: none; border-radius: 7px;
+  padding: 8px 14px; font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: var(--font-body);
+  display: inline-flex; align-items: center; gap: 5px;
+  transition: transform .15s, box-shadow .15s;
+  flex-shrink: 0;
+}
+.bannerCta:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(201,168,76,.35); }
+.bannerDismiss {
+  background: none; border: none; cursor: pointer; color: var(--ink-soft);
+  padding: 4px; display: flex; border-radius: 5px;
+}
+.bannerDismiss:hover { background: rgba(11,24,41,.05); color: var(--navy); }
+
+/* ── UpgradeDialog (modal) ─── */
+.dialog {
+  background: #fff; border-radius: 16px;
+  width: 100%; max-width: 460px;
+  padding: 32px 28px 24px;
+  text-align: center; position: relative;
+  box-shadow: 0 32px 80px rgba(0,0,0,.3);
+}
+.dialogClose {
+  position: absolute; top: 14px; right: 14px;
+  background: none; border: none; cursor: pointer; color: var(--ink-soft);
+  display: flex; padding: 4px; border-radius: 6px;
+}
+.dialogClose:hover { background: rgba(11,24,41,.05); color: var(--navy); }
+.dialogIcon {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: rgba(201,168,76,.12); color: #8B6914;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+}
+.dialogTitle {
+  font-family: var(--font-display); font-size: 22px;
+  color: var(--navy); margin-bottom: 8px;
+}
+.dialogMsg { font-size: 13px; color: var(--ink-mid); line-height: 1.55; margin-bottom: 10px; }
+.dialogMeta { font-size: 12px; color: var(--ink-soft); margin-bottom: 22px; }
+.dialogActions { display: flex; gap: 10px; justify-content: center; }
+
+/* ── LockedCard (full-page block) ─── */
+.lockedCard {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; padding: 64px 24px;
+  background: #fff; border: 1px solid var(--border-card); border-radius: 12px;
+  margin: 32px auto; max-width: 520px;
+}
+.lockedTitle {
+  font-family: var(--font-display); font-size: 24px;
+  color: var(--navy); margin: 18px 0 8px;
+}
+.lockedMsg { font-size: 13px; color: var(--ink-mid); margin-bottom: 6px; line-height: 1.55; }
+.lockedMeta { font-size: 12px; color: var(--ink-soft); margin-top: 8px; }

@@ -1,0 +1,161 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  background: var(--cream);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 28px 16px;
+  border-bottom: 1px solid rgba(201,168,76,.12);
+  background: linear-gradient(90deg, #fff 0%, #fdfaf5 100%);
+  flex-wrap: wrap;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--navy);
+}
+.sub { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+
+.controls { display: flex; align-items: center; gap: 10px; }
+
+.searchWrap { position: relative; display: flex; align-items: center; }
+.searchIcon { position: absolute; left: 11px; color: var(--ink-soft); pointer-events: none; }
+.searchInput {
+  border: 1.5px solid rgba(201,168,76,.2);
+  border-radius: 8px;
+  padding: 9px 32px 9px 34px;
+  font-size: 13px;
+  font-family: var(--font-body);
+  color: var(--ink);
+  outline: none;
+  background: #fff;
+  width: 220px;
+  transition: border-color .18s;
+}
+.searchInput:focus { border-color: var(--navy-mid); }
+.clearBtn { position: absolute; right: 10px; background: none; border: none; color: var(--ink-soft); cursor: pointer; display: flex; align-items: center; padding: 2px; }
+
+.tableWrap {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 28px 32px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,.06);
+  border: 1px solid rgba(201,168,76,.1);
+}
+
+.table thead {
+  background: linear-gradient(90deg, #0D1B2A 0%, #1A3A5C 100%);
+}
+.table thead th {
+  color: rgba(255,255,255,.75);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  padding: 14px 18px;
+  text-align: left;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid rgba(201,168,76,.08);
+  transition: background .15s;
+}
+.table tbody tr:hover { background: rgba(201,168,76,.03); }
+.table tbody tr:last-child { border-bottom: none; }
+.table tbody td {
+  padding: 13px 18px;
+  font-size: 13px;
+  color: var(--ink);
+  vertical-align: middle;
+}
+
+.custName { font-weight: 600; color: var(--navy); }
+.custEmail { font-size: 11px; color: var(--ink-soft); margin-top: 2px; }
+.phone { font-size: 13px; }
+.notes { font-size: 12px; color: var(--ink-soft); max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Tier badges */
+.tierBadge {
+  display: inline-block;
+  padding: 3px 12px;
+  border-radius: 99px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.tierVVIP { background: linear-gradient(135deg, #E8CC7A, #C9A84C); color: #0D1B2A; }
+.tierVIP { background: rgba(201,168,76,.14); color: var(--gold-dk); border: 1px solid rgba(201,168,76,.3); }
+.tierRegular { background: rgba(26,58,92,.07); color: var(--navy-lt); }
+
+.rowActions { display: flex; gap: 6px; }
+.rowBtn {
+  width: 28px; height: 28px;
+  border: 1.5px solid rgba(201,168,76,.2);
+  border-radius: 7px;
+  background: #fff;
+  color: var(--ink-mid);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all .15s;
+}
+.rowBtn:hover { border-color: var(--navy); color: var(--navy); }
+.rowBtnDanger { color: var(--err); border-color: rgba(192,57,43,.18); }
+.rowBtnDanger:hover { background: rgba(192,57,43,.05); border-color: var(--err); }
+
+/* Locked + empty states */
+.locked {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 60px 24px;
+  text-align: center;
+  color: var(--ink-soft);
+}
+.locked h2 { font-family: var(--font-display); font-size: 24px; color: var(--navy); }
+.locked p { font-size: 13px; line-height: 1.65; max-width: 340px; }
+
+.center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 80px 20px;
+  text-align: center;
+  color: var(--ink-soft);
+}
+.empty h3 { font-family: var(--font-display); font-size: 20px; color: var(--navy); margin-top: 8px; }
+.empty p { font-size: 13px; }
+
+@media (max-width: 720px) {
+  .header { padding: 16px 16px; }
+  .tableWrap { padding: 14px 16px; }
+}

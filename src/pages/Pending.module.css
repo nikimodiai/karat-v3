@@ -1,0 +1,89 @@
+.screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0D1B2A 0%, #1A3A5C 60%, #2C5F8A 100%);
+  padding: 24px;
+}
+
+.box {
+  background: #fff;
+  border-radius: 18px;
+  padding: 52px 44px;
+  width: 100%;
+  max-width: 460px;
+  text-align: center;
+  box-shadow: 0 24px 64px rgba(0,0,0,.25);
+  animation: slideUp .4s ease;
+}
+
+.iconWrap {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(201,168,76,.12), rgba(201,168,76,.04));
+  border: 1.5px solid rgba(201,168,76,.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 22px;
+}
+
+.title {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 24px;
+  color: #0D1B2A;
+  margin-bottom: 12px;
+}
+
+.sub {
+  font-size: 13px;
+  color: rgba(13,27,42,.55);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+.infoCard {
+  background: #F4F7FA;
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.infoRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #0D1B2A;
+}
+
+.contact {
+  font-size: 12px;
+  color: rgba(13,27,42,.45);
+  margin-bottom: 24px;
+}
+.contact a {
+  color: #2C5F8A;
+  font-weight: 500;
+  text-decoration: none;
+}
+.contact a:hover { text-decoration: underline; }
+
+.btnLogout {
+  background: none;
+  border: 1.5px solid rgba(13,27,42,.15);
+  color: rgba(13,27,42,.55);
+  border-radius: 8px;
+  padding: 9px 22px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: all .18s;
+}
+.btnLogout:hover { border-color: #0D1B2A; color: #0D1B2A; }

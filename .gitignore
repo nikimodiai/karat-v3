@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+.pnp/
+.pnp.js
+
+# Build output
+dist/
+build/
+.vite/
+
+# Env / secrets
+.env
+.env.local
+.env.*.local
+.env.production
+
+# OS / Editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Test / coverage
+coverage/
+.nyc_output/
+
+# n8n local exports (may contain credentials — handle with care)
+*.n8n.local.json

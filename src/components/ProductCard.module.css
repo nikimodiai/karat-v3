@@ -1,0 +1,131 @@
+/* Grid card */
+.card {
+  background:#fff;
+  border-radius:12px;
+  border:1px solid var(--border-card);
+  overflow:hidden;
+  box-shadow:var(--shadow-card);
+  display:flex; flex-direction:column;
+  transition:box-shadow .2s, transform .2s;
+  position:relative;
+}
+.card:hover { box-shadow:var(--shadow-float); transform:translateY(-2px); }
+
+/* Status stripe */
+.stripe {
+  height:3px;
+  background:linear-gradient(90deg,var(--gold),var(--gold-dk));
+}
+.stripeOut { background:linear-gradient(90deg,#ef4444,#be123c); }
+
+.imgWrap {
+  position:relative;
+  aspect-ratio:1;
+  background:var(--cream);
+  overflow:hidden;
+}
+.img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .3s; }
+.card:hover .img { transform:scale(1.04); }
+.imgPlaceholder {
+  width:100%; height:100%;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg,#F7F4EE,#EDE8DE);
+}
+
+.skuBadge {
+  position:absolute; bottom:8px; left:8px;
+  background:rgba(11,24,41,.75); backdrop-filter:blur(6px);
+  color:rgba(248,245,236,.9);
+  padding:3px 8px; border-radius:99px;
+  font-size:10px; font-weight:600; letter-spacing:.04em;
+}
+.statusBadge {
+  position:absolute; top:8px; right:8px;
+  padding:3px 9px; border-radius:99px;
+  font-size:10px; font-weight:700; letter-spacing:.04em;
+}
+.inStock  { background:rgba(21,128,61,.9); color:#fff; }
+.soldOut  { background:rgba(190,18,60,.9); color:#fff; }
+
+.body { padding:12px 14px; flex:1; display:flex; flex-direction:column; gap:4px; }
+.name {
+  font-size:14px; font-weight:600; color:var(--navy);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  font-family:var(--font-display);
+}
+.meta { font-size:11px; color:var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.price { font-size:15px; font-weight:700; color:var(--gold-dk); margin-top:2px; letter-spacing:-.01em; }
+.caratBadge {
+  display:inline-flex; align-items:center; gap:3px;
+  background:var(--gold-pale); border:1px solid rgba(201,168,76,.25);
+  color:var(--gold-dk); border-radius:99px;
+  padding:2px 7px; font-size:10px; font-weight:600;
+  width:fit-content;
+}
+
+.actions {
+  display:flex; align-items:center; gap:5px;
+  padding:8px 10px 10px;
+  border-top:1px solid var(--border-soft);
+}
+.actionBtn {
+  flex:1; display:flex; align-items:center; justify-content:center; gap:5px;
+  padding:7px 6px; border-radius:7px;
+  border:1.5px solid var(--border-soft);
+  background:#fff; color:var(--ink-mid);
+  font-size:11px; font-weight:600;
+  cursor:pointer; font-family:var(--font-body);
+  transition:all .15s; white-space:nowrap;
+}
+.actionBtn:hover { border-color:var(--navy); color:var(--navy); background:var(--cream); }
+.actionBtnDanger:hover { border-color:var(--danger); color:var(--danger); background:var(--danger-bg); }
+.actionBtnStock:hover { border-color:var(--success); color:var(--success); background:var(--success-bg); }
+
+/* ─── List mode ─── */
+.listCard {
+  background:#fff;
+  border-radius:10px;
+  border:1px solid var(--border-card);
+  box-shadow:var(--shadow-card);
+  display:flex; align-items:center; gap:14px;
+  padding:12px 16px;
+  transition:box-shadow .18s, transform .18s;
+}
+.listCard:hover { box-shadow:var(--shadow-float); transform:translateX(2px); }
+.listImg {
+  width:56px; height:56px; border-radius:8px;
+  object-fit:cover; flex-shrink:0;
+  border:1px solid var(--border-soft);
+}
+.listImgPlaceholder {
+  width:56px; height:56px; border-radius:8px;
+  background:var(--cream); display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; border:1px solid var(--border-soft);
+}
+.listInfo { flex:1; min-width:0; }
+.listName { font-size:14px; font-weight:600; color:var(--navy); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.listMeta { font-size:12px; color:var(--ink-soft); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.listRight { display:flex; align-items:center; gap:10px; flex-shrink:0; }
+.listPrice { font-size:14px; font-weight:700; color:var(--gold-dk); }
+.listActions { display:flex; align-items:center; gap:6px; }
+.listIconBtn {
+  width:30px; height:30px; border-radius:7px;
+  border:1.5px solid var(--border-soft); background:#fff;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; color:var(--ink-soft);
+  transition:all .14s;
+}
+.listIconBtn:hover { border-color:var(--navy); color:var(--navy); background:var(--cream); }
+.listIconBtnDanger:hover { border-color:var(--danger); color:var(--danger); background:var(--danger-bg); }
+
+/* Video badge — small pill rendered next to product name when a video exists */
+.videoBadge {
+  display: inline-flex;
+  align-items: center; justify-content: center;
+  margin-left: 6px;
+  background: rgba(124,58,237,.12);
+  color: #6d28d9;
+  border-radius: 4px;
+  padding: 1px 5px;
+  vertical-align: middle;
+}

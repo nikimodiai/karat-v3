@@ -1,0 +1,596 @@
+{
+  "name": "Karat - Add Edit product",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "has-new-images",
+              "leftValue": "={{ $json.totalNewImages }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "7b28c382-25b0-42bf-b8c2-4dd80802e97a",
+      "name": "Has New Images?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -8272,
+        14272
+      ]
+    },
+    {
+      "parameters": {
+        "subject": "={{ '\ud83d\udc8e ' + ($json.isEdit ? 'Updated' : 'New') + ' Item: ' + $json.aiTitle + ' [' + $json.sku + ']' }}",
+        "message": "={{ (function() {\n  var d = $json;\n  var now = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });\n  var kf = (d.aiKeyFeatures || '').split(' | ').filter(function(f) { return f.trim(); });\n  var kfHtml = kf.map(function(f) { return '<li style=\"padding:3px 0;\">' + f + '</li>'; }).join('');\n  var galleryHtml = (d.allImageUrls || []).map(function(url, i) {\n    return '<div style=\"display:inline-block;margin:6px;\"><img src=\"' + url + '\" style=\"width:140px;height:140px;object-fit:cover;border-radius:4px;border:1px solid #e8d5a3;\"/><p style=\"text-align:center;font-size:11px;color:#888;margin:4px 0 0;\">Photo ' + (i+1) + '</p></div>';\n  }).join('');\n  return '<div style=\"font-family:Georgia,serif;max-width:660px;margin:0 auto;color:#333;\">'\n    + '<div style=\"background:linear-gradient(135deg,#b8860b,#d4af5a);padding:24px 28px;border-radius:8px 8px 0 0;\">'\n    + '<h1 style=\"color:white;margin:0;font-size:20px;font-weight:400;\">\ud83d\udc8e ' + (d.isEdit ? 'Product Updated' : 'New Product Added') + '</h1>'\n    + '<p style=\"color:rgba(255,255,255,0.8);margin:5px 0 0;font-size:12px;\">' + now + '</p></div>'\n    + '<div style=\"background:#fffdf5;padding:24px 28px;border:1px solid #e8d5a3;border-top:none;\">'\n    + '<h2 style=\"font-size:18px;font-weight:400;color:#b8860b;margin-top:0;\">' + d.aiTitle + '</h2>'\n    + '<table style=\"width:100%;border-collapse:collapse;margin-bottom:16px;\">'\n    + '<tr><td style=\"padding:5px 0;color:#888;width:140px;font-size:13px;\">SKU</td><td style=\"font-family:monospace;background:#f5f5f5;padding:2px 8px;border-radius:3px;font-size:13px;\">' + d.sku + '</td></tr>'\n    + '<tr><td style=\"padding:5px 0;color:#888;font-size:13px;\">Category</td><td style=\"font-size:13px;\">' + d.category + '</td></tr>'\n    + '<tr><td style=\"padding:5px 0;color:#888;font-size:13px;\">Gold</td><td style=\"font-size:13px;\">' + d.goldCarat + '</td></tr>'\n    + '<tr><td style=\"padding:5px 0;color:#888;font-size:13px;\">Diamond</td><td style=\"font-size:13px;\">' + (d.diamondPurity || 'N/A') + '</td></tr>'\n    + '<tr><td style=\"padding:5px 0;color:#888;font-size:13px;\">Weight</td><td style=\"font-size:13px;\">' + d.weight + 'g</td></tr>'\n    + '<tr><td style=\"padding:5px 0;color:#888;font-size:13px;\">Price</td><td style=\"font-size:15px;font-weight:bold;color:#b8860b;\">\u20b9' + Number(d.price).toLocaleString('en-IN') + '</td></tr>'\n    + '<tr><td style=\"padding:5px 0;color:#888;font-size:13px;\">Owner ID</td><td style=\"font-size:12px;color:#888;\">' + d.ownerId + '</td></tr>'\n    + '</table>'\n    + '<h3 style=\"font-size:14px;color:#b8860b;margin-bottom:8px;\">AI Description</h3>'\n    + '<p style=\"font-size:13px;color:#444;line-height:1.7;margin-bottom:16px;\">' + d.aiDetailedDescription + '</p>'\n    + (kfHtml ? '<h3 style=\"font-size:14px;color:#b8860b;margin-bottom:6px;\">Key Features</h3><ul style=\"font-size:13px;color:#555;padding-left:16px;margin-bottom:16px;line-height:1.8;\">' + kfHtml + '</ul>' : '')\n    + (d.aiWhatsappSummary ? '<div style=\"background:#f9f4e8;border-left:3px solid #b8860b;padding:12px 16px;margin-bottom:16px;border-radius:0 4px 4px 0;\"><p style=\"margin:0;font-size:13px;color:#555;\">\ud83d\udcac <em>' + d.aiWhatsappSummary + '</em></p></div>' : '')\n    + (d.aiStyleTip ? '<p style=\"font-size:13px;color:#666;margin-bottom:16px;\">\ud83d\udca1 <em>' + d.aiStyleTip + '</em></p>' : '')\n    + '<h3 style=\"font-size:14px;color:#b8860b;margin-bottom:10px;\">\ud83d\udcf8 Product Images</h3>'\n    + '<div style=\"margin-bottom:8px;\">' + (galleryHtml || '<p style=\"color:#888;font-size:13px;\">No images</p>') + '</div>'\n    + '</div>'\n    + '<div style=\"background:#f9f4e8;padding:12px 28px;border:1px solid #e8d5a3;border-top:none;border-radius:0 0 8px 8px;font-size:12px;color:#999;\">Karat Inventory System &bull; ' + now + '</div></div>';\n})() }}",
+        "options": {}
+      },
+      "id": "87666b33-7c2c-4234-a416-f15594f70cb9",
+      "name": "Notify Owner- Product Saved",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -5456,
+        14176
+      ],
+      "webhookId": "a40edff3-0e0e-43d5-b51d-b8bf41973126",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "o7fZduR5GwlJVLqs",
+          "name": "Gmail account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({\n  success: true,\n  sku: $json.sku,\n  aiTitle: $json.aiTitle,\n  aiDetailedDescription: $json.aiDetailedDescription,\n  aiKeyFeatures: $json.aiKeyFeatures,\n  aiOccasions: $json.aiOccasions,\n  aiCareInstructions: $json.aiCareInstructions,\n  aiWhatsappSummary: $json.aiWhatsappSummary,\n  aiStyleTip: $json.aiStyleTip,\n  primaryImageUrl: $json.primaryUrl,\n  allImageUrls: $json.allImageUrls,\n  totalImages: $json.totalUploadedImages,\n  productId: ($json.savedProduct && $json.savedProduct.id) ? $json.savedProduct.id : $json.productId,\n  message: 'Product saved successfully!'\n}) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "656c8f03-f57b-4f13-9170-1e47de819c6c",
+      "name": "Respond Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -5456,
+        14368
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://bigmdvjrvqyqzyrijdum.supabase.co/rest/v1/products' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $('Parse Form Data').first().json.supabaseKey || ($env.SUPABASE_SERVICE_KEY || '') }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + ($('Parse Form Data').first().json.supabaseKey || ($env.SUPABASE_SERVICE_KEY || '')) }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($('Build Supabase Row').first().json.supabaseRow) }}",
+        "options": {}
+      },
+      "id": "ded8fd8a-614f-49e3-8b59-e601615e7e14",
+      "name": "Supabase - Insert Product",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -5904,
+        14272
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const d        = $input.first().json;\nconst formData = $('Parse Form Data').first().json;\n\n// Pull all fields from formData (Parse Form Data) as authoritative source\nconst ownerId       = formData.ownerId      || d.ownerId      || '';\nconst sku           = formData.sku          || d.sku          || '';\n// BUG12 fix: itemName in formData (set by Parse Form Data from body.name)\nconst itemName      = formData.itemName     || d.itemName     || '';\nconst category      = formData.category     || d.category     || '';\n// BUG11 fix: sub_category was missing from row\nconst subCategory   = formData.subCategory  || d.subCategory  || '';\nconst goldCarat     = formData.goldCarat    || d.goldCarat    || '';\nconst diamondPurity = formData.diamondPurity|| d.diamondPurity|| '';\nconst weight        = formData.weight       || d.weight       || null;\nconst price         = formData.price        || d.price        || null;\nconst stockQty      = formData.stockQty     || d.stockQty     || '1';\nconst material      = formData.material     || d.material     || '';\nconst occasion      = formData.occasion     || d.occasion     || '';\nconst description   = formData.description  || d.description  || '';\n// BUG10 fix: in_stock was hardcoded to true, now reads from form\nconst inStock       = formData.inStock !== undefined ? formData.inStock : true;\n\n// Images come from Merge All Image Data (upstream node)\nvar imagesArr = d.allImageUrls || d.imagesArray || [];\nif (typeof imagesArr === 'string') {\n  try { imagesArr = JSON.parse(imagesArr); } catch(e) { imagesArr = [imagesArr]; }\n}\n\nconst row = {\n  owner_id:             ownerId,\n  sku:                  sku,\n  name:                 itemName,\n  category:             category,\n  sub_category:         subCategory,\n  gold_carat:           goldCarat,\n  diamond_purity:       diamondPurity,\n  weight:               parseFloat(weight)  || null,\n  price:                parseFloat(price)   || null,\n  stock_qty:            parseInt(stockQty)  || 1,\n  material:             material,\n  occasion:             occasion,\n  description:          description,\n  in_stock:             inStock,\n  is_current:           true,\n  images:               imagesArr,\n  primary_image_url:    d.primaryUrl || (imagesArr[0] || ''),\n  // AI fields (populated by Parse AI Response or Skip AI nodes upstream)\n  // [v3 removed] ai_title:             d.aiTitle               || '',\n  // [v3 removed] ai_description:       d.aiDetailedDescription || '',\n  // [v3 removed] ai_key_features:      d.aiKeyFeatures         || '',\n  // [v3 removed] ai_occasions:         d.aiOccasions           || '',\n  // [v3 removed] ai_care_instructions: d.aiCareInstructions    || '',\n  // [v3 removed] ai_whatsapp_summary:  d.aiWhatsappSummary     || '',\n  // [v3 removed] ai_style_tip:         d.aiStyleTip            || '',\n};\n\nreturn [{ json: Object.assign({}, d, {\n  supabaseRow:  row,\n  imagesArray:  imagesArr,\n  allImageUrls: imagesArr\n}) }];"
+      },
+      "id": "137da3e4-0853-470e-95ed-2bbb0876d6bd",
+      "name": "Build Supabase Row",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -6576,
+        14272
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const allItems = $input.all();\nconst formData = $('Parse Form Data').first().json;\n\n// Detect skip path: totalNewImages === 0 means no new uploads\nvar firstJson = allItems.length > 0 ? allItems[0].json : {};\nvar skipped   = (firstJson.totalNewImages === 0 || firstJson.skipImageUpload === true);\n\nvar allImageUrls, allPublicIds;\n\nif (skipped) {\n  // No new uploads \u2014 preserve existing image URLs exactly\n  allImageUrls = firstJson.allImageUrls\n              || firstJson.existingImages\n              || formData.existingImages\n              || [];\n  allPublicIds = [];\n} else {\n  // Came from Extract Cloudinary URLs \u2014 combine existing + new\n  var newImages = allItems.map(function(i) { return i.json; });\n  allImageUrls  = (formData.existingImages || []).slice();\n  newImages.forEach(function(img) {\n    if (img.cloudinaryUrl) allImageUrls.push(img.cloudinaryUrl);\n  });\n  allPublicIds = newImages\n    .map(function(img) { return img.cloudinaryPublicId; })\n    .filter(Boolean);\n}\n\nvar imageColumns = {};\nallImageUrls.forEach(function(url, idx) {\n  imageColumns['image' + (idx + 1) + '_url'] = url;\n});\nfor (var i = allImageUrls.length + 1; i <= 5; i++) {\n  imageColumns['image' + i + '_url'] = '';\n}\n\nvar primaryUrl      = allImageUrls[0] || '';\nvar primaryPublicId = allPublicIds[0] || '';\n\nvar result = Object.assign({}, formData, imageColumns, {\n  primaryUrl:          primaryUrl,\n  primaryPublicId:     primaryPublicId,\n  allImageUrls:        allImageUrls,\n  allPublicIds:        allPublicIds,\n  totalUploadedImages: allImageUrls.length\n});\n\nreturn [{ json: result }];"
+      },
+      "id": "68bfce8c-413c-48c2-94a6-14acbe62e8f5",
+      "name": "Merge All Image Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -7600,
+        14272
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(function(item) {\n  var d = item.json;\n\n  // Cloudinary URL optimization:\n  // w_1000  \u2192 cap width at 1000px (won't upscale smaller images)\n  // f_auto  \u2192 serve WebP to modern browsers, JPEG/PNG as fallback\n  // q_auto  \u2192 Cloudinary picks best quality-to-size ratio automatically\n  // Result: same image, faster load, less bandwidth, zero manual resizing\n  var rawUrl = d.secure_url || '';\n  var optimizedUrl = rawUrl\n    ? rawUrl.replace('/upload/', '/upload/w_1000,f_auto,q_auto/')\n    : '';\n\n  return {\n    json: {\n      cloudinaryUrl:      optimizedUrl,\n      cloudinaryRawUrl:   rawUrl,\n      cloudinaryPublicId: d.public_id  || '',\n      cloudinaryFormat:   d.format     || '',\n      cloudinaryWidth:    d.width      || '',\n      cloudinaryHeight:   d.height     || ''\n    }\n  };\n});"
+      },
+      "id": "b3d558b7-5f5b-45b8-ba54-00a4d6484b92",
+      "name": "Extract Cloudinary URLs",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -7824,
+        14208
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.cloudinary.com/v1_1/jewelleryinventory/image/upload",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "upload_preset",
+              "value": "jewelleryupload"
+            },
+            {
+              "name": "public_id",
+              "value": "={{ 'jewellery/' + $json.ownerId + '_' + $json.sku + $json.imageSuffix }}"
+            },
+            {
+              "name": "folder",
+              "value": "jewellery_inventory"
+            },
+            {
+              "name": "tags",
+              "value": "={{ $json.sku + ',' + $json.category + ',' + $json.ownerId }}"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b6151e4b-30c2-4efd-b655-bef07d7463ef",
+      "name": "Upload Each Image to Cloudinary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -8048,
+        14208
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const formData = $('Parse Form Data').first().json;\nconst binary   = $('Parse Form Data').first().binary || {};\n\n// If frontend pre-uploaded to Cloudinary \u2192 no binary slots \u2192 skip upload\n// Pass the pre-uploaded URLs straight through as allImageUrls\nif (formData.uploadedSlots.length === 0) {\n  var existingUrls = formData.preUploadedImages && formData.preUploadedImages.length > 0\n    ? formData.preUploadedImages\n    : (formData.existingImages || []);\n  return [{\n    json: Object.assign({}, formData, {\n      skipImageUpload: true,\n      totalNewImages:  0,\n      allImageUrls:    existingUrls\n    })\n  }];\n}\n\n// Binary upload path (legacy / future direct upload)\nvar existingCount = (formData.existingImages || []).length;\nreturn formData.uploadedSlots.map(function(slot, index) {\n  var imageNumber = existingCount + index + 1;\n  return {\n    json: Object.assign({}, formData, {\n      currentSlot:     slot,\n      imageIndex:      imageNumber,\n      imageSuffix:     '_img' + imageNumber,\n      skipImageUpload: false,\n      totalNewImages:  formData.uploadedSlots.length\n    }),\n    binary: { data: binary[slot] }\n  };\n});"
+      },
+      "id": "88fb6aad-4f6f-4975-9711-c2d5cedaf974",
+      "name": "Split Into Image Items",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -8496,
+        14272
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const item  = $input.first();\nconst raw   = item.json  || {};\nconst body  = raw.body   || raw;   // handles JSON nested under .body or flat\nconst files = item.binary || {};\n\n// \u2500\u2500 Field extraction (all possible key variants from frontend) \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n// BUG5 fix: frontend sends `name`, workflow expected item_name/itemName\nconst itemName      = body.name          || body.item_name    || body.itemName    || 'Unnamed Item';\nconst goldCarat     = body.gold_carat    || body.goldCarat    || '';\nconst diamondPurity = body.diamond_purity|| body.diamondPurity|| '';\nconst description   = body.description  || '';\nconst price         = body.price        || '';\nconst weight        = body.weight       || '';\nconst category      = body.category     || '';\n// BUG7 fix: sub_category and in_stock were missing\nconst subCategory   = body.sub_category || body.subCategory  || '';\nconst inStock       = body.in_stock !== undefined ? body.in_stock : true;\nconst stockQty      = body.stock_qty    || body.stockQty     || '1';\nconst sku           = body.sku          || body.sku_code      || ('SKU-' + Date.now());\nconst material      = body.material     || '';\nconst occasion      = body.occasion     || '';\nconst ownerId       = body.owner_id     || body.ownerId      || '';\n\n// BUG2+3 fix: frontend sends old_product_id (not product_id) for edits\n// isEdit is derived from presence of old_product_id, not body.is_edit (never sent)\nconst oldProductId  = body.old_product_id || body.oldProductId || '';\nconst isEdit        = !!(oldProductId) || body.is_edit === true || body.is_edit === 'true';\n\n// BUG4 fix: frontend sends regenAI (not regenerate_ai)\nconst regenerateAI  = body.regenAI === true || body.regenAI === 'true'\n                   || body.regenerate_ai === true || body.regenerate_ai === 'true';\n\n// Existing AI fields (sent when editing, to preserve on Skip AI path)\nconst existingAiTitle            = body.ai_title              || body.existing_ai_title            || '';\nconst existingAiDescription      = body.ai_description        || body.existing_ai_description      || '';\nconst existingAiKeyFeatures      = body.ai_key_features       || body.existing_ai_key_features     || '';\nconst existingAiOccasions        = body.ai_occasions          || body.existing_ai_occasions        || '';\nconst existingAiCareInstructions = body.ai_care_instructions  || body.existing_ai_care_instructions|| '';\nconst existingAiWhatsappSummary  = body.ai_whatsapp_summary   || body.existing_ai_whatsapp_summary || '';\nconst existingAiStyleTip         = body.ai_style_tip          || body.existing_ai_style_tip        || '';\n\n// \u2500\u2500 Image handling \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n// BUG1 fix: frontend pre-uploads to Cloudinary and sends URLs in body.images[]\n// Legacy: binary file slots (image1..image5) \u2014 keep for backwards compat\nconst imageSlots    = ['image1','image2','image3','image4','image5'];\nconst uploadedSlots = imageSlots.filter(function(slot) { return !!files[slot]; });\n\n// Primary source: body.images array (pre-uploaded Cloudinary URLs from frontend)\nvar preUploadedImages = [];\nif (Array.isArray(body.images)) {\n  preUploadedImages = body.images.filter(function(u) { return !!u; });\n}\n\n// Legacy fallback: existing_image1..5 keys\nvar existingImages = [];\nfor (var i = 1; i <= 5; i++) {\n  var key = 'existing_image' + i;\n  if (body[key]) existingImages.push(body[key]);\n}\n\n// Merge: pre-uploaded URLs take priority\nvar allKnownImages = preUploadedImages.length > 0 ? preUploadedImages : existingImages;\n\n// Validate: must have at least one image from any source\nif (uploadedSlots.length === 0 && allKnownImages.length === 0) {\n  throw new Error('At least one product image is required. Received body keys: ' + Object.keys(body).join(', '));\n}\n\nif (!ownerId) {\n  throw new Error('owner_id is missing. Body keys: ' + Object.keys(body).join(', '));\n}\n\nreturn [{\n  json: {\n    // Product fields\n    itemName, goldCarat, diamondPurity, description,\n    price, weight, category, subCategory, stockQty,\n    sku, material, occasion, inStock,\n    // Auth / edit control\n    ownerId, isEdit, oldProductId, regenerateAI,\n    // Existing AI (preserved when not regenerating)\n    existingAiTitle, existingAiDescription, existingAiKeyFeatures,\n    existingAiOccasions, existingAiCareInstructions,\n    existingAiWhatsappSummary, existingAiStyleTip,\n    // Images\n    uploadedSlots,\n    existingImages: allKnownImages,\n    preUploadedImages,\n    totalNewImages: uploadedSlots.length,\n    uploadTimestamp: new Date().toISOString()\n  },\n  binary: files\n}];"
+      },
+      "id": "37e52f1d-73be-4989-9822-9c02069e6b34",
+      "name": "Parse Form Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -9392,
+        14368
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "jewellery-upload",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "id": "2092a202-d3e2-4fa6-80e4-0cc46cd5f7c9",
+      "name": "Webhook - Inventory Upload",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -9616,
+        14368
+      ],
+      "webhookId": "jewellery-inventory-upload"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "is-edit-check",
+              "leftValue": "={{ String($('Parse Form Data').first().json.isEdit) }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "5fa9e56d-4270-456b-95c1-a32f88943d60",
+      "name": "Edit ?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -6352,
+        14272
+      ]
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ 'https://bigmdvjrvqyqzyrijdum.supabase.co/rest/v1/products?id=eq.' + $('Parse Form Data').first().json.oldProductId }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"is_current\": false}",
+        "options": {}
+      },
+      "id": "95c26419-1b6c-4267-a34b-7fda85572f0a",
+      "name": "Set previous is_current False",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -6128,
+        14352
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://bigmdvjrvqyqzyrijdum.supabase.co/rest/v1/products?sku=eq.' + encodeURIComponent($json.sku) + '&owner_id=eq.' + $json.ownerId + '&is_current=eq.true&select=id,sku' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4e05cb25-0982-4ab0-8faa-1f59fc0c549c",
+      "name": "Check SKU in Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -9168,
+        14368
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "sku-available",
+              "leftValue": "={{ $json.skuAvailableStr }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "3d919dee-9d9f-404e-9309-2f042b696209",
+      "name": "SKU Available?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -8720,
+        14368
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({\n  success: false,\n  skuDuplicate: true,\n  sku: $('Parse Form Data').first().json.sku,\n  message: 'SKU ' + $('Parse Form Data').first().json.sku + ' already exists. Please use a different SKU.'\n}) }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "a7824b11-4a12-4d93-b410-3bdaf185502b",
+      "name": "Respond - SKU Duplicate",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -8496,
+        14464
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const result   = $input.first().json;\nconst formData = $('Parse Form Data').first().json;\nconst isEdit   = formData.isEdit === true || String(formData.isEdit) === 'true';\n\n// result is the Supabase GET response\n// It's an array: [] = SKU free, [{...}] = SKU exists\nvar existingCount = 0;\nif (Array.isArray(result)) {\n  existingCount = result.length;\n} else if (result && result.length !== undefined) {\n  existingCount = result.length;\n}\n\n// SKU is available if:\n// - it's an edit (SKU field is locked, can't be changed), OR\n// - no existing product has this SKU (for this owner)\nconst skuAvailable = isEdit || existingCount === 0;\n\nreturn [{ json: {\n  skuAvailable: skuAvailable,\n  skuAvailableStr: String(skuAvailable),\n  existingCount: existingCount,\n  sku: formData.sku\n} }];"
+      },
+      "id": "5a289b34-ed80-4db8-be4a-ad5535499f21",
+      "name": "Evaluate SKU Check",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -8944,
+        14368
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Has New Images?": {
+      "main": [
+        [
+          {
+            "node": "Upload Each Image to Cloudinary",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge All Image Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase - Insert Product": {
+      "main": [
+        []
+      ]
+    },
+    "Build Supabase Row": {
+      "main": [
+        [
+          {
+            "node": "Edit ?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge All Image Data": {
+      "main": [
+        []
+      ]
+    },
+    "Extract Cloudinary URLs": {
+      "main": [
+        [
+          {
+            "node": "Merge All Image Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Each Image to Cloudinary": {
+      "main": [
+        [
+          {
+            "node": "Extract Cloudinary URLs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Image Items": {
+      "main": [
+        [
+          {
+            "node": "Has New Images?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Form Data": {
+      "main": [
+        [
+          {
+            "node": "Check SKU in Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - Inventory Upload": {
+      "main": [
+        [
+          {
+            "node": "Parse Form Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit ?": {
+      "main": [
+        [
+          {
+            "node": "Set previous is_current False",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Supabase - Insert Product",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set previous is_current False": {
+      "main": [
+        [
+          {
+            "node": "Supabase - Insert Product",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check SKU in Supabase": {
+      "main": [
+        [
+          {
+            "node": "Evaluate SKU Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SKU Available?": {
+      "main": [
+        [
+          {
+            "node": "Split Into Image Items",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond - SKU Duplicate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate SKU Check": {
+      "main": [
+        [
+          {
+            "node": "SKU Available?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "6ac04d4e-0f49-4b02-a0ad-127e7bf21bc3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "926af9fe819bfca9c65f4c36d0a89dfa16c4f674f94393a7444d2e6d8385c53e"
+  },
+  "id": "uKxZlwVV7fX1gbNw",
+  "tags": [
+    {
+      "updatedAt": "2026-05-05T14:34:52.389Z",
+      "createdAt": "2026-05-05T14:34:52.389Z",
+      "id": "3uVGqJydS7fTDFfB",
+      "name": "Jewellery Store"
+    }
+  ]
+}

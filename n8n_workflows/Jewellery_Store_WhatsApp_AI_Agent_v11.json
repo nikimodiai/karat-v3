@@ -1,0 +1,1741 @@
+{
+  "name": "Jewellery Store - WhatsApp AI Agent v10 (Supabase)",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -11152,
+        1232
+      ],
+      "id": "37566e5f-4492-4fea-882b-dfe797dcf863",
+      "name": "WhatsApp Trigger",
+      "webhookId": "9952a79a-b9a3-45af-8b6e-715761a1df0f",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "vZb4Q8pql07Z697C",
+          "name": "Modi whatsapp"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json;\nconst messages = body.messages;\nif (!messages || messages.length === 0) return [];\nconst msg = messages[0];\nconst contact = (body.contacts || [])[0] || {};\nconst waFrom  = msg.from || contact.wa_id || '';\nconst waName  = (contact.profile || {}).name || waFrom;\n\n// Pass through text, audio, and image \u2014 block everything else\nif (!['text','audio','image'].includes(msg.type)) return [];\n\nconst mediaId = msg.audio?.id || msg.image?.id || '';\nconst mimeType = msg.audio?.mime_type || msg.image?.mime_type || '';\n\nreturn [{ json: {\n  waFrom,\n  waName,\n  waMessage: msg.type === 'text' ? ((msg.text || {}).body || '') : '',\n  messageType: msg.type,\n  mediaId,\n  mimeType\n}}];\n"
+      },
+      "id": "e1a55449-2131-4a3a-a8c3-d8090a4c9eae",
+      "name": "Parse WhatsApp Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -10928,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const agentItem = $input.first().json;\nconst prevData  = $('Parse WhatsApp Message').first().json;\nlet   aiOutput  = String(agentItem.output || '');\n\n// Strip leaked tool-call markup\naiOutput = aiOutput.replace(/<function=[^>]*>[\\s\\S]*?<\\/function>/gi, '').trim();\naiOutput = aiOutput.replace(/```[\\s\\S]*?```/g, '').trim();\naiOutput = aiOutput.split('\\n').filter(l => !/^\\s*\\{\"input\"/.test(l)).join('\\n').trim();\n\n// Strip <think>...</think> reasoning blocks (chain-of-thought leak)\naiOutput = aiOutput.replace(/<think>[\\s\\S]*?<\\/think>/gi, '').trim();\n\n// Strip ##INTERESTED## signal\nconst isInterested = aiOutput.includes('##INTERESTED##');\nlet   cleanMessage = aiOutput;\nlet   interestedSKUs = [];\n\n// Load static data \u2014 stores last shown SKU per customer\nconst store   = $getWorkflowStaticData('global');\nconst lastKey = 'lastSKU_' + prevData.waFrom;\n\nif (isInterested) {\n  const parts = aiOutput.split('##INTERESTED##');\n  cleanMessage = (parts[0] || '').trim();\n  const rawSkus = (parts[1] || '').split(',').map(s => s.trim()).filter(Boolean);\n\n  // Fix 2: If AI said LAST_SKU or gave no SKU, use the last shown SKU from static data\n  const validSkus = rawSkus.filter(s => s !== 'LAST_SKU' && s !== '' && !/^(SKU|XXXX)$/i.test(s));\n  if (validSkus.length > 0) {\n    interestedSKUs = [...new Set(validSkus)];\n  } else {\n    // Fall back to last shown SKU stored in static data\n    const fallback = store[lastKey] || '';\n    if (fallback) interestedSKUs = [fallback];\n  }\n}\n\n// Extract SKUs mentioned in AI reply\nconst skuMatches = [...cleanMessage.matchAll(/\\[SKU:\\s*([^\\]]+)\\]/gi)];\nconst rawMentioned = [...new Set(skuMatches.map(m => m[1].trim()))];\n\n// Save last shown SKU to static data for next turn\nif (!isInterested && rawMentioned.length > 0) {\n  store[lastKey] = rawMentioned[0]; // save first/primary SKU shown\n}\n\n// When interested: clear mentionedSKUs and aiReply to suppress extra messages\nconst mentionedSKUs = isInterested ? [] : rawMentioned;\n\n// Build clean customer-facing reply\nlet aiReply = cleanMessage\n  .replace(/\\[SKU:\\s*[^\\]]+\\]/gi, '')\n  .replace(/I[''']ve\\s+(just\\s+)?(sent|shared|attached|forwarded)\\s+(you\\s+)?(an?\\s+)?(image|photo|picture|pic)[^.!?\\n]*/gi, '')\n  .replace(/[Hh]ere[''']?s?\\s+(an?\\s+)?(image|photo|picture|pic)[^.!?\\n]*/gi, '')\n  .replace(/[Pp]lease\\s+(find|see|check)[^.!?\\n]*(image|photo|picture|pic)[^.!?\\n]*/gi, '')\n  .replace(/\\s{2,}/g, ' ')\n  .replace(/^[\\s,\\.]+/, '')\n  .trim();\n\n// Convert literal \\n sequences to real newlines\n// AI sometimes outputs \\n as escaped text instead of actual newlines\n\n// Blank aiReply for interest \u2014 Notify Customer node sends the message instead\nif (isInterested) aiReply = '';\n\n// Detect image intent from customer message\nconst customerMsg   = prevData.waMessage || '';\nconst wantAllImages = /\\b(all|more|another|other|rest|remaining)\\b.{0,20}\\b(image|photo|pic)/i.test(customerMsg)\n                   || /\\b(image|photo|pic).{0,20}\\b(all|more)/i.test(customerMsg)\n                   || /^\\s*yes\\s*$/i.test(customerMsg);\nconst wantAnyImage  = /\\b(show|see|send|display|view|share)\\b.{0,30}\\b(image|photo|pic)/i.test(customerMsg)\n                   || /\\b(image|photo|pic)\\b/i.test(customerMsg)\n                   || wantAllImages;\n\nreturn [{\n  json: {\n    waFrom:        prevData.waFrom,\n    waName:        prevData.waName,\n    waMessage:     prevData.waMessage,\n    aiReply,\n    isInterested,\n    interestedSKUs,\n    mentionedSKUs,\n    wantAllImages,\n    wantAnyImage\n  }\n}];\n"
+      },
+      "id": "022b6678-f11d-49e5-80be-c717a97166bd",
+      "name": "Extract SKUs from AI Reply",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -6752,
+        1008
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "has-skus",
+              "leftValue": "={{ $json.mentionedSKUs.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "f8a16c31-edbf-478b-9bd5-c3e385eef4b5",
+      "name": "SKUs Found?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -6528,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fetch full product details for the specific SKUs mentioned by AI\n// Uses the cached inventory rows first (fast), falls back to Supabase query\nvar skuData = $('Extract SKUs from AI Reply').first().json;\nvar mentionedSKUs = skuData.mentionedSKUs || [];\n\n// Try cache first\nvar store = $getWorkflowStaticData('global');\nvar cachedRows = store.inventoryRowsCache || [];\n\nif (cachedRows.length > 0) {\n  // Return all cached rows \u2014 Resolve SKUs node will filter\n  return cachedRows.map(function(r) { return { json: r }; });\n}\n\n// Cache miss \u2014 fetch from Supabase\nvar ownerId     = store.ownerId || '';\nvar SERVICE_KEY = ($env.SUPABASE_SERVICE_KEY || '');\nvar url = 'https://bigmdvjrvqyqzyrijdum.supabase.co/rest/v1/products'\n  + '?owner_id=eq.' + ownerId\n  + '&is_current=eq.true&in_stock=eq.true'\n  + '&select=sku,name,ai_title,category,gold_carat,diamond_purity,weight,price,stock_qty,ai_occasions,ai_whatsapp_summary,images,primary_image_url';\n\nvar resp = await $http.get(url, {\n  headers: { 'apikey': SERVICE_KEY, 'Authorization': 'Bearer ' + SERVICE_KEY }\n});\n\nvar products = resp.data || [];\nreturn products.map(function(p) {\n  var images = Array.isArray(p.images) ? p.images : [];\n  var row = {\n    'SKU': p.sku || '', 'Item Name': p.name || '', 'AI Title': p.ai_title || p.name || '',\n    'Category': p.category || '', 'Gold Carat': p.gold_carat || '',\n    'Diamond Purity': p.diamond_purity || 'N/A',\n    'Weight (g)': p.weight || '', 'Price (INR)': p.price || '',\n    'Stock Qty': p.stock_qty || '1', 'Occasions': p.ai_occasions || '',\n    'WhatsApp Summary': p.ai_whatsapp_summary || '', 'Status': 'Active',\n    'Total Images': String(images.length || 1),\n    'Primary Image URL': p.primary_image_url || (images[0] || ''),\n  };\n  for (var i = 0; i < Math.min(images.length, 5); i++) {\n    row['Image ' + (i+1) + ' Direct URL'] = images[i] || '';\n  }\n  return { json: row };\n});"
+      },
+      "id": "8b9c9d68-b1b0-4eec-a75d-d15b62dba545",
+      "name": "Fetch SKU Details",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -6304,
+        1104
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Convert Cloudinary URL to JPG \u2014 WhatsApp only accepts jpeg/png/gif via link\nfunction toWhatsAppUrl(url) {\n  if (!url) return '';\n  if (url.indexOf('res.cloudinary.com') !== -1) {\n    return url.replace(\n      /(\\/upload\\/)(v[0-9]+\\/|)/,\n      function(m, p1, p2) { return p1 + 'f_jpg,q_auto/' + p2; }\n    );\n  }\n  return url;\n}\n\nvar skuData       = $('Extract SKUs from AI Reply').first().json;\nvar inventoryRows = $input.all().map(function(r) { return r.json; })\n                       .filter(function(r) { return (r['Status'] || 'Active') !== 'Inactive'; });\n\nvar mentionedSKUs  = skuData.mentionedSKUs  || [];\nvar interestedSKUs = skuData.interestedSKUs || [];\nvar customerMsg    = skuData.waMessage       || '';\n\n// Detect if customer wants ALL/MORE images of a single item\n// (only applies when ONE item is being discussed)\nvar wantMoreImages = /\\b(all|more|another|other|rest|remaining)\\b.{0,20}\\b(image|photo|pic)/i.test(customerMsg)\n                  || /\\b(image|photo|pic).{0,20}\\b(all|more)/i.test(customerMsg)\n                  || /^\\s*(yes|yeah|haan|bilkul|zaroor|sure)\\s*[.!]*\\s*$/i.test(customerMsg);\n\n// When multiple SKUs are present (category listing), NEVER treat as want-more-images\n// Each item always gets exactly 1 photo in a multi-item response\nvar isMultiItem = mentionedSKUs.length > 1;\nif (isMultiItem) { wantMoreImages = false; }\n\nvar imagesToSend = [];\n\nfor (var si = 0; si < mentionedSKUs.length; si++) {\n  var sku  = mentionedSKUs[si];\n  var item = null;\n  for (var ri = 0; ri < inventoryRows.length; ri++) {\n    if (inventoryRows[ri]['SKU'] === sku) { item = inventoryRows[ri]; break; }\n  }\n  if (!item) continue;\n\n  var totalImages = parseInt(item['Total Images'] || item['totalImages'] || '1', 10) || 1;\n\n  // Collect all available Cloudinary URLs\n  var allUrls = [];\n  for (var i = 1; i <= totalImages; i++) {\n    var raw = item['Image ' + i + ' Direct URL']\n           || item['Image' + i + ' Direct URL']\n           || (i === 1 ? (item['primaryDirectUrl'] || item['Direct Image URL'] || item['Primary Image URL'] || '') : '');\n    var url = toWhatsAppUrl(raw);\n    if (url) allUrls.push(url);\n  }\n  if (allUrls.length === 0) {\n    var fb = toWhatsAppUrl(item['primaryDirectUrl'] || item['Direct Image URL'] || item['Primary Image URL'] || '');\n    if (fb) allUrls.push(fb);\n  }\n  if (allUrls.length === 0) continue;\n\n  var itemTitle = item['AI Title'] || item['aiTitle'] || item['Item Name'] || sku;\n\n  if (wantMoreImages && !isMultiItem) {\n    // Customer asked for more photos of this single item \u2014 send ALL\n    for (var j = 0; j < allUrls.length; j++) {\n      imagesToSend.push({\n        waFrom:      skuData.waFrom,\n        imageUrl:    allUrls[j],\n        sku:         sku,\n        imageIndex:  j + 1,\n        totalImages: allUrls.length,\n        caption:     '\\ud83d\\udcf8 ' + itemTitle + ' \\u2014 Photo ' + (j + 1) + ' of ' + allUrls.length\n      });\n    }\n  } else {\n    // First mention OR multi-item listing \u2014 always send exactly 1 photo per item\n    var itemNum = si + 1;\n    var numPrefix = isMultiItem ? (itemNum + '. ') : '';\n    var hasMore   = allUrls.length > 1;\n    var caption   = (isMultiItem ? '\\ud83d\\udd36 Item ' + itemNum + ': ' : '\\u2728 ')\n      + '*' + itemTitle + '*\\n\\n'\n      + '\\ud83d\\udc8e ' + (item['Gold Carat'] || '') + ' | ' + (item['Diamond Purity'] || '') + '\\n'\n      + '\\u2696\\ufe0f ' + (item['Weight (g)'] || '') + 'g  |  \\ud83d\\udcb0 \\u20b9' + (item['Price (INR)'] || '')\n      + (!isMultiItem && hasMore ? '\\n\\n\\ud83d\\udcf8 Photo 1 of ' + allUrls.length + ' \\u2014 Reply *yes* to see all!' : '');\n\n    imagesToSend.push({\n      waFrom:      skuData.waFrom,\n      imageUrl:    allUrls[0],\n      sku:         sku,\n      imageIndex:  1,\n      totalImages: allUrls.length,\n      caption:     caption\n    });\n  }\n}\n\nvar interestedItemsDetails = inventoryRows.filter(function(r) {\n  return interestedSKUs.indexOf(r['SKU']) !== -1;\n});\n\nreturn [{\n  json: {\n    waFrom:                 skuData.waFrom,\n    waName:                 skuData.waName,\n    waMessage:              skuData.waMessage,\n    aiReply:                skuData.aiReply,\n    isInterested:           skuData.isInterested,\n    interestedSKUs:         interestedSKUs,\n    interestedItemsDetails: interestedItemsDetails,\n    imagesToSend:           imagesToSend,\n    _debug: {\n      mentionedSKUs:     mentionedSKUs,\n      isMultiItem:       isMultiItem,\n      wantMoreImages:    wantMoreImages,\n      inventoryRows:     inventoryRows.length,\n      imagesStagedCount: imagesToSend.length,\n      firstImageUrl:     imagesToSend.length > 0 ? imagesToSend[0].imageUrl : 'none'\n    }\n  }\n}];"
+      },
+      "id": "c049ecc2-045e-4537-9101-f32b560c8cf4",
+      "name": "Resolve SKUs & Build Image List",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -6080,
+        1104
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// No SKUs found \u2014 this is a text-only reply (greeting, general question, etc.)\n// Just pass through the AI reply with empty image/interest arrays.\nconst d = $input.first().json;\nreturn [{\n  json: {\n    waFrom:               d.waFrom,\n    waName:               d.waName,\n    waMessage:            d.waMessage,\n    aiReply:              d.aiReply,\n    isInterested:         d.isInterested,\n    interestedSKUs:       d.interestedSKUs,\n    interestedItemsDetails: [],\n    imagesToSend:         []\n  }\n}];"
+      },
+      "id": "2ba96952-2b09-4515-824d-7e8aa63532a6",
+      "name": "Text Only Reply",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -6080,
+        1344
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "1144772068712842",
+        "recipientPhoneNumber": "={{ $json.waFrom }}",
+        "textBody": "={{ $json.aiReply }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        -5632,
+        1296
+      ],
+      "id": "f4b8c195-0348-40dc-9fe8-084148af72f5",
+      "name": "Send Text Reply to Customer",
+      "webhookId": "f8fc8190-3d26-4857-8b91-0b2eff150f05",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "HFzJcD36hkNsVi4B",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "has-images",
+              "leftValue": "={{ $json.imagesToSend.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "fdaa1194-0c0b-46bc-9eb4-2c56e1229c8f",
+      "name": "Images to Send?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -5856,
+        1056
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const { imagesToSend = [] } = $input.first().json;\nreturn imagesToSend.map(img => ({ json: img }));"
+      },
+      "id": "26d3139f-c726-4dce-a2a6-518f4845b1b8",
+      "name": "Split Images for Sending",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5632,
+        1056
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "is-interested",
+              "leftValue": "={{ $json.isInterested.toString() }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "caseSensitive": false
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "8256ea03-7067-48ee-a08d-39e82c773464",
+      "name": "Customer Confirmed Interest?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -6528,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "var storeStaticData = $getWorkflowStaticData('global');\nvar storeName   = storeStaticData.storeName   || 'Our Store';\nvar ownerEmail  = storeStaticData.ownerEmail  || 'nikimodi81@gmail.com';\nvar ownerId     = storeStaticData.ownerId     || '';\n\nvar data         = $input.first().json;\nvar interestedSKUs = data.interestedSKUs || [];\nvar now          = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });\n\n// \u2500\u2500 Recover full inventory rows to get item details \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n// Try 1: interestedItemsDetails already populated (when SKUs path ran)\nvar items = data.interestedItemsDetails || [];\n\n// Try 2: read from static data cache (always populated by Save & Compress)\nif (items.length === 0 && interestedSKUs.length > 0) {\n  try {\n    var store = $getWorkflowStaticData('global');\n    var cachedRows = store.inventoryRowsCache || [];\n    items = cachedRows.filter(function(r) {\n      return interestedSKUs.indexOf(r['SKU']) !== -1;\n    });\n  } catch(e) {}\n}\n\n// Try 3: read from Fetch Inventory from Sheets if it ran this execution\nif (items.length === 0 && interestedSKUs.length > 0) {\n  try {\n    var fetchedRows = $('Fetch SKU Details').all().map(function(r) { return r.json; });\n    items = fetchedRows.filter(function(r) {\n      return interestedSKUs.indexOf(r['SKU']) !== -1;\n    });\n  } catch(e) {}\n}\n\n// Try 4: read from Fetch Fresh from Sheets if it ran this execution\nif (items.length === 0 && interestedSKUs.length > 0) {\n  try {\n    var freshRows = $('Fetch Owner & Products').all().map(function(r) { return r.json; });\n    items = freshRows.filter(function(r) {\n      return interestedSKUs.indexOf(r['SKU']) !== -1;\n    });\n  } catch(e) {}\n}\n\n// \u2500\u2500 WhatsApp message to owner \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nvar waLines = '';\nif (items.length > 0) {\n  var lineArr = [];\n  for (var wi = 0; wi < items.length; wi++) {\n    var it = items[wi];\n    lineArr.push(\n      '\\uD83D\\uDC8E *' + (it['AI Title'] || it['aiTitle'] || it['Item Name'] || '') + '*\\n'\n      + '\\uD83C\\uDFF7\\uFE0F SKU: ' + (it['SKU'] || '') + '\\n'\n      + '\\uD83E\\uDD47 ' + (it['Gold Carat'] || '') + ' | ' + (it['Diamond Purity'] || '') + '\\n'\n      + '\\u2696\\uFE0F ' + (it['Weight (g)'] || '') + 'g | \\uD83D\\uDCB0 \\u20B9' + (it['Price (INR)'] || '') + '\\n'\n      + '\\uD83D\\uDCE6 Stock: ' + (it['Stock Qty'] || '')\n    );\n  }\n  waLines = lineArr.join('\\n\\n');\n} else {\n  waLines = 'SKUs: ' + interestedSKUs.join(', ');\n}\n\nvar whatsappMsg =\n  '\\uD83D\\uDD14 *New Customer Interest!* \\uD83D\\uDD14\\n\\n'\n  + '\\uD83D\\uDC64 *Name:* ' + (data.waName || '') + '\\n'\n  + '\\uD83D\\uDCF1 *WhatsApp:* +' + (data.waFrom || '') + '\\n'\n  + '\\uD83D\\uDD50 *Time:* ' + now + '\\n\\n'\n  + '*Interested Items:*\\n\\n'\n  + waLines\n  + '\\n\\nPlease contact the customer soon! \\u2728';\n\n// \u2500\u2500 Build Cloudinary image gallery \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nfunction toEmailThumb(url) {\n  if (!url) return '';\n  if (url.indexOf('res.cloudinary.com') === -1) return url;\n  // Insert Cloudinary transformation after /upload/\n  // e.g. .../upload/v123/file.jpg -> .../upload/f_jpg,q_auto,w_200,h_200,c_fill/v123/file.jpg\n  var uploadMarker = '/upload/';\n  var idx = url.indexOf(uploadMarker);\n  if (idx === -1) return url;\n  return url.slice(0, idx + uploadMarker.length)\n       + 'f_jpg,q_auto,w_200,h_200,c_fill/'\n       + url.slice(idx + uploadMarker.length);\n}\n\nfunction buildImageGallery(item) {\n  var total = parseInt(item['Total Images'] || item['totalImages'] || '1', 10) || 1;\n  var html  = '';\n  for (var gi = 1; gi <= total; gi++) {\n    var raw = item['Image ' + gi + ' Direct URL'] || '';\n    if (!raw && gi === 1) {\n      raw = item['primaryDirectUrl'] || item['Direct Image URL'] || item['Primary Image URL'] || '';\n    }\n    if (!raw) continue;\n    var thumb = toEmailThumb(raw);\n    html += '<div style=\"display:inline-block;margin:6px;text-align:center;vertical-align:top;\">'\n          + '<img src=\"' + thumb + '\" width=\"150\" height=\"150\" '\n          + 'style=\"display:block;object-fit:cover;border-radius:4px;border:1px solid #e8d5a3;\"/>'\n          + '<p style=\"font-size:11px;color:#999;margin:4px 0 0;\">Photo ' + gi + '</p>'\n          + '</div>';\n  }\n  return html || '<p style=\"color:#aaa;font-size:13px;margin:0;\">No images available</p>';\n}\n\n// \u2500\u2500 Build email \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nvar itemNameStr  = '';\nvar itemsHtmlStr = '';\nfor (var ei = 0; ei < items.length; ei++) {\n  var item  = items[ei];\n  var title = item['AI Title'] || item['aiTitle'] || item['Item Name'] || '';\n  if (ei > 0) itemNameStr += ', ';\n  itemNameStr += title;\n  itemsHtmlStr +=\n    '<div style=\"background:white;padding:24px;border:1px solid #e8d5a3;border-top:none;\">'\n    + '<h2 style=\"color:#b8860b;font-size:18px;margin-top:0;border-bottom:2px solid #ffd700;padding-bottom:8px;\">' + title + '</h2>'\n    + '<table style=\"width:100%;border-collapse:collapse;margin-bottom:16px;\">'\n    + '<tr><td style=\"padding:5px 0;color:#888;width:140px;font-size:13px;\">SKU</td>'\n    + '<td style=\"font-family:monospace;background:#f5f5f5;padding:3px 8px;border-radius:4px;font-size:13px;\">' + (item['SKU'] || '') + '</td></tr>'\n    + '<tr><td style=\"padding:5px 0;color:#888;font-size:13px;\">Gold</td><td style=\"font-size:13px;\">' + (item['Gold Carat'] || '') + '</td></tr>'\n    + '<tr><td style=\"padding:5px 0;color:#888;font-size:13px;\">Diamond</td><td style=\"font-size:13px;\">' + (item['Diamond Purity'] || '') + '</td></tr>'\n    + '<tr><td style=\"padding:5px 0;color:#888;font-size:13px;\">Weight</td><td style=\"font-size:13px;\">' + (item['Weight (g)'] || '') + 'g</td></tr>'\n    + '<tr><td style=\"padding:5px 0;color:#888;font-size:13px;\">Price</td>'\n    + '<td style=\"font-weight:bold;color:#b8860b;font-size:16px;\">\\u20B9' + (item['Price (INR)'] || '') + '</td></tr>'\n    + '<tr><td style=\"padding:5px 0;color:#888;font-size:13px;\">Occasions</td><td style=\"font-size:13px;\">' + (item['Occasions'] || item['aiOccasions'] || '') + '</td></tr>'\n    + '<tr><td style=\"padding:5px 0;color:#888;font-size:13px;\">Stock</td><td style=\"font-size:13px;\">' + (item['Stock Qty'] || '') + '</td></tr>'\n    + '</table>'\n    + '<p style=\"color:#555;font-size:14px;margin-bottom:16px;\">' + (item['WhatsApp Summary'] || item['aiWhatsappSummary'] || '') + '</p>'\n    + '<p style=\"color:#888;font-size:12px;font-weight:500;margin-bottom:8px;\">\\uD83D\\uDCF8 Product Images</p>'\n    + '<div style=\"margin-bottom:8px;\">' + buildImageGallery(item) + '</div>'\n    + '</div>';\n}\n\nif (!itemsHtmlStr) {\n  itemsHtmlStr = '<div style=\"padding:24px;border:1px solid #e8d5a3;border-top:none;\">'\n    + '<p style=\"font-size:13px;\">SKUs of interest: ' + interestedSKUs.join(', ') + '</p>'\n    + '<p style=\"font-size:12px;color:#aaa;margin-top:8px;\">Item details not available \u2014 please check inventory for SKU details.</p>'\n    + '</div>';\n}\n\nvar emailSubject = '\\uD83D\\uDC8E New Interest: ' + (data.waName || '') + ' \\u2014 ' + (itemNameStr || interestedSKUs.join(', '));\n\nvar emailBody =\n  '<div style=\"font-family:Georgia,serif;max-width:620px;margin:0 auto;color:#333;\">'\n  + '<div style=\"background:linear-gradient(135deg,#b8860b,#ffd700);padding:24px;border-radius:8px 8px 0 0;\">'\n  + '<h1 style=\"color:white;margin:0;font-size:22px;\">\\uD83D\\uDC8E New Customer Interest</h1>'\n  + '<p style=\"color:rgba(255,255,255,0.9);margin:8px 0 0;font-size:13px;\">A customer wants to buy from your store!</p>'\n  + '</div>'\n  + '<div style=\"background:#fffdf5;padding:24px;border:1px solid #e8d5a3;border-top:none;\">'\n  + '<h2 style=\"color:#b8860b;font-size:15px;margin-top:0;\">\\uD83D\\uDC64 Customer Details</h2>'\n  + '<table style=\"width:100%;border-collapse:collapse;\">'\n  + '<tr><td style=\"padding:6px 0;color:#666;font-size:13px;\">Name</td><td style=\"font-weight:bold;font-size:13px;\">' + (data.waName || '') + '</td></tr>'\n  + '<tr><td style=\"padding:6px 0;color:#666;font-size:13px;\">WhatsApp</td><td style=\"font-weight:bold;font-size:13px;\">+' + (data.waFrom || '') + '</td></tr>'\n  + '<tr><td style=\"padding:6px 0;color:#666;font-size:13px;\">Time</td><td style=\"font-size:13px;\">' + now + '</td></tr>'\n  + '</table></div>'\n  + itemsHtmlStr\n  + '<div style=\"background:#f9f4e8;padding:14px 24px;border:1px solid #e8d5a3;border-top:none;border-radius:0 0 8px 8px;font-size:12px;color:#999;\">'\n  + 'Sent by Aanya \\u2014 AI Assistant &bull; ' + now\n  + '</div></div>';\n\nvar result = {};\nfor (var k in data) { if (Object.prototype.hasOwnProperty.call(data, k)) result[k] = data[k]; }\nresult.whatsappMsg  = whatsappMsg;\nresult.emailSubject = emailSubject;\nresult.emailBody    = emailBody;\nresult.ownerEmail   = ownerEmail;\nresult.storeName    = storeName;\nreturn [{ json: result }];\n"
+      },
+      "id": "0db5f6f7-ceab-4493-a33b-f4d9833883b4",
+      "name": "Prepare Owner Notifications",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -6304,
+        720
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.ownerEmail || 'nikimodi81@gmail.com' }}",
+        "subject": "={{ $json.emailSubject }}",
+        "message": "={{ $json.emailBody }}",
+        "options": {}
+      },
+      "id": "ca2f24ba-aed6-4c4a-8951-a65fc8d84518",
+      "name": "Notify Owner via Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -6080,
+        528
+      ],
+      "webhookId": "a237d4e3-fb4f-42eb-9cee-ebf24fd2a3e9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "o7fZduR5GwlJVLqs",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "1144772068712842",
+        "recipientPhoneNumber": "=OWNER_WHATSAPP_NUMBER_WITH_COUNTRY_CODE",
+        "textBody": "={{ $json.whatsappMsg }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        -6080,
+        912
+      ],
+      "id": "dd345307-db43-4807-a4ea-2976c67bffa5",
+      "name": "Notify Owner via WhatsApp",
+      "webhookId": "8816ced0-4d43-4487-813b-41dc4ab1ce7b",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "HFzJcD36hkNsVi4B",
+          "name": "WhatsApp account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://graph.facebook.com/v19.0/1144772068712842/messages",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ messaging_product: 'whatsapp', recipient_type: 'individual', to: $json.waFrom, type: 'image', image: { link: $json.imageUrl, caption: $json.caption } }) }}",
+        "options": {}
+      },
+      "id": "0e7b2cb6-23b4-43b9-a3bb-3ce8a1ab6a22",
+      "name": "Send Image to Customer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -5408,
+        1056
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "HFzJcD36hkNsVi4B",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.inventoryText + ($json.detectedCategory ? '\\n\\nIMPORTANT: Inventory above is filtered for [' + $json.detectedCategory + '] only. Only suggest items from this list.' : '') + '\\n\\nCUSTOMER MESSAGE: ' + $json.waMessage }}",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "You help customers discover jewellery on WhatsApp. Discovery assistant only \u2014 NOT a cart or payment system.\n\n## LANGUAGE \u2014 STRICT RULES (READ CAREFULLY)\n\n### RULE 1: SCRIPT MATCHING (most important rule)\n- If the customer wrote in LATIN/ROMAN script (a-z letters) \u2014 ALWAYS reply in LATIN/ROMAN script, even if the words are Hindi, Marathi, or Gujarati.\n- If the customer wrote in DEVANAGARI script (\u0900-\u097f) \u2014 reply in Devanagari script.\n- If the customer wrote in GUJARATI script (\u0a80-\u0aff) \u2014 reply in Gujarati script.\n- If the customer wrote in TAMIL, TELUGU, KANNADA, MALAYALAM, BENGALI, PUNJABI script \u2014 reply in that same script.\n- NEVER switch script. If they typed Roman, you type Roman. If they typed Devanagari, you type Devanagari.\n\n### RULE 2: HINGLISH (most common case)\n- Hinglish = Hindi or Indian language words written in Roman/Latin script (e.g. 'kya aapke paas bangles hai?')\n- Detect Hinglish by: message is in Roman script BUT contains Hindi/Indian words (kya, aap, hai, nahi, haan, bhai, dikhao, chahiye, wala, kitna, kaisa, etc.)\n- Reply in Hinglish: Roman script, mix of Hindi and English words, casual and warm.\n- Example input:  'kya aapke paas bangles hai?'\n- Example reply:  'Haan! Hamare paas bahut sundar bangles hain. Ye dekhiye [SKU: X] \u2014 22kt gold, bohot elegant design hai. Aapko kaisa design pasand hai?'\n- NEVER reply to Hinglish with Devanagari script.\n\n### RULE 3: ALLOWED LANGUAGES\nReply ONLY in these languages (any script variant):\nEnglish, Hindi (Devanagari or Roman/Hinglish), Marathi, Gujarati, Bengali, Tamil, Telugu, Kannada, Malayalam, Punjabi, Urdu, Odia\n\n### RULE 4: BLOCKED LANGUAGES\nIf the customer writes in Chinese, Spanish, French, Arabic, Japanese, Korean, Portuguese, German, Russian, or any other non-Indian foreign language \u2014 DO NOT reply in that language. Reply in English only.\n\n### RULE 5: FALLBACK\nIf you cannot confidently identify the language or script \u2014 reply in English.\n\n### RULE 6: CONSISTENCY\n- Never switch language or script mid-reply. Pick one and stay in it.\n- SKU codes, numbers, weights, prices, gold carats, diamond grades \u2014 always in English/numerals regardless of language.\n- If customer sent audio, the transcription script determines reply script. Apply all rules above.\n\n## GREETING \u2014 INITIAL MESSAGE\nWhen greeting a new customer, always include (in their language/script):\n- Welcome to XYZ Jewellers\n- You can ask me in Hindi, Hinglish, Marathi, Gujarati, or English\n- You can type, send a VOICE MESSAGE \ud83c\udfa4, or UPLOAD A PHOTO \ud83d\udcf7 of jewellery you like\n- I will find similar pieces from our collection\n\n## IMAGE SEARCH\nWhen the message starts with 'PHOTO_ANALYSIS:':\n- Step 1: Briefly describe the photo to the customer in 1 warm sentence (e.g. 'What a gorgeous kundan necklace! \ud83d\ude0d')\n- Step 2: Search the INVENTORY DATA above for items that closely match the category, metal color, and style\n- Step 3: ONLY if a genuinely similar item exists in inventory \u2192 mention it with [SKU: XXXX]\n- Step 4: If NO similar item exists \u2192 honestly say so\n- NEVER suggest items that don't match the photo's category or style\n- NEVER hallucinate or invent items not in the inventory\n\n## INVENTORY DATA\nThe message is prefixed with current inventory:\nINVENTORY (N items):\nSKU:X|Name|Cat:Category|Gold|Diamond|Weightg|Rs.Price|Qty:N|Occasions|Photos:N\nSTRICT RULES:\n1. Use ONLY items from this INVENTORY list. Never use training knowledge.\n2. If INVENTORY shows [Category: Bangle] - suggest ONLY bangles. Never suggest rings.\n3. Every [SKU: X] in your reply must exist in the INVENTORY above.\n4. If 0 items - say that category is not in stock right now.\n5. Before writing any SKU, verify it appears in INVENTORY above.\n\n## NO ONLINE PURCHASE \u2014 ABSOLUTE RULE\nNever offer cart, payment, UPI, checkout, or order placing. If asked:\nEnglish:  'Thank you! \ud83d\ude4f Our team will contact you personally. I've notified them! \u2728'\nHinglish: 'Shukriya! \ud83d\ude4f Hamari team aapse jald contact karegi. Maine unhe notify kar diya! \u2728'\nHindi:    '\u0936\u0941\u0915\u094d\u0930\u093f\u092f\u093e! \ud83d\ude4f \u0939\u092e\u093e\u0930\u0940 \u091f\u0940\u092e \u0906\u092a\u0938\u0947 \u091c\u0932\u094d\u0926 \u0938\u0902\u092a\u0930\u094d\u0915 \u0915\u0930\u0947\u0917\u0940\u0964 \u092e\u0948\u0902\u0928\u0947 \u0909\u0928\u094d\u0939\u0947\u0902 \u0938\u0942\u091a\u093f\u0924 \u0915\u0930 \u0926\u093f\u092f\u093e \u0939\u0948! \u2728'\nThen append ##INTERESTED## signal.\n\n## SKU TAGS \u2014 MANDATORY\nEvery item mention MUST end with [SKU: XXXX]. Invisible \u2014 sends photo automatically.\nNever say 'I sent a photo'. Never invent SKUs.\n\n## MULTIPLE ITEMS \u2014 UP TO 3\n*1. Name* [SKU: X]\n\ud83d\udc8e Gold | Diamond | Weightg | Rs.Price\nOne-line desc in customer's language/script\n\n*2. Name* [SKU: Y]\n\ud83d\udc8e ...\n\nEnd: ask which one they like (in customer's language/script).\n\n## SINGLE ITEM\nFull details + [SKU: X]. End: ask if they want more photos (in customer's language/script).\n\n## PURCHASE INTEREST\nTriggers: buy/purchase/book/order/interested/confirm/cart/payment/I want/lena hai/mujhe chahiye/kharidna hai.\nReply in customer's language/script that expert will contact them personally.\nAppend: ##INTERESTED##LAST_SKU\n\n## RESPONSE LENGTH\nDEFAULT: 2-3 sentences max. Warm and punchy like a helpful friend texting, not a brochure.\nEXCEPTION: If customer explicitly asks for details/specs \u2014 give full details: gold carat, diamond purity, weight, price, occasion, 2-3 line description.\nMULTIPLE ITEMS: One line per item only \u2014 name, key spec, price. Nothing more.\n\n## TONE\nWarm, luxurious, concise. Match language and script fully. Light emoji. TEXT ONLY."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -7616,
+        1104
+      ],
+      "id": "2ae63ec8-ec9b-4281-9953-45819593a6da",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Parse WhatsApp Message').first().json.waFrom }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -7408,
+        1328
+      ],
+      "id": "77aad2b3-f383-4ed0-90db-39be13edb377",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"https://graph.facebook.com/v21.0/\" + $(\"WhatsApp Trigger\").item.json.metadata.phone_number_id + \"/messages\" }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"messaging_product\": \"whatsapp\", \"status\": \"read\", \"message_id\": $(\"WhatsApp Trigger\").item.json.messages[0].id } }}",
+        "options": {}
+      },
+      "id": "d574a92b-aab5-4698-809e-ef0f6b2026b8",
+      "name": "Mark as Read",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -10928,
+        1136
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "HFzJcD36hkNsVi4B",
+          "name": "WhatsApp account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Token Usage Logger v10\n// Fix: ownerId was ('global').ownerId in v9 \u2014 always undefined\nvar agentOut  = $input.first().json;\nvar prevData  = $('Parse WhatsApp Message').first().json;\nvar now       = new Date().toISOString();\nvar nowIST    = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });\n\nvar staticStore = $getWorkflowStaticData('global');\nvar ownerId     = staticStore.ownerId || '';\n\nvar promptTokens = 0, completionTokens = 0, totalTokens = 0, toolCallCount = 0;\n\nif (agentOut.tokenUsage) {\n  promptTokens     = agentOut.tokenUsage.promptTokens     || agentOut.tokenUsage.input_tokens  || 0;\n  completionTokens = agentOut.tokenUsage.completionTokens || agentOut.tokenUsage.output_tokens || 0;\n  totalTokens      = agentOut.tokenUsage.totalTokens      || agentOut.tokenUsage.total_tokens  || 0;\n}\nif (!totalTokens && agentOut.usageMetadata) {\n  promptTokens     = agentOut.usageMetadata.promptTokenCount     || agentOut.usageMetadata.input_tokens  || 0;\n  completionTokens = agentOut.usageMetadata.candidatesTokenCount || agentOut.usageMetadata.output_tokens || 0;\n  totalTokens      = agentOut.usageMetadata.totalTokenCount      || (promptTokens + completionTokens);\n}\nvar steps = agentOut.intermediateSteps || [];\ntoolCallCount = steps.length;\nif (!totalTokens && steps.length > 0) {\n  for (var si = 0; si < steps.length; si++) {\n    var u = (steps[si].action && steps[si].action.tokenUsage) || {};\n    promptTokens += u.promptTokens || 0;\n    completionTokens += u.completionTokens || 0;\n    totalTokens += u.totalTokens || 0;\n  }\n}\nif (!totalTokens) {\n  var lastStep = steps[steps.length - 1];\n  if (lastStep && lastStep.observation) {\n    try {\n      var obs = JSON.parse(lastStep.observation);\n      if (obs.usage) {\n        promptTokens     = obs.usage.prompt_tokens     || obs.usage.input_tokens  || 0;\n        completionTokens = obs.usage.completion_tokens || obs.usage.output_tokens || 0;\n        totalTokens      = obs.usage.total_tokens      || (promptTokens + completionTokens);\n      }\n    } catch(e) {}\n  }\n}\n\nvar dataSource = 'actual';\nif (!totalTokens) {\n  completionTokens = Math.ceil(String(agentOut.output || '').length / 4);\n  totalTokens      = completionTokens;\n  dataSource       = 'estimated';\n}\n\nvar costUSD = ((promptTokens * 0.59) + (completionTokens * 0.79)) / 1000000;\nvar costINR = costUSD * 84;\n\nreturn [{ json: {\n  ownerId,\n  agentOutput: agentOut, agentOutputText: String(agentOut.output || ''),\n  waFrom: prevData.waFrom || '', waName: prevData.waName || '', waMessage: prevData.waMessage || '',\n  timestampIST: nowIST, timestampISO: now,\n  promptTokens, completionTokens, totalTokens, toolCallCount,\n  costUSD: parseFloat(costUSD.toFixed(6)), costINR: parseFloat(costINR.toFixed(4)),\n  dataSource, replyLength: String(agentOut.output || '').length\n}}];"
+      },
+      "id": "7476cc67-3dfe-4dae-bc4e-892b19b42a53",
+      "name": "Extract Token Usage",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -7200,
+        1104
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://bigmdvjrvqyqzyrijdum.supabase.co/rest/v1/whatsapp_logs",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ owner_id: ($json.ownerId && $json.ownerId !== '' ? $json.ownerId : null), wa_from: $json.waFrom, wa_name: $json.waName, customer_message: ($json.waMessage || '').substring(0,500), prompt_tokens: $json.promptTokens || 0, completion_tokens: $json.completionTokens || 0, total_tokens: $json.totalTokens || 0, tool_calls: $json.toolCallCount || 0, cost_usd: $json.costUSD || 0, cost_inr: $json.costINR || 0, data_source: $json.dataSource || 'actual', reply_length: $json.replyLength || 0 }) }}",
+        "options": {}
+      },
+      "id": "c57778b5-4730-4a3e-af43-971bdbdab24b",
+      "name": "Log Token Usage to Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -6976,
+        1520
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pass the original agent output forward to Extract SKUs\n// agentOutput is the full agent object; output is the text reply\nvar d = $input.first().json;\nvar out = d.agentOutput || {};\n\n// If output text has JSON-escaped newlines, restore them here\n// This happens when the agent output passes through JSON serialisation\nif (out.output && typeof out.output === 'string') {\n  out = JSON.parse(JSON.stringify(out));\n  out.output = out.output.replace(/\\\\n/g, '\\n').replace(/\\\\t/g, '\\t');\n}\n\nreturn [{ json: out }];\n"
+      },
+      "id": "5e9e3c6f-9b30-43bf-aee2-57fc58e31dd0",
+      "name": "Pass Agent Output",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -6976,
+        1008
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const CACHE_TTL_MS = 30 * 60 * 1000; // 30 min\nconst waData = $input.first().json;\nconst waMsg  = (waData.waMessage || '').trim();\n\n// Image/audio messages must always bypass greeting check and force fresh inventory\nconst isImageOrAudio = (waData.messageType === 'image' || waData.messageType === 'audio'\n  || waMsg.startsWith('PHOTO_ANALYSIS'));\n\nconst isGreeting = !isImageOrAudio && (/^(hi+|hello+|hey+|namaste|namaskar|hii+|helo|hy|good\\s*(morning|afternoon|evening|night)|howdy|hai|hlo|hlw|hye)[\\s!.]*$/i.test(waMsg)\n  || /^(\\u0928\\u092e\\u0938\\u094d\\u0924\\u0947|\\u0928\\u092e\\u0938\\u094d\\u0915\\u093e\\u0930|\\u0939\\u0947\\u0932\\u094b|\\u0939\\u0940)[\\s!.]*$/i.test(waMsg));\n\n// \u2500\u2500 CATEGORY DETECTION \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n// Maps keywords (English + Hinglish + Hindi romanized) to DB category values\nvar categoryMap = [\n  { cat: 'Ring',      words: ['ring','rings','anguthi','anghuthi','angoothi','ungli','ring chahiye','ring dikhao'] },\n  { cat: 'Bangle',    words: ['bangle','bangles','bangle chahiye','bangles dikhao','kada','kangan','chudi','churi','choodi','bangdi','valayu'] },\n  { cat: 'Bracelet',  words: ['bracelet','bracelets','bracelet chahiye','haath ka','wristband'] },\n  { cat: 'Necklace',  words: ['necklace','necklaces','haar','mala','kanthi','gala','gulband','necklace chahiye'] },\n  { cat: 'Earring',   words: ['earring','earrings','ear ring','ear rings','bali','tops','jhumka','jhumki','jhoomka','kaan','earing','earings','studs'] },\n  { cat: 'Pendant',   words: ['pendant','pendants','locket','latkan','pendant chahiye'] },\n  { cat: 'Chain',     words: ['chain','chains','chain chahiye','gold chain','zanjeer'] },\n  { cat: 'Maangtika', words: ['maangtika','maang tikka','maang tika','tikka','matha patti','mathapatti'] },\n  { cat: 'Nosering',  words: ['nosering','nose ring','nath','nathni','laung','naak'] },\n  { cat: 'Anklet',    words: ['anklet','anklets','payal','pajeb','payjeb','paizeb'] },\n  { cat: 'Set',       words: ['set','jewellery set','jewelry set','bridal set','wedding set','full set'] }\n];\n\nvar detectedCategory = '';\n\n// For image messages \u2014 category comes from Build Message from Image imageCategory field\nif (isImageOrAudio && waData.imageCategory) {\n  var ic = waData.imageCategory.toLowerCase().trim();\n  for (var ci = 0; ci < categoryMap.length; ci++) {\n    if (ic === categoryMap[ci].cat.toLowerCase() || categoryMap[ci].words.indexOf(ic) !== -1) {\n      detectedCategory = categoryMap[ci].cat;\n      break;\n    }\n  }\n  // If no exact match, use the raw imageCategory as-is (capitalised)\n  if (!detectedCategory && ic) {\n    detectedCategory = ic.charAt(0).toUpperCase() + ic.slice(1);\n  }\n}\n\n// For text/hinglish messages \u2014 scan waMsg for category keywords\nif (!detectedCategory && !isImageOrAudio && waMsg) {\n  var msgLower = waMsg.toLowerCase();\n  outer:\n  for (var mi = 0; mi < categoryMap.length; mi++) {\n    var words = categoryMap[mi].words;\n    for (var wi = 0; wi < words.length; wi++) {\n      if (msgLower.indexOf(words[wi]) !== -1) {\n        detectedCategory = categoryMap[mi].cat;\n        break outer;\n      }\n    }\n  }\n}\n\nconst store    = $getWorkflowStaticData('global');\nconst cached   = store.inventoryText    || '';\nconst cachedAt = store.inventoryCachedAt || 0;\nconst nowMs    = Date.now();\n\n// Normalize detectedCategory to match exact Supabase values\n// Image Explainer may return 'ring/set', 'ring', 'bangle', etc. \u2014 must match DB exactly\nvar categoryNormalizeMap = {\n  'ring': 'Ring', 'rings': 'Ring', 'ring/set': 'Ring',\n  'bangle': 'Bangle', 'bangles': 'Bangle', 'bangle/bracelet': 'Bangle',\n  'bracelet': 'Bracelet', 'bracelets': 'Bracelet',\n  'necklace': 'Necklace', 'necklaces': 'Necklace', 'necklace/set': 'Necklace',\n  'earring': 'Earring', 'earrings': 'Earring', 'ear ring': 'Earring',\n  'pendant': 'Pendant', 'pendants': 'Pendant', 'pendant/chain': 'Pendant',\n  'chain': 'Chain', 'chains': 'Chain',\n  'set': 'Set', 'jewellery set': 'Set', 'jewelry set': 'Set',\n  'maangtika': 'Maangtika', 'maang tikka': 'Maangtika',\n  'nosering': 'Nosering', 'nose ring': 'Nosering', 'nath': 'Nosering',\n  'anklet': 'Anklet', 'anklets': 'Anklet', 'payal': 'Anklet'\n};\n\nif (detectedCategory) {\n  var rawLower = detectedCategory.toLowerCase().trim();\n  // Try exact map first\n  if (categoryNormalizeMap[rawLower]) {\n    detectedCategory = categoryNormalizeMap[rawLower];\n  } else {\n    // Try prefix match \u2014 e.g. 'ring/set' -> check if starts with any key\n    var matched = false;\n    var mapKeys = Object.keys(categoryNormalizeMap);\n    for (var ni = 0; ni < mapKeys.length; ni++) {\n      if (rawLower.indexOf(mapKeys[ni]) === 0 || rawLower.indexOf(mapKeys[ni]) !== -1) {\n        detectedCategory = categoryNormalizeMap[mapKeys[ni]];\n        matched = true;\n        break;\n      }\n    }\n    // If still no match, capitalize first letter as fallback\n    if (!matched) {\n      detectedCategory = detectedCategory.charAt(0).toUpperCase() + detectedCategory.slice(1).toLowerCase();\n    }\n  }\n}\n\n// Cache is only valid if same category (or no category = full inventory)\nconst cachedCategory = store.inventoryCachedCategory || '';\nconst categoryMatches = (detectedCategory === cachedCategory);\nconst isValid = !isImageOrAudio && cached && categoryMatches && (nowMs - cachedAt) < CACHE_TTL_MS;\n\nreturn [{ json: {\n  waFrom:            waData.waFrom,\n  waName:            waData.waName,\n  waMessage:         waMsg,\n  messageType:       waData.messageType || 'text',\n  imageCategory:     waData.imageCategory || '',\n  isGreeting:        isGreeting,\n  useCache:          isGreeting || isValid,\n  cachedText:        cached,\n  cacheAgeMin:       Math.round((nowMs - cachedAt) / 60000),\n  detectedCategory:  detectedCategory\n}}];"
+      },
+      "id": "9df7196e-c536-4d39-8f26-52878189909f",
+      "name": "Check Cache",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -8784,
+        1104
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "cache-check",
+              "leftValue": "={{ $json.useCache.toString() }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "caseSensitive": false
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "b59a9d36-280a-4f4d-bde9-a14d138debfa",
+      "name": "Cache Valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -8560,
+        1104
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst store = $getWorkflowStaticData('global');\nreturn [{ json: {\n  waFrom:        d.waFrom,\n  waName:        d.waName,\n  waMessage:     d.waMessage,\n  inventoryText: d.isGreeting ? '' : d.cachedText,\n  ownerId:       store.ownerId    || '',\n  storeName:     store.storeName  || 'Our Store',\n  ownerEmail:    store.ownerEmail || '',\n  cacheHit:      d.isGreeting ? 'greeting_skip' : 'cache_hit',\n  cacheAgeMin:   d.cacheAgeMin\n}}];"
+      },
+      "id": "9351efb5-b7ed-4e66-90a0-64b88c9e85bd",
+      "name": "Serve from Cache",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -7888,
+        1008
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://bigmdvjrvqyqzyrijdum.supabase.co/rest/v1/stores?whatsapp_phone=eq.' + $('WhatsApp Trigger').first().json.metadata.display_phone_number + '&select=owner_id,store_name,email,status&limit=1' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c4203d75-b17c-4ff7-acee-1025f94f6be3",
+      "name": "Fetch Owner & Products",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -8336,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Save & Compress Inventory v10\n// Input 0: store row from Fetch Owner & Products (owner_id, store_name, email)\n// Input from Fetch Products by Owner: array of product rows\nvar storeItem  = $('Fetch Owner & Products').first().json;\n// waMessage must come from Check Cache (has PHOTO_ANALYSIS / original message)\n// NOT from Fetch Owner & Products (store row has no waMessage)\nvar waData     = $('Check Cache').first().json;\nvar ownerId    = storeItem.owner_id   || '';\nvar storeName  = storeItem.store_name || 'Our Store';\nvar ownerEmail = storeItem.email      || '';\n\nif (!ownerId) {\n  return [{ json: {\n    waFrom: waData.waFrom, waName: waData.waName, waMessage: waData.waMessage,\n    inventoryText: '', ownerId: '', storeName: 'Unknown',\n    cacheHit: 'no_store_found', cacheAgeMin: 0\n  }}];\n}\n\n// Products come from Fetch Products by Owner HTTP node\n// n8n HTTP node returns array items \u2014 collect all items\nvar allItems = $input.all();\nvar products = allItems.map(function(item) { return item.json; });\n\nvar rows = products.map(function(p) {\n  var images = Array.isArray(p.images) ? p.images : [];\n  var row = {\n    'SKU':               p.sku              || '',\n    'Item Name':         p.name             || '',\n    'AI Title':          p.name || '',\n    'Category':          p.category         || '',\n    'Gold Carat':        p.gold_carat       || '',\n    'Diamond Purity':    p.diamond_purity   || 'N/A',\n    'Weight (g)':        String(p.weight    || ''),\n    'Price (INR)':       String(p.price     || ''),\n    'Stock Qty':         String(p.stock_qty || '1'),\n    'Occasions':         p.occasion || '',\n    'WhatsApp Summary':  (p.description || '').slice(0, 140),\n    'Status':            'Active',\n    'Total Images':      String(images.length || 1),\n    'Primary Image URL': p.primary_image_url || (images[0] || '')\n  };\n  for (var i = 0; i < Math.min(images.length, 5); i++) {\n    row['Image ' + (i+1) + ' Direct URL'] = images[i] || '';\n  }\n  return row;\n});\n\nvar lines = rows.map(function(r) {\n  return 'SKU:' + r['SKU'] + '|'\n       + (r['AI Title'] || r['Item Name']) + '|'\n       + 'Cat:' + r['Category'] + '|'\n       + r['Gold Carat'] + '|'\n       + (r['Diamond Purity'] || 'N/A') + '|'\n       + r['Weight (g)'] + 'g|'\n       + 'Rs.' + r['Price (INR)'] + '|'\n       + 'Qty:' + r['Stock Qty'] + '|'\n       + r['Occasions'] + '|'\n       + 'Photos:' + r['Total Images'];\n});\n\nvar inventoryText = rows.length > 0\n  ? 'INVENTORY (' + rows.length + ' items' + (waData.detectedCategory ? ' [Category: ' + waData.detectedCategory + ']' : '') + '):\\n' + lines.join('\\n')\n  : 'INVENTORY (0 items' + (waData.detectedCategory ? ' [Category: ' + waData.detectedCategory + ']' : '') + '): No products in this category currently in stock.';\n\nvar staticData = $getWorkflowStaticData('global');\nstaticData.inventoryText          = inventoryText;\nstaticData.inventoryCachedAt      = Date.now();\nstaticData.inventoryRowsCache     = rows;\nstaticData.inventoryCachedCategory = waData.detectedCategory || '';\nstaticData.ownerId                = ownerId;\nstaticData.storeName              = storeName;\nstaticData.ownerEmail             = ownerEmail;\n\nreturn [{ json: {\n  waFrom:        waData.waFrom,\n  waName:        waData.waName,\n  waMessage:     waData.waMessage,\n  inventoryText: inventoryText,\n  ownerId:       ownerId,\n  storeName:     storeName,\n  ownerEmail:    ownerEmail,\n  cacheHit:      'miss_refreshed',\n  cacheAgeMin:   0\n}}];"
+      },
+      "id": "342c13a5-9380-45c4-830b-e6087ffa8b7d",
+      "name": "Save & Compress Inventory",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -7888,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "1144772068712842",
+        "recipientPhoneNumber": "={{ $json.waFrom }}",
+        "textBody": "={{ (function() {\n  var name = $json.waName || '';\n  var msg  = $json.waMessage || '';\n  // Detect Hindi: Devanagari chars OR common Hindi words in Latin script\n  var isHindi = /[\\u0900-\\u097F]/.test(msg)\n             || /\\b(kharid|lena|chahiye|pasand|dikhao|batao|nahi|haan|bhai|yaar|accha|theek|bahut|sundar|shukriya|dhanyavaad)\\b/i.test(msg);\n  if (isHindi) {\n    return '\\u0936\\u0941\\u0915\\u094D\\u0930\\u093F\\u092F\\u093E ' + (name ? name + ' \\u091C\\u0940' : '') + '! \\uD83D\\uDE4F\\u2728\\n\\n'\n         + ' \\u0915\\u0940 \\u0939\\u092E\\u093E\\u0930\\u0940 \\u091F\\u0940\\u092E \\u0915\\u094B \\u0906\\u092A\\u0915\\u0940 \\u0930\\u0941\\u091A\\u093F \\u0915\\u0947 \\u092C\\u093E\\u0930\\u0947 \\u092E\\u0947\\u0902 \\u0938\\u0942\\u091A\\u093F\\u0924 \\u0915\\u0930 \\u0926\\u093F\\u092F\\u093E \\u0917\\u092F\\u093E \\u0939\\u0948\\u0964 \\uD83D\\uDC8E\\n\\n'\n         + '\\u0939\\u092E\\u093E\\u0930\\u0947 \\u091C\\u094C\\u0939\\u0930\\u0940 \\u0935\\u093F\\u0936\\u0947\\u0937\\u091C\\u094D\\u091E \\u091C\\u0932\\u094D\\u0926 \\u0939\\u0940 \\u0906\\u092A\\u0938\\u0947 \\u0935\\u094D\\u092F\\u0915\\u094D\\u0924\\u093F\\u0917\\u0924 \\u0930\\u0942\\u092A \\u0938\\u0947 \\u0938\\u0902\\u092A\\u0930\\u094D\\u0915 \\u0915\\u0930\\u0947\\u0902\\u0917\\u0947 \\u0914\\u0930 \\u0906\\u092A\\u0915\\u0940 \\u092A\\u0942\\u0930\\u0940 \\u0938\\u0939\\u093E\\u092F\\u0924\\u093E \\u0915\\u0930\\u0947\\u0902\\u0917\\u0947\\u0964\\n\\n'\n         + '\\u0924\\u092C \\u0924\\u0915, \\u0939\\u092E\\u093E\\u0930\\u0947 \\u0916\\u0942\\u092C\\u0938\\u0942\\u0930\\u0924 \\u0938\\u0902\\u0917\\u094D\\u0930\\u0939 \\u0915\\u094B \\u0914\\u0930 \\u0926\\u0947\\u0916\\u0924\\u0947 \\u0930\\u0939\\u0947\\u0902! \\uD83D\\uDE0A';\n  } else {\n    return '\\u2728 Thank you for your interest' + (name ? ', ' + name : '') + '! \\uD83D\\uDE4F\\n\\n'\n         + 'We have notified the owner. Our jewellery expert will personally contact you soon to discuss more details. \\uD83D\\uDC8E\\n\\n'\n         + 'In the meantime, feel free to browse more of our beautiful collection! \\uD83D\\uDE0A';\n  }\n})() }}",
+        "additionalFields": {}
+      },
+      "id": "cd1e3dcb-915a-42c5-9a3d-0cf461be6b69",
+      "name": "Notify Customer of Interest",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        -6080,
+        720
+      ],
+      "webhookId": "d518a958-aeed-42ea-9714-17aab4a46b6d",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "HFzJcD36hkNsVi4B",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "has-reply",
+              "leftValue": "={{ $json.aiReply }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "30f06245-0231-4bac-9041-86603d25ac34",
+      "name": "Has Text Reply?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -5856,
+        1296
+      ]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "is-text",
+                    "leftValue": "={{ $json.messageType }}",
+                    "rightValue": "text",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "is-audio",
+                    "leftValue": "={{ $json.messageType }}",
+                    "rightValue": "audio",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 1
+                },
+                "conditions": [
+                  {
+                    "id": "is-image",
+                    "leftValue": "={{ $json.messageType }}",
+                    "rightValue": "image",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "image"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "none"
+        }
+      },
+      "id": "33131135-c3e6-4b84-8ea5-8f9af86f52a1",
+      "name": "Message Type?",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [
+        -10032,
+        1120
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://graph.facebook.com/v19.0/{{ $json.mediaId }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {}
+      },
+      "id": "3fcccc16-0149-4f3a-92d8-467cf43494a8",
+      "name": "Get Audio URL",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -9808,
+        800
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "HFzJcD36hkNsVi4B",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {}
+      },
+      "id": "77c32614-b8bb-4c47-92e2-6e5f4b38f052",
+      "name": "Download Audio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -9584,
+        800
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "HFzJcD36hkNsVi4B",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.deepinfra.com/v1/openai/audio/transcriptions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer K9rmeGR1qj7POmWBOSDhIuQCN6Uk3XO7"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "openai/whisper-large-v3-turbo"
+            },
+            {
+              "name": "response_format",
+              "value": "verbose_json"
+            },
+            {
+              "name": "prompt",
+              "value": "This is a customer message about jewellery in Hindi, Marathi, Gujarati, or English. The customer may speak Hinglish."
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8778a5f1-5489-4d15-b1aa-31f87a000ad7",
+      "name": "Transcribe Audio",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -9296,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const transcription = $input.first().json;\nconst prevData = $('Parse WhatsApp Message').first().json;\n\nvar transcribedText = transcription.text\n  || (transcription.results && transcription.results.text)\n  || '';\n\nvar detectedLang = transcription.language\n  || (transcription.results && transcription.results.language)\n  || '';\n\nvar langMap = {\n  'hi': 'Hindi', 'mr': 'Marathi', 'gu': 'Gujarati',\n  'bn': 'Bengali', 'ta': 'Tamil',  'te': 'Telugu',\n  'kn': 'Kannada', 'ml': 'Malayalam', 'pa': 'Punjabi',\n  'ur': 'Urdu',   'en': 'English', 'or': 'Odia'\n};\nvar langName = langMap[detectedLang] || detectedLang || 'Hindi';\n\nif (!transcribedText) {\n  return [{ json: {\n    waFrom:       prevData.waFrom,\n    waName:       prevData.waName,\n    waMessage:    'Customer sent a voice message that could not be transcribed. Please ask them to type their message.',\n    messageType:  'audio_failed',\n    originalType: 'audio',\n    detectedLang: detectedLang,\n    mediaId:      prevData.mediaId\n  }}];\n}\n\n// Prefix with language instruction so AI replies in correct language\nvar waMessage = '[AUDIO MESSAGE - spoken in ' + langName + ', reply in ' + langName + ']\\n' + transcribedText;\n\nreturn [{ json: {\n  waFrom:       prevData.waFrom,\n  waName:       prevData.waName,\n  waMessage:    waMessage,\n  messageType:  'audio_transcribed',\n  originalType: 'audio',\n  detectedLang: detectedLang,\n  langName:     langName,\n  mediaId:      prevData.mediaId\n}}];"
+      },
+      "id": "3c5c2a59-234f-4206-99d7-aac5d43ff906",
+      "name": "Build Message from Audio",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -9008,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "operation": "mediaUrlGet",
+        "mediaGetId": "={{ $json.mediaId }}"
+      },
+      "id": "c17df9be-7a6c-460f-bda6-8baaac08d821",
+      "name": "Get Image URL",
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        -9808,
+        1216
+      ],
+      "webhookId": "314d467a-c939-4854-8572-64be946fcf16",
+      "credentials": {
+        "whatsAppApi": {
+          "id": "HFzJcD36hkNsVi4B",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "whatsAppApi",
+        "options": {}
+      },
+      "id": "57486212-13ff-4c94-b7d1-cc961d303ca2",
+      "name": "Download Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -9584,
+        1232
+      ],
+      "credentials": {
+        "whatsAppApi": {
+          "id": "HFzJcD36hkNsVi4B",
+          "name": "WhatsApp account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "You are a jewellery expert analyzing a customer's photo for an inventory match system.\n\nAnalyze the jewellery in this image and output EXACTLY in this format:\n\nCATEGORY: [pick ONLY one: Ring, Bangle, Bracelet, Necklace, Earring, Pendant, Chain, Set, Maangtika, Nosering, Anklet]\nMETAL_COLOR: [one of: yellow gold/white gold/rose gold/silver/platinum/mixed]\nGOLD_CARAT: [if visible e.g. 18kt/22kt/24kt, else: unknown]\nSTYLE: [one of: plain/diamond/kundan/meenakari/filigree/solitaire/cluster/pave/antique/temple/polki/pearl/gemstone]\nSTONES: [list visible stones e.g. diamond/ruby/emerald/none]\nDESIGN_DETAILS: [1 sentence: shape, pattern, thickness, motifs]\n\nIMPORTANT: CATEGORY must be a single word from the list above. Never combine with slash like 'ring/set'.",
+        "messages": {
+          "messageValues": [
+            {
+              "type": "HumanMessagePromptTemplate",
+              "messageType": "imageBinary"
+            }
+          ]
+        }
+      },
+      "id": "004ef82a-5442-48e0-a67e-8c30e52e29cc",
+      "name": "Image Explainer",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.4,
+      "position": [
+        -9360,
+        1104
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "meta-llama/Llama-4-Scout-17B-16E-Instruct",
+          "mode": "list"
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "id": "e502048f-87e3-4fee-8e73-e16fd2b90f9b",
+      "name": "DeepInfra Vision Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -9296,
+        1328
+      ],
+      "credentials": {
+        "openAiApi": {
+          "id": "WOGXrApDeKshPZQQ",
+          "name": "DeepInfra API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const data     = $input.first().json;\nconst prevData = $('Parse WhatsApp Message').first().json;\n\nvar description = data.text || data.response || data.output || '';\n\n// Parse structured fields from Image Explainer output\nfunction extractField(text, field) {\n  var regex = new RegExp(field + ':\\\\s*(.+)', 'i');\n  var match = text.match(regex);\n  return match ? match[1].trim() : '';\n}\n\nvar category    = extractField(description, 'CATEGORY');\nvar metalColor  = extractField(description, 'METAL_COLOR');\nvar goldCarat   = extractField(description, 'GOLD_CARAT');\nvar style       = extractField(description, 'STYLE');\nvar stones      = extractField(description, 'STONES');\nvar designDesc  = extractField(description, 'DESIGN_DETAILS');\n\n// Build a precise search query for AI Agent\nvar searchQuery = '';\n\nif (description && description.length > 10) {\n  searchQuery = 'PHOTO_ANALYSIS:\\n'\n    + 'Category: ' + (category || 'unknown') + '\\n'\n    + 'Metal: ' + (metalColor || 'unknown') + '\\n'\n    + 'Gold Carat: ' + (goldCarat || 'unknown') + '\\n'\n    + 'Style: ' + (style || 'unknown') + '\\n'\n    + 'Stones: ' + (stones || 'none') + '\\n'\n    + 'Design: ' + (designDesc || 'not specified') + '\\n\\n'\n    + 'MATCHING INSTRUCTIONS:\\n'\n    + '1. Search inventory for items where Cat matches \"' + (category || '') + '\".\\n'\n    + '2. From those, find items where Gold Carat contains \"' + (goldCarat || '') + '\" OR metal color matches.\\n'\n    + '3. EXACT MATCH = same category + same style + same metal. If found, show it with [SKU: XXXX].\\n'\n    + '4. CLOSE MATCH = same category + similar metal. If found, show with [SKU: XXXX] and note the difference.\\n'\n    + '5. NO MATCH = if NO item in inventory matches even the category, say so honestly.\\n'\n    + '6. NEVER suggest an item from a different category (e.g. do not suggest a ring for a necklace photo).\\n'\n    + '7. Start reply by briefly describing the photo to the customer in 1 warm sentence.\\n'\n    + '8. Reply in the same language/script the customer has been using.';\n} else {\n  searchQuery = 'Customer uploaded a photo but it could not be analyzed clearly. Please ask them to describe what they are looking for.';\n}\n\nreturn [{ json: {\n  waFrom:           prevData.waFrom,\n  waName:           prevData.waName,\n  waMessage:        searchQuery,\n  messageType:      'image_search',\n  originalType:     'image',\n  imageDescription: description,\n  imageCategory:    category,\n  imageStyle:       style,\n  imageMetalColor:  metalColor\n}}];"
+      },
+      "id": "bfa4959c-06ce-49d2-9f6b-22d3b961c204",
+      "name": "Build Message from Image",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -9008,
+        1104
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "google/gemma-3-12b-it",
+          "mode": "list",
+          "cachedResultName": "google/gemma-3-12b-it"
+        },
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -7696,
+        1328
+      ],
+      "id": "0dca1f80-b371-4b50-8ff0-a70c0dd516ae",
+      "name": "DeepInfra Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "WOGXrApDeKshPZQQ",
+          "name": "DeepInfra API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Lookup Store Owner v10\n// Also fetches owner_whatsapp for alert delivery\nconst d          = $input.first().json;\nconst phoneNumId = $('WhatsApp Trigger').first().json.metadata.display_phone_number || '';\nconst SERVICE_KEY = ($env.SUPABASE_SERVICE_KEY || '');\nconst BASE_URL    = 'https://bigmdvjrvqyqzyrijdum.supabase.co';\n\nvar ownerId       = '';\nvar storeName     = 'Our Store';\nvar ownerEmail    = '';\nvar ownerWhatsApp = '';\n\ntry {\n  var resp = await $http.get(\n    BASE_URL + '/rest/v1/stores?whatsapp_phone=eq.' + encodeURIComponent(phoneNumId)\n    + '&select=owner_id,store_name,email,status,owner_whatsapp&limit=1',\n    { headers: {\n        'apikey': SERVICE_KEY,\n        'Authorization': 'Bearer ' + SERVICE_KEY\n    }}\n  );\n  var rows = Array.isArray(resp) ? resp : (resp.data ? resp.data : []);\n  var storeRow = rows.length > 0 ? rows[0] : null;\n  if (storeRow) {\n    ownerId       = storeRow.owner_id        || '';\n    storeName     = storeRow.store_name      || 'Our Store';\n    ownerEmail    = storeRow.email           || '';\n    ownerWhatsApp = storeRow.owner_whatsapp  || '';\n  }\n} catch(e) {}\n\nif (ownerId) {\n  var store = $getWorkflowStaticData('global');\n  store.ownerId       = ownerId;\n  store.storeName     = storeName;\n  store.ownerEmail    = ownerEmail;\n  store.ownerWhatsApp = ownerWhatsApp;\n}\n\nreturn [{ json: Object.assign({}, d, { ownerId, storeName, ownerEmail, ownerWhatsApp }) }];"
+      },
+      "id": "265a8282-7eee-40a6-9234-3e55900bffe2",
+      "name": "Lookup Store Owner",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -10704,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Subscription and Usage Check v10\nconst d       = $input.first().json;\nconst ownerId = d.ownerId || '';\nconst waFrom  = d.waFrom  || '';\nconst SK      = ($env.SUPABASE_SERVICE_KEY || '');\nconst BASE    = 'https://bigmdvjrvqyqzyrijdum.supabase.co';\n\nif (!ownerId) {\n  return [{ json: Object.assign({}, d, {\n    subscriptionOk: true, planName: 'unknown',\n    conversationLimit: 9999, monthlyBudgetInr: 9999,\n    conversationsUsed: 0, costUsedInr: 0,\n    convPct: 0, costPct: 0, usagePct: 0, alertLevel: 'none',\n    isNewSession: true, sessionId: null\n  })}];\n}\n\nvar sr = await $http.get(\n  BASE + '/rest/v1/stores?owner_id=eq.' + ownerId\n  + '&select=plan_name,conversation_limit,monthly_budget_inr,subscription_status,plan_expires_at,owner_whatsapp,email&limit=1',\n  { headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK }}\n);\nvar srows = Array.isArray(sr) ? sr : (sr.data || []);\nvar store = srows[0] || {};\n\nvar planName          = store.plan_name           || 'starter';\nvar conversationLimit = store.conversation_limit  || 500;\nvar monthlyBudgetInr  = store.monthly_budget_inr  || 250;\nvar subStatus         = store.subscription_status || 'active';\nvar planExpiresAt     = store.plan_expires_at     || null;\nvar ownerWhatsApp     = store.owner_whatsapp      || d.ownerWhatsApp || '';\nvar ownerEmail        = store.email               || d.ownerEmail    || '';\n\nvar isExpired = subStatus === 'expired' || subStatus === 'cancelled'\n  || (planExpiresAt && new Date(planExpiresAt) < new Date());\n\nvar now      = new Date();\nvar monthKey = now.getFullYear() + '_' + String(now.getMonth() + 1).padStart(2, '0');\n\nvar sessionData = { session_id: null, is_new_session: true };\ntry {\n  var sessionResp = await $http.post(\n    BASE + '/rest/v1/rpc/upsert_session',\n    { owner_id: ownerId, wa_from: waFrom, month_key: monthKey },\n    { headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK, 'Content-Type': 'application/json' }}\n  );\n  var sessionRows = Array.isArray(sessionResp) ? sessionResp : (sessionResp.data || []);\n  if (sessionRows[0]) sessionData = sessionRows[0];\n} catch(e) {}\n\nvar isNewSession = sessionData.is_new_session !== false;\nvar sessionId    = sessionData.session_id || null;\n\nvar usageResp = await $http.get(\n  BASE + '/rest/v1/owner_usage_current?owner_id=eq.' + ownerId,\n  { headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK }}\n);\nvar urows = Array.isArray(usageResp) ? usageResp : (usageResp.data || []);\nvar usage = urows[0] || {};\n\nvar conversationsUsed = parseInt(usage.conversations_used || 0);\nvar costUsedInr       = parseFloat(usage.cost_used_inr    || 0);\n\nvar convPct  = conversationLimit > 0 ? Math.round(conversationsUsed / conversationLimit * 100) : 0;\nvar costPct  = monthlyBudgetInr  > 0 ? Math.round(costUsedInr       / monthlyBudgetInr  * 100) : 0;\nvar usagePct = Math.max(convPct, costPct);\n\nvar limitReason = '';\nif (isExpired)                                   limitReason = 'subscription_expired';\nelse if (conversationsUsed >= conversationLimit) limitReason = 'conversation_limit';\nelse if (costUsedInr >= monthlyBudgetInr)        limitReason = 'cost_limit_internal';\nvar subscriptionOk = limitReason === '';\n\nvar alertLevel = 'none';\nif (!subscriptionOk) {\n  alertLevel = 'limit_reached';\n} else if (usagePct >= 90) {\n  try {\n    var flagResp = await $http.get(\n      BASE + '/rest/v1/alert_flags?owner_id=eq.' + ownerId\n           + '&alert_type=eq.90_percent&month_key=eq.' + monthKey + '&limit=1',\n      { headers: { 'apikey': SK, 'Authorization': 'Bearer ' + SK }}\n    );\n    var frows = Array.isArray(flagResp) ? flagResp : (flagResp.data || []);\n    if (frows.length === 0) alertLevel = '90_percent';\n  } catch(e) {\n    alertLevel = '90_percent';\n  }\n}\n\nreturn [{ json: Object.assign({}, d, {\n  subscriptionOk, limitReason, planName,\n  conversationLimit, conversationsUsed, convPct,\n  monthlyBudgetInr, costUsedInr: Math.round(costUsedInr * 100) / 100, costPct,\n  usagePct, alertLevel, monthKey,\n  isNewSession, sessionId, ownerWhatsApp, ownerEmail,\n  subStatus, isExpired\n}) }];"
+      },
+      "id": "bf7b354d-c29f-4b09-9ecb-8d9bdd8d9f8f",
+      "name": "Check Subscription & Usage",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -10480,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "sub-ok",
+              "leftValue": "={{ String($json.subscriptionOk) }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c61c70d7-b1dd-4886-b0fd-cae8c731ea5f",
+      "name": "Subscription OK?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -10256,
+        1328
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const d = $input.first().json;\nconst reason    = d.limitReason || 'unknown';\n\n// Customer always gets the same polite message \u2014 no technical details\nconst customerMsg = 'Hello! Our automated assistant is temporarily unavailable.\\n'\n  + 'Please contact us directly for product enquiries. Thank you for your patience! \\uD83D\\uDE4F';\n\nvar ownerSubject, ownerAlert;\n\nif (reason === 'subscription_expired') {\n  ownerSubject = '\u26a0\ufe0f Karat \u2014 Subscription Expired';\n  ownerAlert   = '*Karat Alert*\\n\\n'\n    + 'Your subscription has *expired*. Your WhatsApp AI bot is now *offline*.\\n\\n'\n    + 'Renew your subscription to reactivate: nikimodi81@gmail.com';\n\n} else if (reason === 'cost_limit_internal') {\n  // Owner-facing message: same as conversation limit \u2014 no LLM cost details\n  ownerSubject = '\ud83d\udeab Karat \u2014 Monthly Limit Reached';\n  ownerAlert   = '*Karat: Monthly Limit Reached*\\n\\n'\n    + 'Your WhatsApp AI bot has reached its monthly limit.\\n\\n'\n    + '*Conversations used:* ' + d.conversationsUsed + '\\n'\n    + '*Plan:* ' + d.planName + '\\n\\n'\n    + 'The bot is *paused* until 1st of next month or until you upgrade.\\n\\n'\n    + 'Upgrade your plan: nikimodi81@gmail.com';\n\n} else {\n  // conversation_limit or anything else\n  ownerSubject = '\ud83d\udeab Karat \u2014 Monthly Conversation Limit Reached';\n  ownerAlert   = '*Karat: Monthly Limit Reached*\\n\\n'\n    + '*Conversations used:* ' + d.conversationsUsed + ' / ' + d.conversationLimit + '\\n'\n    + '*Plan:* ' + d.planName + '\\n\\n'\n    + 'The bot is *paused* until 1st of next month or until you upgrade.\\n\\n'\n    + 'Upgrade your plan: nikimodi81@gmail.com';\n}\n\nreturn [{ json: {\n  waFrom: d.waFrom, ownerEmail: d.ownerEmail,\n  customerMsg, ownerAlert, ownerSubject,\n  planName: d.planName, usagePct: d.usagePct,\n  limitReason: reason\n}}];"
+      },
+      "id": "b915c8b7-64ff-4aae-adc6-f0bc69d10c53",
+      "name": "Build Limit Messages",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -10032,
+        1520
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://graph.facebook.com/v19.0/' + $('WhatsApp Trigger').first().json.metadata.phone_number_id + '/messages' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ messaging_product: 'whatsapp', to: $json.waFrom, type: 'text', text: { body: $json.customerMsg }}) }}",
+        "options": {}
+      },
+      "id": "005471d3-8287-4641-a4b1-c60d4388d185",
+      "name": "Send Limit Reached to Customer",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -9808,
+        1520
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.ownerEmail || 'nikimodi81@gmail.com' }}",
+        "subject": "={{ $json.ownerSubject || '[Karat] \u26a0\ufe0f Bot Paused' }}",
+        "message": "={{ $json.ownerAlert }}",
+        "options": {}
+      },
+      "id": "03bf6f5f-fdfb-483b-baa7-8cc940e4db91",
+      "name": "Alert Owner - Limit Reached",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -9584,
+        1520
+      ],
+      "webhookId": "a61cd65a-2f97-42d3-b449-807fbb75c02f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "o7fZduR5GwlJVLqs",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check 90% Alert v10\n// v10: inserts row into alert_flags table instead of n8n static data\nconst d = $input.first().json;\n\nif (d.alertLevel !== '90_percent') {\n  return [{ json: { sendAlert: false } }];\n}\n\nconst SK   = ($env.SUPABASE_SERVICE_KEY || '');\nconst BASE = 'https://bigmdvjrvqyqzyrijdum.supabase.co';\n\ntry {\n  await $http.post(\n    BASE + '/rest/v1/alert_flags',\n    { owner_id: d.ownerId, alert_type: '90_percent', month_key: d.monthKey },\n    { headers: {\n        'apikey': SK,\n        'Authorization': 'Bearer ' + SK,\n        'Content-Type': 'application/json',\n        'Prefer': 'return=minimal'\n    }}\n  );\n} catch(e) {\n  return [{ json: { sendAlert: false } }];\n}\n\nconst remaining = d.conversationLimit - d.conversationsUsed;\n\nconst line1 = '[Karat] Usage Alert';\nconst line2 = 'Plan: ' + d.planName;\nconst line3 = 'Conversations used: ' + d.conversationsUsed + ' / ' + d.conversationLimit + ' (' + d.convPct + '%)';\nconst line4 = 'Remaining: ' + remaining + ' conversations';\nconst line5 = 'Resets: 1st of next month';\nconst line6 = 'Upgrade to avoid interruption.';\nconst line7 = 'Contact: nikimodi81@gmail.com';\n\nconst ownerMsg = [line1, line2, line3, line4, line5, line6, line7].join('\\n');\n\nreturn [{ json: {\n  sendAlert:     true,\n  ownerEmail:    d.ownerEmail    || 'nikimodi81@gmail.com',\n  ownerWhatsApp: d.ownerWhatsApp || '',\n  ownerMsg,\n  subject: '[Karat] WARNING - ' + d.convPct + '% Conversations Used - ' + d.planName,\n  usagePct: d.usagePct,\n  planName: d.planName\n}}];\n"
+      },
+      "id": "051868b5-b8cb-401c-ae2d-6b8db5789e28",
+      "name": "Check 90% Alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -6752,
+        1520
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "send-alert",
+              "leftValue": "={{ String($json.sendAlert) }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "cff4e83c-d5ae-4e57-8507-095bab81688e",
+      "name": "Send 90% Alert?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -6528,
+        1520
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.ownerEmail }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.ownerMsg }}",
+        "options": {}
+      },
+      "id": "f0e25145-25a1-4fb6-ad05-675c4aeec207",
+      "name": "Send 90% Alert Email",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -6304,
+        1520
+      ],
+      "webhookId": "3f03c737-8d35-4239-a42c-943ddd64bbb2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "o7fZduR5GwlJVLqs",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://bigmdvjrvqyqzyrijdum.supabase.co/rest/v1/products?owner_id=eq.' + $('Fetch Owner & Products').first().json.owner_id + '&is_current=eq.true&in_stock=eq.true' + ($('Check Cache').first().json.detectedCategory ? '&category=eq.' + $('Check Cache').first().json.detectedCategory : '') + '&select=sku,name,ai_title,category,gold_carat,diamond_purity,weight,price,stock_qty,ai_occasions,ai_whatsapp_summary,images,primary_image_url&order=created_at.desc' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c18c564e-bb4a-45ea-b204-57d4d5a88e28",
+      "name": "Fetch Products by Owner",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -8112,
+        1200
+      ]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "google/gemma-3-4b-it",
+          "mode": "list",
+          "cachedResultName": "google/gemma-3-4b-it"
+        },
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -7568,
+        1344
+      ],
+      "id": "d573cb91-11c4-4ce8-b62d-35804983a9ea",
+      "name": "DeepInfra Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "WOGXrApDeKshPZQQ",
+          "name": "DeepInfra API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "Parse WhatsApp Message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Mark as Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse WhatsApp Message": {
+      "main": [
+        [
+          {
+            "node": "Lookup Store Owner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract SKUs from AI Reply": {
+      "main": [
+        [
+          {
+            "node": "SKUs Found?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Customer Confirmed Interest?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SKUs Found?": {
+      "main": [
+        [
+          {
+            "node": "Fetch SKU Details",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Text Only Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resolve SKUs & Build Image List": {
+      "main": [
+        [
+          {
+            "node": "Has Text Reply?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Images to Send?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Only Reply": {
+      "main": [
+        [
+          {
+            "node": "Has Text Reply?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Images to Send?": {
+      "main": [
+        [
+          {
+            "node": "Split Images for Sending",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Images for Sending": {
+      "main": [
+        [
+          {
+            "node": "Send Image to Customer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Customer Confirmed Interest?": {
+      "main": [
+        [
+          {
+            "node": "Prepare Owner Notifications",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Owner Notifications": {
+      "main": [
+        [
+          {
+            "node": "Notify Owner via Gmail",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notify Owner via WhatsApp",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Notify Customer of Interest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Extract Token Usage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Token Usage": {
+      "main": [
+        [
+          {
+            "node": "Log Token Usage to Supabase",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Pass Agent Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pass Agent Output": {
+      "main": [
+        [
+          {
+            "node": "Extract SKUs from AI Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Cache": {
+      "main": [
+        [
+          {
+            "node": "Cache Valid?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cache Valid?": {
+      "main": [
+        [
+          {
+            "node": "Serve from Cache",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Fetch Owner & Products",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Serve from Cache": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save & Compress Inventory": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has Text Reply?": {
+      "main": [
+        [
+          {
+            "node": "Send Text Reply to Customer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message Type?": {
+      "main": [
+        [
+          {
+            "node": "Check Cache",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Audio URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Image URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Audio URL": {
+      "main": [
+        [
+          {
+            "node": "Download Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Audio": {
+      "main": [
+        [
+          {
+            "node": "Transcribe Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe Audio": {
+      "main": [
+        [
+          {
+            "node": "Build Message from Audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Message from Audio": {
+      "main": [
+        [
+          {
+            "node": "Check Cache",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Image URL": {
+      "main": [
+        [
+          {
+            "node": "Download Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Image": {
+      "main": [
+        [
+          {
+            "node": "Image Explainer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image Explainer": {
+      "main": [
+        [
+          {
+            "node": "Build Message from Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Message from Image": {
+      "main": [
+        [
+          {
+            "node": "Check Cache",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Owner & Products": {
+      "main": [
+        [
+          {
+            "node": "Fetch Products by Owner",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch SKU Details": {
+      "main": [
+        [
+          {
+            "node": "Resolve SKUs & Build Image List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lookup Store Owner": {
+      "main": [
+        [
+          {
+            "node": "Check Subscription & Usage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Subscription & Usage": {
+      "main": [
+        [
+          {
+            "node": "Subscription OK?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Subscription OK?": {
+      "main": [
+        [
+          {
+            "node": "Message Type?",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Build Limit Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Limit Messages": {
+      "main": [
+        [
+          {
+            "node": "Send Limit Reached to Customer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Limit Reached to Customer": {
+      "main": [
+        [
+          {
+            "node": "Alert Owner - Limit Reached",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Token Usage to Supabase": {
+      "main": [
+        [
+          {
+            "node": "Check 90% Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check 90% Alert": {
+      "main": [
+        [
+          {
+            "node": "Send 90% Alert?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send 90% Alert?": {
+      "main": [
+        [
+          {
+            "node": "Send 90% Alert Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Products by Owner": {
+      "main": [
+        [
+          {
+            "node": "Save & Compress Inventory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepInfra Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepInfra Vision Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Image Explainer",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepInfra Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "00fcc836-e4e3-44e5-b8ce-b0954a25b759",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "926af9fe819bfca9c65f4c36d0a89dfa16c4f674f94393a7444d2e6d8385c53e"
+  },
+  "id": "QMNV671g9oftrHuP",
+  "tags": [
+    {
+      "updatedAt": "2026-05-05T14:34:52.389Z",
+      "createdAt": "2026-05-05T14:34:52.389Z",
+      "id": "3uVGqJydS7fTDFfB",
+      "name": "Jewellery Store"
+    }
+  ]
+}
