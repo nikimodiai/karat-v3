@@ -240,25 +240,25 @@ function RateHint({ info, purity }) {
   if (!purity) return null;
   if (info.source === 'missing' || info.rate === 0) {
     return (
-      <small className={`${styles.hint} ${styles.hintWarn}`}>
-        <AlertTriangle size={10}/> No rate for this purity in metal_rates. Update today's rate first.
-      </small>
+      <div className={`${styles.rateCard} ${styles.rateCardWarn}`}>
+        <AlertTriangle size={12}/>
+        <span>No rate published for this purity yet.</span>
+      </div>
     );
   }
-  const unit = info.unitLabel || '/g';
-  if (info.source === 'derived') {
-    return (
-      <small className={styles.hint}>
-        <TrendingUp size={10}/> Derived from 999 base:&nbsp;
-        <strong>{fmtINR(info.displayRate)}{unit}</strong>
-        <span className={styles.muted}>&nbsp;(per-gram: {fmtINR(info.rate)})</span>
-      </small>
-    );
-  }
+  const unit       = info.unitLabel || '/g';
+  const isDerived  = info.source === 'derived';
   return (
-    <small className={styles.hint}>
-      <TrendingUp size={10}/> Today's rate: <strong>{fmtINR(info.displayRate)}{unit}</strong>
-      <span className={styles.muted}>&nbsp;(per-gram: {fmtINR(info.rate)})</span>
-    </small>
+    <div className={styles.rateCard}>
+      <div className={styles.rateCardTop}>
+        <TrendingUp size={11} className={styles.rateIcon}/>
+        <span className={styles.rateLabel}>{isDerived ? 'Derived rate' : "Today's rate"}</span>
+        <span className={styles.ratePrice}>{fmtINR(info.displayRate)}<small>{unit}</small></span>
+      </div>
+      <div className={styles.rateCardBottom}>
+        {isDerived && <span>from 999 base · </span>}
+        <span>per-gram <strong>{fmtINR(info.rate)}</strong></span>
+      </div>
+    </div>
   );
 }
