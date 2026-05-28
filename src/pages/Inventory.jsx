@@ -203,10 +203,16 @@ export default function Inventory() {
       // Visibility & dynamic pricing
       visibility:          form.visibility     || 'all',
       dynamic_price:       form.dynamic_price  ?? false,
+      // Dual-metal breakdown (NEW — see 2026_05_28_dynamic_pricing.sql)
+      gold_purity:         form.gold_purity         || null,
+      gold_weight_grams:   form.gold_weight_grams   ? Number(form.gold_weight_grams)   : null,
+      silver_purity:       form.silver_purity       || null,
+      silver_weight_grams: form.silver_weight_grams ? Number(form.silver_weight_grams) : null,
+      // Legacy single-metal snapshot fields (kept for back-compat / search)
       metal_type:          form.metal_type     || null,
       metal_weight_grams:  form.metal_weight_grams ? Number(form.metal_weight_grams) : null,
       wastage_percent:     Number(form.wastage_percent)    || 0,
-      making_charge_type:  form.making_charge_type  || 'percentage',
+      making_charge_type:  form.making_charge_type  || 'per_gram',
       making_charge_value: Number(form.making_charge_value) || 0,
       stone_value_inr:     Number(form.stone_value_inr)     || 0,
       diamond_value_inr:   Number(form.diamond_value_inr)   || 0,

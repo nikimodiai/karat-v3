@@ -178,6 +178,54 @@ export function calcJewelleryPrice({
   return { goldCost, silverCost, metalCost, makingCost, stoneCost, hallmark, total };
 }
 
+// ── metal_rates lookup helpers ──────────────────────────────────────
+// metal_rates rows look like:
+//   { metal_type: 'gold_916', purity_factor: '0.916', rate_per_gram: '12500', is_current: true, ... }
+//
+// purityToMetalType('22K Gold')         -> 'gold_917'   (22/24×1000 rounded)
+// purityToMetalType('970 Silver (T..)') -> 'silver_970'
+// purityToMetalType('Platinum')         -> 'platinum'
+export function purityToMetalType(purity) {
+  if (!purity) return null;
+  const k = String(purity).match(/^(\d+)K/);
+  if (k) return `gold_${Math.round(Number(k[1]) / 24 * 1000)}`;
+  const s = String(purity).match(/^(\d{3})\s*Silver/i);
+  if (s) return `silver_${s[1]}`;
+  if (/plat/i.test(purity)) return 'platinum';
+  return null;
+}
+
+// Look up a per-gram rate for a purity. Falls back proportionally to the
+// 999 base when an exact row isn't available — so a shop that only
+// records gold_999 & silver_999 can still price 22K / 970-silver items.
+//
+// Returns: { rate, source: 'exact' | 'derived' | 'missing', baseRate, ratio }
+export function resolveMetalRate(purity, rows) {
+  if (!purity || !rows?.length) return { rate: 0, source: 'missing' };
+  const targetKey = purityToMetalType(purity);
+  if (!targetKey) return { rate: 0, source: 'missing' };
+
+  const exact = rows.find(r => r.metal_type === targetKey);
+  if (exact) return { rate: Number(exact.rate_per_gram), source: 'exact' };
+
+  // Derive from the 999-purity base of the same metal family
+  const isGold   = targetKey.startsWith('gold');
+  const isSilver = targetKey.startsWith('silver');
+  if (!isGold && !isSilver) return { rate: 0, source: 'missing' };
+
+  const base = rows.find(r => r.metal_type === (isGold ? 'gold_999' : 'silver_999'));
+  if (!base) return { rate: 0, source: 'missing' };
+
+  const targetPurity = Number(targetKey.split('_')[1]);   // e.g. 970
+  const ratio = targetPurity / 999;
+  return {
+    rate: Number(base.rate_per_gram) * ratio,
+    source: 'derived',
+    baseRate: Number(base.rate_per_gram),
+    ratio,
+  };
+}
+
 // TODO (production): wire to a live gold-rate API. Options:
 //   - GoldAPI.io (paid, USD-based, convert via FX)
 //   - MetalPriceAPI

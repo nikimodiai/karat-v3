@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { X, Upload, Trash2, Calculator, Video, Image as ImageIcon } from 'lucide-react';
+import { X, Upload, Trash2, Tag, Zap, Video, Image as ImageIcon } from 'lucide-react';
 import {
   CATEGORIES, SUBCATEGORY_MAP, METAL_PURITY_GROUPS, DIAMOND_PURITIES,
   SILVER_CATEGORIES, MAX_IMAGE_BYTES,
@@ -7,7 +7,7 @@ import {
 
 const ALL_METAL_OPTIONS = METAL_PURITY_GROUPS.flatMap(g => g.options);
 import { PLAN_LABELS, planKey, hasFeature as hasF } from '../lib/plans';
-import PricingCalculator from './PricingCalculator';
+import DynamicPricingPanel from './DynamicPricingPanel';
 import VideoUpload from './VideoUpload';
 import styles from './ProductModal.module.css';
 
@@ -26,16 +26,26 @@ const EMPTY_FORM = {
   description: '', in_stock: true,
   // Visibility
   visibility: 'all',
-  // Dynamic pricing toggle + calculation fields
+  // Pricing mode: false → owner types a fixed price; true → live recompute
   dynamic_price: false,
+  // Dynamic pricing breakdown (one row per metal component)
+  gold_purity: '',
+  gold_weight_grams: '',
+  silver_purity: '',
+  silver_weight_grams: '',
+  // Charges (used in both modes when present)
   metal_type: '',
   metal_weight_grams: '',
   wastage_percent: 0,
-  making_charge_type: 'percentage',
+  making_charge_type: 'per_gram',
   making_charge_value: 0,
   stone_value_inr: 0,
   diamond_value_inr: 0,
   hallmark_charge: 45,
+  // Optional stone breakdown — kept locally for recompute, not persisted as separate columns
+  stone_weight_ct: '',
+  stone_rate_per_ct: '',
+  flat_stone_cost: '',
 };
 
 export default function ProductModal({ product, store, onSave, onClose, checkSKU, planLimits }) {
@@ -47,7 +57,6 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
   const [skuError, setSkuError]     = useState('');
   const [saving, setSaving]         = useState(false);
   const [subcats, setSubcats]       = useState([]);
-  const [showCalc, setShowCalc]     = useState(false);
   const fileRefs = useRef([null,null,null,null,null]);
   const isEdit   = !!product;
 
@@ -78,14 +87,21 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
         in_stock:       typeof product.in_stock === 'boolean' ? product.in_stock : true,
         visibility:     product.visibility     || 'all',
         dynamic_price:  product.dynamic_price  ?? false,
+        gold_purity:    product.gold_purity    || '',
+        gold_weight_grams:   product.gold_weight_grams   ?? '',
+        silver_purity:       product.silver_purity       || '',
+        silver_weight_grams: product.silver_weight_grams ?? '',
         metal_type:     product.metal_type     || '',
         metal_weight_grams: product.metal_weight_grams ?? '',
         wastage_percent:    product.wastage_percent    ?? 0,
-        making_charge_type:  product.making_charge_type  || 'percentage',
+        making_charge_type:  product.making_charge_type  || 'per_gram',
         making_charge_value: product.making_charge_value ?? 0,
         stone_value_inr:     product.stone_value_inr     ?? 0,
         diamond_value_inr:   product.diamond_value_inr   ?? 0,
         hallmark_charge:     product.hallmark_charge     ?? 45,
+        stone_weight_ct:     '',
+        stone_rate_per_ct:   '',
+        flat_stone_cost:     '',
       });
       const urls = Array.isArray(product.images) ? product.images : [];
       const existing = [null,null,null,null,null];
@@ -111,7 +127,6 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
       setCustomMetalMode(false); setCustomDiamondMode(false);
     }
     setSkuError('');
-    setShowCalc(false);
   }, [product]);
 
   const set = useCallback((key, val) => {
@@ -172,7 +187,14 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
     if (!form.category)       return alert('Category is required');
     if (!form.gold_carat)     return alert('Gold/Silver/Metal purity is required');
     if (!form.weight)         return alert('Weight is required');
-    if (!form.price)          return alert('Price is required');
+    if (form.dynamic_price) {
+      const hasGold   = form.gold_purity   && Number(form.gold_weight_grams)   > 0;
+      const hasSilver = form.silver_purity && Number(form.silver_weight_grams) > 0;
+      if (!hasGold && !hasSilver) return alert('Dynamic pricing needs at least one metal (gold or silver) with a purity and weight.');
+      if (!Number(form.price))    return alert('Live price is ₹0 — check that today\'s metal rates are loaded.');
+    } else {
+      if (!form.price)        return alert('Price is required');
+    }
     if (skuError)             return alert('Fix the SKU error first');
     if (imageCount === 0)     return alert('At least one product image is required');
 
@@ -358,28 +380,11 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
 
           <div className="fg fg3" style={{ marginTop: 14 }}>
             <div className="fld">
-              <label className="lbl">Weight (grams) <span className="req">*</span></label>
+              <label className="lbl">Total Weight (grams) <span className="req">*</span></label>
               <input
                 className="inp" type="number" step="0.01" min="0"
                 value={form.weight} onChange={e => set('weight', e.target.value)}
                 placeholder="e.g. 5.20"
-              />
-            </div>
-            <div className="fld">
-              <label className="lbl">
-                Price (₹ INR) <span className="req">*</span>
-                <button
-                  type="button"
-                  className={styles.calcLink}
-                  onClick={() => setShowCalc(s => !s)}
-                >
-                  <Calculator size={11}/> {showCalc ? 'Hide calculator' : 'Calculate price'}
-                </button>
-              </label>
-              <input
-                className="inp" type="number" min="0"
-                value={form.price} onChange={e => set('price', e.target.value)}
-                placeholder="e.g. 45000"
               />
             </div>
             <div className="fld">
@@ -389,28 +394,6 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
                 value={form.stock_qty} onChange={e => set('stock_qty', e.target.value)}
               />
             </div>
-          </div>
-
-          {/* Dynamic pricing calculator (collapsible) */}
-          <PricingCalculator
-            open={showCalc}
-            weight={form.weight}
-            carat={form.gold_carat}
-            onApply={(data) => {
-              set('price',              String(data.total));
-              set('metal_type',         data.metalType);
-              set('metal_weight_grams', data.metalWeightGrams);
-              set('wastage_percent',    data.wastagePercent);
-              set('making_charge_type', data.makingChargeType);
-              set('making_charge_value',data.makingChargeValue);
-              set('stone_value_inr',    data.stoneValueInr);
-              set('hallmark_charge',    data.hallmarkCharge);
-            }}
-            onClose={() => setShowCalc(false)}
-          />
-
-          {/* Visibility + Dynamic Price */}
-          <div className="fg fg2" style={{ marginTop: 14 }}>
             <div className="fld">
               <label className="lbl">Visible To</label>
               <select className="inp" value={form.visibility} onChange={e => set('visibility', e.target.value)}>
@@ -419,18 +402,71 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
                 <option value="vvip_vip">VVIP &amp; VIP Only</option>
               </select>
             </div>
-            <div className="fld" style={{ justifyContent: 'flex-end' }}>
-              <label className={styles.stockToggle} style={{ marginTop: 28 }}>
-                <input
-                  type="checkbox"
-                  checked={form.dynamic_price === true}
-                  onChange={e => set('dynamic_price', e.target.checked)}
-                  style={{ width: 16, height: 16, accentColor: 'var(--navy)' }}
-                />
-                Dynamic price (auto-update daily)
-              </label>
-            </div>
           </div>
+
+          {/* ── Pricing ─────────────────────────────────────────────── */}
+          <div className="sec-label" style={{ marginTop: 20 }}>
+            ② Pricing <span className="req">*</span>
+          </div>
+
+          <div className={styles.priceModeRow}>
+            <button
+              type="button"
+              className={`${styles.priceModeBtn} ${!form.dynamic_price ? styles.priceModeBtnActive : ''}`}
+              onClick={() => set('dynamic_price', false)}
+            >
+              <Tag size={13}/> Fixed Price
+              <small>Owner enters one final number</small>
+            </button>
+            <button
+              type="button"
+              className={`${styles.priceModeBtn} ${form.dynamic_price ? styles.priceModeBtnActive : ''}`}
+              onClick={() => set('dynamic_price', true)}
+            >
+              <Zap size={13}/> Dynamic Pricing
+              <small>Auto-updates with daily metal rates</small>
+            </button>
+          </div>
+
+          {!form.dynamic_price ? (
+            <div className="fg fg2" style={{ marginTop: 12 }}>
+              <div className="fld">
+                <label className="lbl">Price (₹ ex-GST) <span className="req">*</span></label>
+                <input
+                  className="inp" type="number" min="0"
+                  value={form.price} onChange={e => set('price', e.target.value)}
+                  placeholder="e.g. 45000"
+                />
+              </div>
+              <div className="fld">
+                <label className="lbl">Hallmark / BIS Fee (₹)</label>
+                <input
+                  className="inp" type="number" min="0"
+                  value={form.hallmark_charge}
+                  onChange={e => set('hallmark_charge', e.target.value)}
+                />
+              </div>
+            </div>
+          ) : (
+            <>
+              <DynamicPricingPanel
+                value={form}
+                onChange={(next) => setForm(f => ({ ...f, ...next }))}
+                onTotalChange={(total, snapshot) => {
+                  setForm(f => ({
+                    ...f,
+                    price: total ? String(total) : '',
+                    ...snapshot,
+                  }));
+                }}
+              />
+              <div className={styles.priceSnapshot}>
+                <span>Computed Price</span>
+                <strong>₹{form.price ? Number(form.price).toLocaleString('en-IN') : '—'}</strong>
+                <small>saved to <code>products.price</code>, recomputed each load</small>
+              </div>
+            </>
+          )}
 
           <div style={{ marginTop: 14 }}>
             <div className="fld">
@@ -445,9 +481,9 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
             </div>
           </div>
 
-          {/* ② Images */}
+          {/* ③ Images */}
           <div className="sec-label" style={{ marginTop: 20 }}>
-            <ImageIcon size={11} style={{verticalAlign: 'middle', marginRight: 4}}/> ② Product Images (up to 5) <span className="req">*</span>
+            <ImageIcon size={11} style={{verticalAlign: 'middle', marginRight: 4}}/> ③ Product Images (up to 5) <span className="req">*</span>
           </div>
           <div className={styles.imgGrid}>
             {[0,1,2,3,4].map(i => {
@@ -483,9 +519,9 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
             First image is the primary photo sent to WhatsApp customers. JPG, PNG, WebP · Max 5 MB each.
           </p>
 
-          {/* ③ Video — Pro plan only */}
+          {/* ④ Video — Pro plan only */}
           <div className="sec-label" style={{ marginTop: 20 }}>
-            <Video size={11} style={{verticalAlign: 'middle', marginRight: 4}}/> ③ Product Video (optional · max 10s)
+            <Video size={11} style={{verticalAlign: 'middle', marginRight: 4}}/> ④ Product Video (optional · max 10s)
             <span className={styles.proBadge}>{PLAN_LABELS[planName] || 'Trial'}</span>
           </div>
           <VideoUpload
