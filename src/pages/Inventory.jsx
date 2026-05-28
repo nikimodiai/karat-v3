@@ -64,19 +64,25 @@ async function uploadImageToCloudinary(file) {
 }
 
 async function uploadVideoToCloudinary(file) {
-  const fd = new FormData();
-  fd.append('file', file);
-  fd.append('upload_preset', CLOUDINARY_VIDEO_PRESET);
-  // Cloudinary auto-detects video → /video/upload endpoint
-  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/video/upload`, {
-    method: 'POST', body: fd,
-  });
-  if (!res.ok) {
-    const txt = await res.text().catch(() => '');
-    throw new Error('Video upload failed: ' + txt.slice(0, 200));
+  // Try video preset first, then fall back to the image preset.
+  // Use /auto/upload so Cloudinary detects the resource type itself.
+  const presetsToTry = [CLOUDINARY_VIDEO_PRESET, CLOUDINARY_PRESET].filter(Boolean);
+  let lastErr = '';
+  for (const preset of presetsToTry) {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', preset);
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/auto/upload`,
+      { method: 'POST', body: fd },
+    );
+    if (res.ok) {
+      const json = await res.json();
+      if (json.secure_url) return json.secure_url;
+    }
+    lastErr = await res.text().catch(() => 'unknown');
   }
-  const json = await res.json();
-  return json.secure_url || null;
+  throw new Error(lastErr.slice(0, 300) || 'Cloudinary rejected the upload');
 }
 
 // Rough storage estimate for images already uploaded (best-effort; the
@@ -168,7 +174,8 @@ export default function Inventory() {
       try {
         finalVideoUrl = await uploadVideoToCloudinary(videoFile);
       } catch (e) {
-        showToast('Video upload failed — saving product without video', '#C0392B');
+        console.error('[VideoUpload]', e);
+        showToast(`Video upload failed: ${e.message?.slice(0,120) || 'unknown error'}`, '#C0392B');
         finalVideoUrl = existingVideoUrl || null;
       }
     }
@@ -193,6 +200,17 @@ export default function Inventory() {
       primary_image_url: finalImages[0] || null,
       video_url:      finalVideoUrl,
       is_current:     true,
+      // Visibility & dynamic pricing
+      visibility:          form.visibility     || 'all',
+      dynamic_price:       form.dynamic_price  ?? false,
+      metal_type:          form.metal_type     || null,
+      metal_weight_grams:  form.metal_weight_grams ? Number(form.metal_weight_grams) : null,
+      wastage_percent:     Number(form.wastage_percent)    || 0,
+      making_charge_type:  form.making_charge_type  || 'percentage',
+      making_charge_value: Number(form.making_charge_value) || 0,
+      stone_value_inr:     Number(form.stone_value_inr)     || 0,
+      diamond_value_inr:   Number(form.diamond_value_inr)   || 0,
+      hallmark_charge:     Number(form.hallmark_charge)     ?? 45,
     };
 
     if (isEdit && editProduct) {

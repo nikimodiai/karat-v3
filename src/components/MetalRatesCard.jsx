@@ -111,29 +111,35 @@ export default function MetalRatesCard() {
         </div>
       ) : (
         <div className={styles.strip}>
-          {rates.map((r, i) => {
-            const type  = metalType(r.metal_key);
-            const color = TYPE_COLOR[type] || TYPE_COLOR.Gold;
-            const unit  = unitLabel(r.metal_key);
+          {['Gold', 'Silver', 'Platinum'].map(group => {
+            const groupRates = rates.filter(r => metalType(r.metal_key) === group);
+            if (!groupRates.length) return null;
+            const color = TYPE_COLOR[group] || TYPE_COLOR.Gold;
             return (
-              <div
-                key={r.metal_key}
-                className={styles.chip}
-                style={i < rates.length - 1 ? { borderRight: '1px solid var(--border)' } : {}}
-              >
-                <span className={styles.chipPurity}>{purityLabel(r.metal_key)}</span>
-                <div className={styles.chipRate}>
-                  <span className={styles.chipSym}>₹</span>
-                  <span className={styles.chipNum}>
-                    {Math.round(r.rate_inr).toLocaleString('en-IN')}
-                  </span>
+              <div key={group} className={styles.group}>
+                <div className={styles.groupLabel} style={{ color: color.text, borderBottomColor: color.unit }}>
+                  {group}
                 </div>
-                <span
-                  className={styles.chipUnit}
-                  style={{ background: color.unit, color: color.text }}
-                >
-                  {unit}
-                </span>
+                <div className={styles.groupChips}>
+                  {groupRates.map((r, i) => (
+                    <div
+                      key={r.metal_key}
+                      className={styles.chip}
+                      style={i < groupRates.length - 1 ? { borderRight: '1px solid var(--border)' } : {}}
+                    >
+                      <span className={styles.chipPurity}>{purityLabel(r.metal_key)}</span>
+                      <div className={styles.chipRate}>
+                        <span className={styles.chipSym}>₹</span>
+                        <span className={styles.chipNum}>
+                          {Math.round(r.rate_inr).toLocaleString('en-IN')}
+                        </span>
+                      </div>
+                      <span className={styles.chipUnit} style={{ background: color.unit, color: color.text }}>
+                        {unitLabel(r.metal_key)}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
             );
           })}

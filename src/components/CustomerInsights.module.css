@@ -1,0 +1,128 @@
+.wrap {
+  background: #fff;
+  border-radius: var(--r);
+  border: 1px solid var(--border-card);
+  box-shadow: var(--shadow-card);
+  padding: 20px;
+}
+
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 8px; margin-bottom: 16px;
+}
+.titleRow {
+  display: flex; align-items: center; gap: 8px;
+}
+.title {
+  font-size: 14px; font-weight: 600; color: var(--navy);
+  font-family: var(--font-display);
+}
+.badge {
+  font-size: 10px; font-weight: 700; letter-spacing: .06em;
+  background: rgba(201,168,76,.12); color: #8B6914;
+  border-radius: 99px; padding: 2px 8px;
+}
+.stats {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; color: var(--ink-mid);
+}
+.refreshBtn {
+  background: none; border: 1px solid var(--border); border-radius: 6px;
+  padding: 4px 6px; cursor: pointer; display: flex; align-items: center;
+  color: var(--ink-soft); transition: all .15s;
+}
+.refreshBtn:hover { border-color: var(--gold); color: var(--gold-dk); }
+.refreshBtn:disabled { opacity: .5; cursor: not-allowed; }
+
+.stateRow {
+  display: flex; align-items: center; gap: 8px;
+  padding: 16px 0; color: var(--ink-soft); font-size: 13px;
+}
+
+.list { display: flex; flex-direction: column; gap: 8px; }
+
+/* ── Customer card ───────────────────────────────────────────── */
+.customerCard {
+  border: 1px solid var(--border-card);
+  border-radius: 10px; overflow: hidden;
+}
+
+.customerHeader {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; cursor: pointer;
+  background: var(--cream);
+  transition: background .15s;
+}
+.customerHeader:hover { background: rgba(201,168,76,.07); }
+
+.customerLeft { display: flex; align-items: center; gap: 10px; }
+.avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(201,168,76,.15); color: #8B6914;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.customerName { font-size: 13px; font-weight: 600; color: var(--navy); }
+.customerMeta { font-size: 11px; color: var(--ink-soft); margin-top: 1px; }
+
+.customerRight { display: flex; align-items: center; gap: 8px; }
+
+.featureTags { display: flex; gap: 4px; flex-wrap: wrap; }
+.featureTag {
+  font-size: 9px; font-weight: 600; letter-spacing: .04em;
+  background: rgba(23,48,90,.08); color: var(--navy);
+  border-radius: 4px; padding: 2px 6px;
+  white-space: nowrap;
+}
+
+/* ── Customer body ───────────────────────────────────────────── */
+.customerBody {
+  padding: 14px;
+  border-top: 1px solid var(--border);
+}
+
+/* AI summary */
+.summarySection {
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  background: linear-gradient(135deg, rgba(201,168,76,.06) 0%, rgba(124,58,237,.04) 100%);
+  border: 1px solid rgba(201,168,76,.2);
+  border-radius: 8px;
+}
+.summaryTitle {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 700; letter-spacing: .07em;
+  text-transform: uppercase; color: #8B6914;
+  margin-bottom: 8px;
+}
+.summaryText { font-size: 13px; color: var(--ink); line-height: 1.6; }
+.summaryEmpty { display: flex; align-items: center; gap: 10px; }
+.summaryHint { font-size: 11px; color: var(--ink-soft); }
+.summariseBtn {
+  display: flex; align-items: center; gap: 5px;
+  background: var(--navy); color: #fff;
+  border: none; border-radius: 6px; padding: 6px 12px;
+  font-size: 12px; font-weight: 600; font-family: var(--font-body);
+  cursor: pointer; white-space: nowrap;
+  transition: opacity .15s;
+}
+.summariseBtn:hover { opacity: .88; }
+.summariseBtn:disabled { opacity: .55; cursor: not-allowed; }
+
+/* Message list */
+.msgList { display: flex; flex-direction: column; gap: 2px; }
+.msgRow {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 7px 8px; border-radius: 6px;
+  transition: background .15s;
+}
+.msgRow:hover { background: var(--cream); }
+.msgTime {
+  font-size: 10px; color: var(--ink-soft);
+  white-space: nowrap; flex-shrink: 0; margin-top: 2px;
+  min-width: 100px;
+}
+.msgText { font-size: 12px; color: var(--ink); flex: 1; line-height: 1.5; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spin { animation: spin .8s linear infinite; }

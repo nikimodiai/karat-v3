@@ -86,7 +86,7 @@ export default function Dashboard({ onNavigate }) {
   const aiLimit    = effectiveLimit(store, 'ai_models');
 
   const totalValue = useMemo(() => {
-    return products.reduce((sum, p) => sum + (Number(p.price) || 0), 0);
+    return products.reduce((sum, p) => sum + (Number(p.price) || 0) * (Number(p.stock_qty) || 1), 0);
   }, [products]);
 
   // ── Alerts ─────────────────────────────────────────────────────

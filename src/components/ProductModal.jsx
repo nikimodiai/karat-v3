@@ -24,6 +24,18 @@ const EMPTY_FORM = {
   gold_carat: '', diamond_purity: '', material: '', occasion: '',
   weight: '', price: '', stock_qty: 1,
   description: '', in_stock: true,
+  // Visibility
+  visibility: 'all',
+  // Dynamic pricing toggle + calculation fields
+  dynamic_price: false,
+  metal_type: '',
+  metal_weight_grams: '',
+  wastage_percent: 0,
+  making_charge_type: 'percentage',
+  making_charge_value: 0,
+  stone_value_inr: 0,
+  diamond_value_inr: 0,
+  hallmark_charge: 45,
 };
 
 export default function ProductModal({ product, store, onSave, onClose, checkSKU, planLimits }) {
@@ -64,6 +76,16 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
         stock_qty:      product.stock_qty ?? 1,
         description:    product.description    || '',
         in_stock:       typeof product.in_stock === 'boolean' ? product.in_stock : true,
+        visibility:     product.visibility     || 'all',
+        dynamic_price:  product.dynamic_price  ?? false,
+        metal_type:     product.metal_type     || '',
+        metal_weight_grams: product.metal_weight_grams ?? '',
+        wastage_percent:    product.wastage_percent    ?? 0,
+        making_charge_type:  product.making_charge_type  || 'percentage',
+        making_charge_value: product.making_charge_value ?? 0,
+        stone_value_inr:     product.stone_value_inr     ?? 0,
+        diamond_value_inr:   product.diamond_value_inr   ?? 0,
+        hallmark_charge:     product.hallmark_charge     ?? 45,
       });
       const urls = Array.isArray(product.images) ? product.images : [];
       const existing = [null,null,null,null,null];
@@ -374,9 +396,41 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
             open={showCalc}
             weight={form.weight}
             carat={form.gold_carat}
-            onApply={(total) => set('price', String(total))}
+            onApply={(data) => {
+              set('price',              String(data.total));
+              set('metal_type',         data.metalType);
+              set('metal_weight_grams', data.metalWeightGrams);
+              set('wastage_percent',    data.wastagePercent);
+              set('making_charge_type', data.makingChargeType);
+              set('making_charge_value',data.makingChargeValue);
+              set('stone_value_inr',    data.stoneValueInr);
+              set('hallmark_charge',    data.hallmarkCharge);
+            }}
             onClose={() => setShowCalc(false)}
           />
+
+          {/* Visibility + Dynamic Price */}
+          <div className="fg fg2" style={{ marginTop: 14 }}>
+            <div className="fld">
+              <label className="lbl">Visible To</label>
+              <select className="inp" value={form.visibility} onChange={e => set('visibility', e.target.value)}>
+                <option value="all">All Customers</option>
+                <option value="vvip">VVIP Only</option>
+                <option value="vvip_vip">VVIP &amp; VIP Only</option>
+              </select>
+            </div>
+            <div className="fld" style={{ justifyContent: 'flex-end' }}>
+              <label className={styles.stockToggle} style={{ marginTop: 28 }}>
+                <input
+                  type="checkbox"
+                  checked={form.dynamic_price === true}
+                  onChange={e => set('dynamic_price', e.target.checked)}
+                  style={{ width: 16, height: 16, accentColor: 'var(--navy)' }}
+                />
+                Dynamic price (auto-update daily)
+              </label>
+            </div>
+          </div>
 
           <div style={{ marginTop: 14 }}>
             <div className="fld">

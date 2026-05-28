@@ -15,6 +15,7 @@ import {
   conversationTokenCopy, hasFeature, fmtLimit,
 } from '../lib/plans';
 import { UpgradeBanner } from '../components/UpgradeNotice';
+import CustomerInsights from '../components/CustomerInsights';
 import styles from './Analytics.module.css';
 
 const GOLD_PALETTE = ['#C9A84C','#E8CC7A','#8B6914','#d4a843','#f0e0a0','#a07830','#b5912a'];
@@ -217,40 +218,6 @@ export default function Analytics() {
           )}
         </div>
 
-        {/* ── How Conversations Work — pricing explainer ─────────── */}
-        <div className={styles.explainerCard}>
-          <div className={styles.explainerHead}>
-            <div className={styles.explainerIcon}><Info size={16} color="#8B6914"/></div>
-            <div>
-              <div className={styles.explainerTitle}>How Your Conversation Quota Works</div>
-              <div className={styles.explainerSub}>
-                You're billed per conversation, not per token. We absorb the AI compute cost — you get predictable monthly pricing.
-              </div>
-            </div>
-          </div>
-          <div className={styles.explainerGrid}>
-            <div className={styles.explainerStat}>
-              <div className={styles.explainerLbl}>One conversation =</div>
-              <div className={styles.explainerVal}>1 customer chat session</div>
-              <div className={styles.explainerNote}>{tokenInfo.fairUse}</div>
-            </div>
-            <div className={styles.explainerStat}>
-              <div className={styles.explainerLbl}>Avg. tokens per chat</div>
-              <div className={styles.explainerVal}>~{tokenInfo.tokensPerConv.toLocaleString('en-IN')}</div>
-              <div className={styles.explainerNote}>covers all back-and-forth in one session</div>
-            </div>
-            <div className={styles.explainerStat}>
-              <div className={styles.explainerLbl}>Your AI engine</div>
-              <div className={styles.explainerVal}>{tokenInfo.model}</div>
-              <div className={styles.explainerNote}>upgrades with your plan</div>
-            </div>
-            <div className={styles.explainerStat}>
-              <div className={styles.explainerLbl}>Monthly allotment</div>
-              <div className={styles.explainerVal}>{fmtLimit(convLimit)} conversations</div>
-              <div className={styles.explainerNote}>~{Math.round((convLimit === Infinity ? 100000 : convLimit) * tokenInfo.tokensPerConv / 1000).toLocaleString('en-IN')}K tokens included</div>
-            </div>
-          </div>
-        </div>
 
         {/* ── Inventory Breakdown — visible to all tiers ─────────── */}
         <SectionTitle icon={Package}>Inventory Breakdown</SectionTitle>
@@ -440,6 +407,14 @@ export default function Analytics() {
                 </div>
               </>
             )}
+          </>
+        )}
+
+        {/* ── Customer Interactions (Pro/Enterprise) ───────────── */}
+        {showPro && (
+          <>
+            <SectionTitle icon={MessageSquare}>Customer Interactions — Last 7 Days</SectionTitle>
+            <CustomerInsights />
           </>
         )}
 

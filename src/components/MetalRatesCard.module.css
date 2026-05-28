@@ -66,8 +66,33 @@
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
+  gap: 0;
 }
 .strip::-webkit-scrollbar { display: none; }
+
+/* ── Metal group (Gold / Silver / Platinum) ──────────────────── */
+.group {
+  display: flex;
+  flex-direction: column;
+  border-right: 2px solid var(--border);
+  padding-right: 0;
+}
+.group:last-child { border-right: none; }
+
+.groupLabel {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0 12px 6px;
+  border-bottom: 2px solid transparent;
+  margin-bottom: 4px;
+}
+
+.groupChips {
+  display: flex;
+  flex: 1;
+}
 
 /* ── Chip ────────────────────────────────────────────────────── */
 .chip {

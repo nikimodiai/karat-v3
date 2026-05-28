@@ -1,0 +1,103 @@
+{
+  "name": "Karat – Dynamic Price Update",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            { "field": "cronExpression", "expression": "40 12 * * *" },
+            { "field": "cronExpression", "expression": "40 18 * * *" }
+          ]
+        }
+      },
+      "name": "Schedule (12:40 & 18:40 IST)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT id, owner_id, metal_type, metal_weight_grams, wastage_percent, making_charge_type, making_charge_value, stone_value_inr, diamond_value_inr, hallmark_charge FROM products WHERE dynamic_price = true AND is_current = true AND metal_type IS NOT NULL AND metal_weight_grams IS NOT NULL AND metal_weight_grams > 0",
+        "options": {}
+      },
+      "name": "Get Dynamic-Price Products",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [460, 300],
+      "credentials": { "postgres": { "id": "SUPABASE_POSTGRES_CRED", "name": "Supabase Postgres" } }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT owner_id, metal_type, rate_per_gram, purity_factor FROM metal_rates WHERE is_current = true",
+        "options": {}
+      },
+      "name": "Get Current Metal Rates",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [460, 460],
+      "credentials": { "postgres": { "id": "SUPABASE_POSTGRES_CRED", "name": "Supabase Postgres" } }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build a lookup map: owner_id + metal_type -> rate_per_gram\nconst rates = $('Get Current Metal Rates').all().map(r => r.json);\nconst rateMap = {};\nrates.forEach(r => {\n  const key = `${r.owner_id}::${r.metal_type}`;\n  rateMap[key] = Number(r.rate_per_gram);\n});\n\n// Helper: derive rate from 999 base if exact purity not found\nfunction resolveRate(ownerId, metalType) {\n  const exactKey = `${ownerId}::${metalType}`;\n  if (rateMap[exactKey]) return rateMap[exactKey];\n\n  const isGold   = metalType.startsWith('gold');\n  const isSilver = metalType.startsWith('silver');\n  const baseKey  = isGold   ? `${ownerId}::gold_999`\n                 : isSilver ? `${ownerId}::silver_999`\n                 : null;\n  if (!baseKey || !rateMap[baseKey]) return 0;\n\n  const targetPurity = Number(metalType.split('_')[1]) || 0;\n  return rateMap[baseKey] * (targetPurity / 999);\n}\n\n// Calculate new price for each product\nconst products = $('Get Dynamic-Price Products').all().map(p => p.json);\nconst results = [];\n\nfor (const p of products) {\n  const rate = resolveRate(p.owner_id, p.metal_type);\n  if (!rate) continue;  // no rate available — skip this product\n\n  const grams       = Number(p.metal_weight_grams);\n  const wastage     = Number(p.wastage_percent  || 0) / 100;\n  const metalCost   = rate * grams * (1 + wastage);\n\n  const makingMode  = p.making_charge_type  || 'percentage';\n  const makingVal   = Number(p.making_charge_value || 0);\n  let makingCost = 0;\n  if      (makingMode === 'percentage') makingCost = metalCost * makingVal / 100;\n  else if (makingMode === 'per_gram')   makingCost = makingVal * grams;\n  else                                  makingCost = makingVal; // flat\n\n  const stone    = Number(p.stone_value_inr   || 0);\n  const diamond  = Number(p.diamond_value_inr || 0);\n  const hallmark = Number(p.hallmark_charge   || 45);\n\n  const newPrice = Math.round(metalCost + makingCost + stone + diamond + hallmark);\n\n  results.push({\n    id:        p.id,\n    owner_id:  p.owner_id,\n    newPrice,\n    metalCost: Math.round(metalCost),\n    rate,\n  });\n}\n\nreturn results.map(r => ({ json: r }));\n"
+      },
+      "name": "Calculate New Prices",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [700, 380]
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "UPDATE products SET price = {{ $json.newPrice }}, updated_at = NOW() WHERE id = '{{ $json.id }}'",
+        "options": {}
+      },
+      "name": "Update Product Price",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [940, 380],
+      "credentials": { "postgres": { "id": "SUPABASE_POSTGRES_CRED", "name": "Supabase Postgres" } }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO whatsapp_logs (owner_id, feature, customer_message, data_source) VALUES ('{{ $json.owner_id }}', 'dynamic_price_update', 'Auto-updated price to ₹{{ $json.newPrice }} (metal_cost=₹{{ $json.metalCost }}, rate=₹{{ $json.rate }}/g)', 'n8n_scheduler') ON CONFLICT DO NOTHING",
+        "options": {}
+      },
+      "name": "Log Price Update",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [1180, 380],
+      "credentials": { "postgres": { "id": "SUPABASE_POSTGRES_CRED", "name": "Supabase Postgres" } }
+    }
+  ],
+  "connections": {
+    "Schedule (12:40 & 18:40 IST)": {
+      "main": [[
+        { "node": "Get Dynamic-Price Products", "type": "main", "index": 0 },
+        { "node": "Get Current Metal Rates",    "type": "main", "index": 0 }
+      ]]
+    },
+    "Get Dynamic-Price Products": {
+      "main": [[{ "node": "Calculate New Prices", "type": "main", "index": 0 }]]
+    },
+    "Get Current Metal Rates": {
+      "main": [[{ "node": "Calculate New Prices", "type": "main", "index": 1 }]]
+    },
+    "Calculate New Prices": {
+      "main": [[{ "node": "Update Product Price", "type": "main", "index": 0 }]]
+    },
+    "Update Product Price": {
+      "main": [[{ "node": "Log Price Update", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "staticData": null,
+  "tags": [{ "name": "karat" }, { "name": "pricing" }],
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "description": "Runs at 12:40 PM and 6:40 PM IST daily. For every product with dynamic_price=true, fetches the owner's current metal rate from metal_rates, calculates the new price (metal cost + making + stones + hallmark, no GST), and updates products.price. If the exact purity rate is missing, it derives from the 999-base rate."
+  }
+}
