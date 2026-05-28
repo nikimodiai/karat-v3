@@ -37,6 +37,11 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
   const fileRefs = useRef([null,null,null,null,null]);
   const isEdit   = !!product;
 
+  const [customCatMode,     setCustomCatMode]     = useState(false);
+  const [customSubcatMode,  setCustomSubcatMode]  = useState(false);
+  const [customMetalMode,   setCustomMetalMode]   = useState(false);
+  const [customDiamondMode, setCustomDiamondMode] = useState(false);
+
   // Plan-based feature gates
   const planName    = planKey(store);
   const videoUnlocked = hasF(store, 'video_upload');
@@ -66,12 +71,20 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
       setExistingVideoUrl(product.video_url || null);
       setVideoFile(null);
       if (product.category) setSubcats(SUBCATEGORY_MAP[product.category] || []);
+      // Detect custom (not-in-list) values saved in older or manually-entered products
+      const knownSubs = product.category ? (SUBCATEGORY_MAP[product.category] || []) : [];
+      setCustomCatMode(!!product.category && !CATEGORIES.some(c => c.value === product.category));
+      setCustomSubcatMode(!!product.sub_category && knownSubs.length > 0 && !knownSubs.includes(product.sub_category));
+      setCustomMetalMode(!!product.gold_carat && !GOLD_CARATS.includes(product.gold_carat));
+      setCustomDiamondMode(!!product.diamond_purity && !DIAMOND_PURITIES.includes(product.diamond_purity));
     } else {
       setForm(EMPTY_FORM);
       setSlotFiles([null,null,null,null,null]);
       setExisting([null,null,null,null,null]);
       setExistingVideoUrl(null); setVideoFile(null);
       setSubcats([]);
+      setCustomCatMode(false); setCustomSubcatMode(false);
+      setCustomMetalMode(false); setCustomDiamondMode(false);
     }
     setSkuError('');
     setShowCalc(false);
@@ -85,6 +98,8 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
     set('category', cat);
     set('sub_category', '');
     setSubcats(SUBCATEGORY_MAP[cat] || []);
+    setCustomCatMode(false);
+    setCustomSubcatMode(false);
     // Auto-suggest a sensible Carat default when category is Silver
     if (SILVER_CATEGORIES.has(cat) && !/silver/i.test(form.gold_carat)) {
       set('gold_carat', '925 Silver (Sterling)');
@@ -196,34 +211,102 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
           <div className="fg fg3" style={{ marginTop: 14 }}>
             <div className="fld">
               <label className="lbl">Category <span className="req">*</span></label>
-              <select className="inp" value={form.category} onChange={e => handleCategory(e.target.value)}>
-                <option value="">Select category…</option>
-                {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
-              </select>
+              {customCatMode ? (
+                <div className={styles.customInputWrap}>
+                  <input className="inp" value={form.category} autoFocus
+                    onChange={e => { set('category', e.target.value); set('sub_category', ''); setSubcats([]); }}
+                    placeholder="e.g. Bajuband, Haath Phool…" />
+                  <button type="button" className={styles.customBack}
+                    onClick={() => { setCustomCatMode(false); setCustomSubcatMode(false); set('category', ''); set('sub_category', ''); setSubcats([]); }}>
+                    ← Choose from list
+                  </button>
+                </div>
+              ) : (
+                <select className="inp" value={form.category} onChange={e => {
+                  if (e.target.value === '__custom__') { setCustomCatMode(true); set('category', ''); set('sub_category', ''); setSubcats([]); setCustomSubcatMode(false); }
+                  else handleCategory(e.target.value);
+                }}>
+                  <option value="">Select category…</option>
+                  {CATEGORIES.map(c => <option key={c.value} value={c.value}>{c.label}</option>)}
+                  <option disabled>──────────────</option>
+                  <option value="__custom__">➕ Other / type your own…</option>
+                </select>
+              )}
             </div>
             <div className="fld">
               <label className="lbl">Sub-category</label>
-              <select className="inp" value={form.sub_category} onChange={e => set('sub_category', e.target.value)}>
-                <option value="">{subcats.length ? 'Select…' : 'Select category first'}</option>
-                {subcats.map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
+              {customSubcatMode ? (
+                <div className={styles.customInputWrap}>
+                  <input className="inp" value={form.sub_category} autoFocus
+                    onChange={e => set('sub_category', e.target.value)}
+                    placeholder="e.g. Navratna Ring, Chuda Set…" />
+                  <button type="button" className={styles.customBack}
+                    onClick={() => { setCustomSubcatMode(false); set('sub_category', ''); }}>
+                    ← Choose from list
+                  </button>
+                </div>
+              ) : (
+                <select className="inp" value={form.sub_category} onChange={e => {
+                  if (e.target.value === '__custom__') { setCustomSubcatMode(true); set('sub_category', ''); }
+                  else set('sub_category', e.target.value);
+                }}>
+                  <option value="">{subcats.length ? 'Select…' : 'Select category first'}</option>
+                  {subcats.map(s => <option key={s} value={s}>{s}</option>)}
+                  <option disabled>──────────────</option>
+                  <option value="__custom__">➕ Other / type your own…</option>
+                </select>
+              )}
             </div>
             <div className="fld">
               <label className="lbl">Metal Purity <span className="req">*</span></label>
-              <select className="inp" value={form.gold_carat} onChange={e => set('gold_carat', e.target.value)}>
-                <option value="">Select…</option>
-                {GOLD_CARATS.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
+              {customMetalMode ? (
+                <div className={styles.customInputWrap}>
+                  <input className="inp" value={form.gold_carat} autoFocus
+                    onChange={e => set('gold_carat', e.target.value)}
+                    placeholder="e.g. Panchdhatu, 20K Green Gold…" />
+                  <button type="button" className={styles.customBack}
+                    onClick={() => { setCustomMetalMode(false); set('gold_carat', ''); }}>
+                    ← Choose from list
+                  </button>
+                </div>
+              ) : (
+                <select className="inp" value={form.gold_carat} onChange={e => {
+                  if (e.target.value === '__custom__') { setCustomMetalMode(true); set('gold_carat', ''); }
+                  else set('gold_carat', e.target.value);
+                }}>
+                  <option value="">Select…</option>
+                  {GOLD_CARATS.map(c => <option key={c} value={c}>{c}</option>)}
+                  <option disabled>──────────────</option>
+                  <option value="__custom__">➕ Other / type your own…</option>
+                </select>
+              )}
             </div>
           </div>
 
           <div className="fg fg3" style={{ marginTop: 14 }}>
             <div className="fld">
               <label className="lbl">Diamond Purity</label>
-              <select className="inp" value={form.diamond_purity} onChange={e => set('diamond_purity', e.target.value)}>
-                <option value="">None / N/A</option>
-                {DIAMOND_PURITIES.map(d => <option key={d} value={d}>{d}</option>)}
-              </select>
+              {customDiamondMode ? (
+                <div className={styles.customInputWrap}>
+                  <input className="inp" value={form.diamond_purity} autoFocus
+                    onChange={e => set('diamond_purity', e.target.value)}
+                    placeholder="e.g. GIA Certified, SI3…" />
+                  <button type="button" className={styles.customBack}
+                    onClick={() => { setCustomDiamondMode(false); set('diamond_purity', ''); }}>
+                    ← Choose from list
+                  </button>
+                </div>
+              ) : (
+                <select className="inp" value={form.diamond_purity} onChange={e => {
+                  if (e.target.value === '__custom__') { setCustomDiamondMode(true); set('diamond_purity', ''); }
+                  else set('diamond_purity', e.target.value);
+                }}>
+                  <option value="">None / N/A</option>
+                  {DIAMOND_PURITIES.map(d => <option key={d} value={d}>{d}</option>)}
+                  <option disabled>──────────────</option>
+                  <option value="__custom__">➕ Other / type your own…</option>
+                </select>
+              )}
             </div>
             <div className="fld">
               <label className="lbl">Stone / Material</label>

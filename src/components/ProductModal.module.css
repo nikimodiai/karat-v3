@@ -158,6 +158,53 @@
   border-radius: 8px;
 }
 
+.customInputWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.customBack {
+  font-size: 11px;
+  color: var(--navy);
+  background: none;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
+  opacity: 0.6;
+  text-decoration: underline;
+  width: fit-content;
+}
+.customBack:hover { opacity: 1; }
+
+.calcLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  color: var(--gold);
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: 6px;
+  padding: 0;
+  text-decoration: underline;
+}
+
+.proBadge {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(201,168,76,.15);
+  color: var(--navy);
+  vertical-align: middle;
+  letter-spacing: .04em;
+}
+
 @media (max-width: 640px) {
   .modal { max-height: 100dvh; border-radius: 0; max-width: 100%; }
   .header { padding: 18px 18px 0; }
