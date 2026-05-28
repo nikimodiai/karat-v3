@@ -14,6 +14,7 @@ import {
   effectiveLimit, planKey, PLAN_LABELS, hasFeature, fmtLimit, pctUsed,
 } from '../lib/plans';
 import { fmtINR } from '../lib/pricing';
+import MetalRatesCard from '../components/MetalRatesCard';
 import styles from './Dashboard.module.css';
 
 const GOLD_PALETTE = ['#C9A84C','#E8CC7A','#8B6914','#F5E9C5','#d4a843','#a07830'];
@@ -188,6 +189,9 @@ export default function Dashboard({ onNavigate }) {
             color="#8B6914" bg="rgba(139,105,20,.09)"
           />
         </div>
+
+        {/* Metal Rates */}
+        <MetalRatesCard />
 
         {/* Charts row */}
         <div className={styles.chartsRow}>
