@@ -3,10 +3,42 @@ import { db, N8N_SIGNUP_URL, INACTIVITY_MS } from '../lib/config';
 
 const AuthContext = createContext(null);
 
+// Helper to get initial auth state from localStorage to avoid flashing loading screen on refresh
+const getInitialAuthState = () => {
+  let initialUser = null;
+  let initialStore = null;
+  let initialStatus = 'loading';
+
+  try {
+    const storedStr = localStorage.getItem('karat-auth-v3');
+    if (storedStr) {
+      const parsed = JSON.parse(storedStr);
+      const user = parsed?.user || parsed?.currentSession?.user;
+      if (user) {
+        initialUser = user;
+        const cachedStoreStr = localStorage.getItem('karat_cached_store');
+        if (cachedStoreStr) {
+          initialStore = JSON.parse(cachedStoreStr);
+          initialStatus = 'app';
+        }
+      } else {
+        initialStatus = 'login';
+      }
+    } else {
+      initialStatus = 'login';
+    }
+  } catch (e) {
+    // Fallback to loading
+  }
+
+  return { initialUser, initialStore, initialStatus };
+};
+
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [store, setStore] = useState(null);
-  const [authStatus, setAuthStatus] = useState('loading'); // loading | login | pending | app
+  const { initialUser, initialStore, initialStatus } = getInitialAuthState();
+  const [user, setUser] = useState(initialUser);
+  const [store, setStore] = useState(initialStore);
+  const [authStatus, setAuthStatus] = useState(initialStatus); // loading | login | pending | app
   const inactivityRef = useRef(null);
   const loadedUidRef = useRef(null);
 
@@ -21,7 +53,9 @@ export function AuthProvider({ children }) {
     try { await db.auth.signOut(); } catch(e) {}
     const keys = Object.keys(localStorage);
     keys.forEach(k => {
-      if (k.startsWith('sb-') || k.includes('supabase')) localStorage.removeItem(k);
+      if (k.startsWith('sb-') || k.includes('supabase') || k === 'karat_cached_store') {
+        localStorage.removeItem(k);
+      }
     });
     try { sessionStorage.clear(); } catch(e) {}
     setUser(null); setStore(null);
@@ -60,6 +94,9 @@ export function AuthProvider({ children }) {
     }
 
     setStore(storeData);
+    try {
+      localStorage.setItem('karat_cached_store', JSON.stringify(storeData));
+    } catch (e) {}
     setAuthStatus('app');
   }, []);
 
@@ -127,7 +164,15 @@ export function AuthProvider({ children }) {
   }, [user, loadStore]);
 
   const updateStore = useCallback((patch) => {
-    setStore(prev => prev ? { ...prev, ...patch } : prev);
+    setStore(prev => {
+      const next = prev ? { ...prev, ...patch } : prev;
+      if (next) {
+        try {
+          localStorage.setItem('karat_cached_store', JSON.stringify(next));
+        } catch (e) {}
+      }
+      return next;
+    });
   }, []);
 
   return (
