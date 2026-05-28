@@ -14,7 +14,7 @@ import { useAuth } from './useAuth';
 const StoreDataContext = createContext(null);
 
 export function StoreDataProvider({ children }) {
-  const { user, store, authStatus } = useAuth();
+  const { user, store, authStatus, isAuthReady } = useAuth();
 
   const [products,  setProducts]  = useState([]);
   const [customers, setCustomers] = useState([]);
@@ -84,15 +84,19 @@ export function StoreDataProvider({ children }) {
 
   // Auto-load when the user becomes available / changes.
   useEffect(() => {
-    if (authStatus !== 'app' || !user) {
-      setProducts([]); setCustomers([]); setMonthlyUsage(null);
-      loadedForUid.current = null;
+    if (authStatus !== 'app' || !user || !isAuthReady) {
+      // Do not clear the data if it's already cached/loaded, but do not
+      // load from DB until auth is fully initialized and authenticated.
+      if (authStatus !== 'app' || !user) {
+        setProducts([]); setCustomers([]); setMonthlyUsage(null);
+        loadedForUid.current = null;
+      }
       return;
     }
     if (loadedForUid.current === user.id) return;
     loadedForUid.current = user.id;
     loadAll();
-  }, [authStatus, user, loadAll]);
+  }, [authStatus, user, isAuthReady, loadAll]);
 
   // ── Mutators used by Inventory / Customers pages ──────────────────
   const setProductsAndSync = useCallback((updater) => {

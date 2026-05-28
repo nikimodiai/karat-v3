@@ -39,6 +39,7 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(initialUser);
   const [store, setStore] = useState(initialStore);
   const [authStatus, setAuthStatus] = useState(initialStatus); // loading | login | pending | app
+  const [isAuthReady, setIsAuthReady] = useState(false);
   const inactivityRef = useRef(null);
   const loadedUidRef = useRef(null);
 
@@ -101,7 +102,10 @@ export function AuthProvider({ children }) {
   }, []);
 
   const handleUser = useCallback(async (u) => {
-    if (loadedUidRef.current === u.id) return;
+    if (loadedUidRef.current === u.id) {
+      setIsAuthReady(true);
+      return;
+    }
     loadedUidRef.current = u.id;
     setUser(u);
     resetInactivity();
@@ -110,9 +114,11 @@ export function AuthProvider({ children }) {
         setTimeout(() => reject(new Error('timeout')), 10000)
       );
       await Promise.race([loadStore(u), timeout]);
+      setIsAuthReady(true);
     } catch(e) {
       loadedUidRef.current = null;
       setAuthStatus('login');
+      setIsAuthReady(true);
     }
   }, [loadStore, resetInactivity]);
 
@@ -127,6 +133,7 @@ export function AuthProvider({ children }) {
         setUser(null); setStore(null);
         loadedUidRef.current = null;
         setAuthStatus('login');
+        setIsAuthReady(true);
       }
     });
 
@@ -134,8 +141,14 @@ export function AuthProvider({ children }) {
     // doesn't resolve auth state (e.g. older Supabase clients / token race).
     db.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) handleUser(session.user);
-      else setAuthStatus(prev => prev === 'loading' ? 'login' : prev);
-    }).catch(() => setAuthStatus(prev => prev === 'loading' ? 'login' : prev));
+      else {
+        setAuthStatus(prev => prev === 'loading' ? 'login' : prev);
+        setIsAuthReady(true);
+      }
+    }).catch(() => {
+      setAuthStatus(prev => prev === 'loading' ? 'login' : prev);
+      setIsAuthReady(true);
+    });
 
     // Inactivity reset events
     const events = ['click','keydown','mousemove','touchstart','scroll'];
@@ -176,7 +189,7 @@ export function AuthProvider({ children }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, store, authStatus, loginWithGoogle, logout, refreshStore, updateStore }}>
+    <AuthContext.Provider value={{ user, store, authStatus, isAuthReady, loginWithGoogle, logout, refreshStore, updateStore }}>
       {children}
     </AuthContext.Provider>
   );
