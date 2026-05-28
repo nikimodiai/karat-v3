@@ -85,16 +85,32 @@ export const CATEGORIES = [
 
 // ── Metal & Purity options ──────────────────────────────────────────
 export const GOLD_CARATS = [
-  '18K Gold',
-  '20K Gold',
-  '22K Gold',
   '24K Gold',
+  '23K Gold',
+  '22K Gold',
+  '21K Gold',
+  '20K Gold',
+  '18K Gold',
+  '16K Gold',
+  '14K Gold',
+  '12K Gold',
+  '10K Gold',
+  '9K Gold',
+  '8K Gold',
   '18K White Gold',
+  '14K White Gold',
+  '9K White Gold',
   '18K Rose Gold',
+  '14K Rose Gold',
+  '9K Rose Gold',
   'Platinum',
-  // Silver purities — also used when category = "Silver"
-  '925 Silver (Sterling)',
+  // Silver purities
   '999 Silver (Fine)',
+  '970 Silver (Traditional)',
+  '958 Silver (Britannia)',
+  '925 Silver (Sterling)',
+  '900 Silver (Coin)',
+  '835 Silver (Alloyed)',
   '800 Silver',
 ];
 
