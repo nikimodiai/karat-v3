@@ -7,19 +7,20 @@
   padding: 20px;
 }
 
-/* ── Header ─────────────────────────────────────────────────── */
+/* ── Header ──────────────────────────────────────────────────── */
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .titleRow {
   display: flex;
   align-items: center;
   gap: 8px;
-  flex-wrap: wrap;
 }
 
 .title {
@@ -29,36 +30,21 @@
   font-family: var(--font-display);
 }
 
-.lastUpdated {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 11px;
-  color: var(--ink-soft);
-}
-
-.addBtn {
+.dateTag {
   display: flex;
   align-items: center;
   gap: 5px;
-  background: none;
-  border: 1px solid rgba(201, 168, 76, 0.4);
-  border-radius: 7px;
-  color: var(--gold-dk);
-  font-size: 12px;
-  font-weight: 600;
-  font-family: var(--font-body);
-  padding: 5px 12px;
-  cursor: pointer;
-  transition: all 0.15s;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-soft);
+  background: rgba(201, 168, 76, 0.07);
+  border: 1px solid rgba(201, 168, 76, 0.2);
+  border-radius: 99px;
+  padding: 3px 10px;
   white-space: nowrap;
 }
-.addBtn:hover {
-  background: var(--gold-pale);
-  border-color: var(--gold);
-}
 
-/* ── States ─────────────────────────────────────────────────── */
+/* ── States ──────────────────────────────────────────────────── */
 .stateRow {
   display: flex;
   align-items: center;
@@ -73,10 +59,9 @@
   color: var(--ink-mid);
   font-size: 13px;
   text-align: center;
-  line-height: 1.6;
 }
 
-/* ── Table ──────────────────────────────────────────────────── */
+/* ── Table ───────────────────────────────────────────────────── */
 .table {
   display: flex;
   flex-direction: column;
@@ -84,12 +69,11 @@
 
 .row {
   display: grid;
-  grid-template-columns: 2fr 1.4fr 1.4fr 1fr 72px;
+  grid-template-columns: 2fr 1.4fr 1.4fr;
   align-items: center;
   gap: 8px;
-  padding: 8px 8px;
+  padding: 9px 8px;
   border-radius: 8px;
-  min-height: 44px;
   transition: background 0.15s;
 }
 .row:not(.rowHeader):hover { background: var(--cream); }
@@ -104,14 +88,10 @@
   border-bottom: 1px solid var(--border);
   border-radius: 0;
   margin-bottom: 2px;
-  min-height: auto;
 }
 .rowHeader:hover { background: transparent; }
 
-.rowEditing { background: rgba(201, 168, 76, 0.04) !important; }
-.rowAdd     { background: rgba(201, 168, 76, 0.04) !important; }
-
-/* ── Columns ────────────────────────────────────────────────── */
+/* ── Columns ─────────────────────────────────────────────────── */
 .cMetal {
   font-size: 13px;
   font-weight: 600;
@@ -123,7 +103,7 @@
 
 .cRate {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 2px;
   font-size: 14px;
   font-weight: 700;
@@ -135,74 +115,20 @@
   color: var(--ink-mid);
 }
 
-.cTime {
-  font-size: 11px;
+.unit {
+  font-size: 10px;
   color: var(--ink-soft);
+  font-weight: 500;
+  margin-left: 1px;
 }
 
-.cAct {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 2px;
-}
-
-.sym  { font-size: 11px; color: var(--ink-soft); }
-.unit { font-size: 10px; color: var(--ink-soft); font-weight: 500; margin-left: 1px; }
-
-/* ── Inputs ─────────────────────────────────────────────────── */
-.editInput {
-  width: 88px;
-  padding: 4px 7px;
-  border: 1.5px solid var(--gold);
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--navy);
-  font-family: var(--font-body);
-  outline: none;
-  background: #fff;
-}
-.editInput:focus { box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.18); }
-
-.metalSel {
-  width: 100%;
-  padding: 4px 7px;
-  border: 1.5px solid var(--gold);
-  border-radius: 6px;
-  font-size: 12px;
-  color: var(--navy);
-  font-family: var(--font-body);
-  outline: none;
-  background: #fff;
-}
-.metalSel:focus { box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.18); }
-
-/* ── Buttons ────────────────────────────────────────────────── */
-.iconBtn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 5px;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s;
-}
-.iconBtn:hover:not(:disabled) { background: rgba(11, 24, 41, 0.07); }
-.iconBtn:disabled { opacity: 0.4; cursor: not-allowed; }
-
-/* ── Responsive ─────────────────────────────────────────────── */
+/* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .row { grid-template-columns: 1.8fr 1.2fr 72px; }
-  .cRate10 { display: none; }
-  .cTime   { display: none; }
-  .rowHeader .cRate10,
-  .rowHeader .cTime { display: none; }
+  .row      { grid-template-columns: 2fr 1fr; }
+  .cRate10  { display: none; }
+  .rowHeader .cRate10 { display: none; }
 }
 
 @media (max-width: 480px) {
   .card { padding: 16px; }
-  .row  { grid-template-columns: 1fr 1fr 64px; }
 }

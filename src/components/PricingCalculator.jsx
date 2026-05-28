@@ -7,21 +7,32 @@ import {
   metalType, parseGoldCarat, parseSilverFineness, isPlatinum,
 } from '../lib/pricing';
 import { db } from '../lib/config';
-import { useAuth } from '../hooks/useAuth';
 import styles from './PricingCalculator.module.css';
 
-// Map a carat string (e.g. "22K Gold") to the metal_rates.metal_type code
-function caratToCode(carat) {
-  if (!carat) return null;
-  if (isPlatinum(carat)) return 'platinum';
-  const g = parseGoldCarat(carat);
-  if (g) {
-    const map = { 24: 'gold_999', 22: 'gold_916', 18: 'gold_750', 14: 'gold_585', 9: 'gold_375' };
-    return map[g] || `gold_${Math.round(g / 24 * 1000)}`;
-  }
+// Find a rate in daily_metal_rates rows for a given carat string.
+// Handles various metal_key naming conventions (gold_22k, gold_916, etc.)
+function findDailyRate(carat, rows) {
+  if (!rows?.length || !carat) return null;
+  const g  = parseGoldCarat(carat);
   const sf = parseSilverFineness(carat);
-  if (sf) return `silver_${Math.round(sf * 1000)}`;
-  return null;
+  const pt = isPlatinum(carat);
+  const match = rows.find(r => {
+    const k = r.metal_key.toLowerCase().replace(/[\s-]/g, '_');
+    if (pt) return k.includes('plat');
+    if (g) {
+      const purity = Math.round(g / 24 * 1000);
+      return (
+        k === `gold_${g}k` || k === `gold_${purity}` ||
+        k.includes(`gold`) && (k.includes(`${g}k`) || k.includes(`${purity}`))
+      );
+    }
+    if (sf) {
+      const f = Math.round(sf * 1000);
+      return k.includes('silver') && (k.includes(String(f)) || k === 'silver');
+    }
+    return false;
+  });
+  return match ? Number(match.rate_inr) : null;
 }
 
 // ── PricingCalculator ────────────────────────────────────────────────
@@ -35,7 +46,6 @@ export default function PricingCalculator({
   open, weight, carat, onApply, onClose,
   initial = {},
 }) {
-  const { user } = useAuth();
   // ── State ─────────────────────────────────────────────────────────
   const [ratePerGram,    setRatePerGram]    = useState(initial.ratePerGram ?? '');
   const [making,         setMaking]         = useState(initial.making ?? '');
@@ -48,24 +58,23 @@ export default function PricingCalculator({
   const [liveRates,      setLiveRates]      = useState([]);
   const [usingLive,      setUsingLive]      = useState(false);
 
-  // Fetch live rates from the owner's metal_rates table when the calculator opens
+  // Fetch today's rates from daily_metal_rates when the calculator opens
   useEffect(() => {
-    if (!open || !user?.id) return;
-    db.from('metal_rates')
-      .select('metal_type, rate_per_gram')
-      .eq('store_id', user.id)
-      .eq('is_current', true)
-      .then(({ data }) => setLiveRates(data || []));
-  }, [open, user?.id]);
+    if (!open) return;
+    db.from('daily_metal_rates')
+      .select('rate_date, metal_key, rate_inr')
+      .order('rate_date', { ascending: false })
+      .limit(20)                              // latest date's rows (≤ ~10 metals)
+      .then(({ data }) => {
+        if (!data?.length) return;
+        // Keep only the most recent date's rows
+        const latest = data[0].rate_date;
+        setLiveRates(data.filter(r => r.rate_date === latest));
+      });
+  }, [open]);
 
-  // Helper: look up a rate from live DB data for a given carat string
-  const liveRateFor = (c) => {
-    if (!liveRates.length) return null;
-    const code = caratToCode(c);
-    if (!code) return null;
-    const found = liveRates.find(r => r.metal_type === code);
-    return found ? found.rate_per_gram : null;
-  };
+  // Helper: look up a rate from daily_metal_rates for a given carat string
+  const liveRateFor = (c) => findDailyRate(c, liveRates);
 
   // Pre-fill rate from live DB rates (preferred), falling back to static defaults
   useEffect(() => {
