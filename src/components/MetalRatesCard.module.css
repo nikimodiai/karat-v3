@@ -4,7 +4,7 @@
   border: 1px solid var(--border-card);
   border-top: 3px solid rgba(201, 168, 76, 0.45);
   box-shadow: var(--shadow-card);
-  padding: 20px;
+  padding: 18px 20px 16px;
 }
 
 /* ── Header ──────────────────────────────────────────────────── */
@@ -49,86 +49,90 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 16px 0;
+  padding: 12px 0 4px;
   color: var(--ink-soft);
   font-size: 13px;
 }
 
 .emptyState {
-  padding: 20px 0;
+  padding: 16px 0 4px;
   color: var(--ink-mid);
   font-size: 13px;
-  text-align: center;
 }
 
-/* ── Table ───────────────────────────────────────────────────── */
-.table {
+/* ── Rate strip ──────────────────────────────────────────────── */
+.strip {
+  display: flex;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  /* hide scrollbar but keep functionality */
+  scrollbar-width: none;
+  margin: 0 -4px;
+}
+.strip::-webkit-scrollbar { display: none; }
+
+/* ── Individual chip ─────────────────────────────────────────── */
+.chip {
+  flex: 1 0 130px;
   display: flex;
   flex-direction: column;
-}
-
-.row {
-  display: grid;
-  grid-template-columns: 2fr 1.4fr 1.4fr;
   align-items: center;
-  gap: 8px;
-  padding: 9px 8px;
-  border-radius: 8px;
+  gap: 5px;
+  padding: 10px 20px 8px;
+  text-align: center;
   transition: background 0.15s;
+  border-radius: 8px;
 }
-.row:not(.rowHeader):hover { background: var(--cream); }
+.chip:hover { background: var(--cream); }
 
-.rowHeader {
+.chipType {
   font-size: 10px;
   font-weight: 700;
-  color: var(--ink-soft);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
-  padding: 4px 8px 8px;
-  border-bottom: 1px solid var(--border);
-  border-radius: 0;
-  margin-bottom: 2px;
+  padding: 2px 8px;
+  border-radius: 99px;
 }
-.rowHeader:hover { background: transparent; }
 
-/* ── Columns ─────────────────────────────────────────────────── */
-.cMetal {
-  font-size: 13px;
+.chipPurity {
+  font-size: 12px;
   font-weight: 600;
   color: var(--navy);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  opacity: 0.7;
 }
 
-.cRate {
+.chipRate {
   display: flex;
   align-items: baseline;
-  gap: 2px;
+  gap: 3px;
+  margin-top: 2px;
+}
+
+.chipSym {
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--navy);
 }
 
-.cRate10 {
-  font-size: 12px;
-  color: var(--ink-mid);
+.chipNum {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--navy);
+  letter-spacing: -0.02em;
+  font-family: var(--font-display);
 }
 
-.unit {
+.chipUnit {
   font-size: 10px;
   color: var(--ink-soft);
   font-weight: 500;
-  margin-left: 1px;
+  background: rgba(11, 24, 41, 0.05);
+  border-radius: 99px;
+  padding: 1px 7px;
 }
 
 /* ── Responsive ──────────────────────────────────────────────── */
-@media (max-width: 768px) {
-  .row      { grid-template-columns: 2fr 1fr; }
-  .cRate10  { display: none; }
-  .rowHeader .cRate10 { display: none; }
-}
-
-@media (max-width: 480px) {
-  .card { padding: 16px; }
+@media (max-width: 640px) {
+  .chip { flex: 0 0 120px; }
+  .chipNum { font-size: 18px; }
 }
