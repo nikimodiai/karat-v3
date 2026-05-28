@@ -35,10 +35,13 @@ function sortRates(rows) {
   });
 }
 
-function fmtRateDate(dateStr) {
-  if (!dateStr) return '';
-  return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-IN', {
-    day: 'numeric', month: 'long', year: 'numeric',
+function fmtUpdatedAt(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleString('en-IN', {
+    day: 'numeric', month: 'short', year: 'numeric',
+    hour: 'numeric', minute: '2-digit', hour12: true,
   });
 }
 
@@ -49,10 +52,10 @@ const TYPE_COLOR = {
 };
 
 export default function MetalRatesCard() {
-  const [rates,    setRates]    = useState([]);
-  const [rateDate, setRateDate] = useState(null);
-  const [loading,  setLoading]  = useState(true);
-  const [error,    setError]    = useState(null);
+  const [rates,     setRates]     = useState([]);
+  const [updatedAt, setUpdatedAt] = useState(null);
+  const [loading,   setLoading]   = useState(true);
+  const [error,     setError]     = useState(null);
 
   useEffect(() => {
     async function load() {
@@ -60,7 +63,7 @@ export default function MetalRatesCard() {
       setError(null);
       const { data, error: err } = await db
         .from('daily_metal_rates')
-        .select('rate_date, metal_key, rate_inr')
+        .select('rate_date, metal_key, rate_inr, updated_at')
         .order('rate_date', { ascending: false })
         .limit(50);
       if (err) {
@@ -75,10 +78,14 @@ export default function MetalRatesCard() {
         return;
       }
       const latestDate = data[0].rate_date;
-      const sorted = sortRates(data.filter(r => r.rate_date === latestDate));
-      console.log('[MetalRatesCard] loaded', sorted.length, 'rates for', latestDate);
+      const todays     = data.filter(r => r.rate_date === latestDate);
+      const sorted     = sortRates(todays);
+      const newest     = todays.reduce(
+        (acc, r) => (acc && new Date(acc) > new Date(r.updated_at) ? acc : r.updated_at),
+        null,
+      );
       setRates(sorted);
-      setRateDate(latestDate);
+      setUpdatedAt(newest);
       setLoading(false);
     }
     load();
@@ -90,13 +97,13 @@ export default function MetalRatesCard() {
         <div className={styles.titleRow}>
           <TrendingUp size={14} color="#C9A84C" />
           <span className={styles.title}>Today's Metal Rates</span>
+          {updatedAt && (
+            <span className={styles.dateTag}>
+              <CalendarDays size={11} />
+              Updated {fmtUpdatedAt(updatedAt)}
+            </span>
+          )}
         </div>
-        {rateDate && (
-          <span className={styles.dateTag}>
-            <CalendarDays size={11} />
-            Updated on {fmtRateDate(rateDate)}
-          </span>
-        )}
       </div>
 
       {loading ? (

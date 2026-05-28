@@ -36,21 +36,33 @@ export default function DynamicPricingPanel({ value, onChange, onTotalChange }) 
 
   const patch = (delta) => onChange({ ...v, ...delta });
 
-  // Live rates from the shared metal_rates reference table ───────────
+  // Live rates from the shared daily_metal_rates reference table ─────
+  // Rows look like: { metal_key: 'gold_999_pm', rate_inr: 156072, ... }
+  // We strip the trailing '_pm' marker and map rate_inr → rate_per_gram
+  // so resolveMetalRate() sees the same shape it's always used.
   const [rates,    setRates]    = useState([]);
   const [loading,  setLoading]  = useState(false);
   const [ratesErr, setRatesErr] = useState(null);
 
   useEffect(() => {
-    // metal_rates is a shared reference table — common rows for all
-    // jewellery owners, no per-store filter. Pull every current row.
     setLoading(true);
-    db.from('metal_rates')
-      .select('metal_type, purity_factor, rate_per_gram, fetched_at')
-      .eq('is_current', true)
+    db.from('daily_metal_rates')
+      .select('rate_date, metal_key, rate_inr')
+      .order('rate_date', { ascending: false })
+      .limit(50)
       .then(({ data, error }) => {
-        if (error) { setRatesErr(error.message); setRates([]); }
-        else       { setRatesErr(null);          setRates(data || []); }
+        if (error) { setRatesErr(error.message); setRates([]); setLoading(false); return; }
+        const rows = data || [];
+        if (!rows.length) { setRatesErr(null); setRates([]); setLoading(false); return; }
+        const latestDate = rows[0].rate_date;
+        const normalized = rows
+          .filter(r => r.rate_date === latestDate)
+          .map(r => ({
+            metal_type:    r.metal_key.replace(/_pm$/i, ''),
+            rate_per_gram: Number(r.rate_inr),
+          }));
+        setRatesErr(null);
+        setRates(normalized);
         setLoading(false);
       });
   }, []);
