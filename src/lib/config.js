@@ -127,6 +127,33 @@ export const GOLD_CARATS = [
   'Stainless Steel',
 ];
 
+// ── Metal Purity grouped (for product form optgroups & calculator) ──
+export const METAL_PURITY_GROUPS = [
+  {
+    label: 'Gold Purity',
+    options: [
+      '24K Gold', '23K Gold', '22K Gold', '21K Gold', '20K Gold',
+      '18K Gold', '16K Gold', '14K Gold', '10K Gold', '9K Gold', '8K Gold',
+      '18K White Gold', '14K White Gold', '9K White Gold',
+      '18K Rose Gold', '14K Rose Gold', '9K Rose Gold',
+    ],
+  },
+  {
+    label: 'Silver Purity',
+    options: [
+      '999 Silver (Fine)', '970 Silver (Traditional)', '958 Silver (Britannia)',
+      '925 Silver (Sterling)', '900 Silver (Coin)', '835 Silver (Alloyed)', '800 Silver',
+    ],
+  },
+  {
+    label: 'Others',
+    options: [
+      'Platinum', 'Panchdhatu (5-Metal Alloy)', 'Ashtadhatu (8-Metal Alloy)',
+      'Brass', 'Copper', 'Titanium', 'Stainless Steel',
+    ],
+  },
+];
+
 // GIA clarity scale (best → lowest), plus Polki for traditional Indian uncut-diamond jewellery
 export const DIAMOND_PURITIES = [
   'FL',

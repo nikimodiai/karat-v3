@@ -49,7 +49,8 @@ export default function ProductCard({ product: p, viewMode, onEdit, onDelete, on
   // DB uses in_stock (boolean); support both for safety
   const isIn = p.in_stock === true;
   const imgs = Array.isArray(p.images) ? p.images : [];
-  const priceStr = p.price ? '₹' + Number(p.price).toLocaleString('en-IN') : null;
+  const priceNum = p.price ? Number(p.price) : null;
+  const priceStr = priceNum ? '₹' + priceNum.toLocaleString('en-IN') : null;
   const weightStr = p.weight ? p.weight + 'g' : '';
 
   if (viewMode === 'list') {
@@ -71,7 +72,11 @@ export default function ProductCard({ product: p, viewMode, onEdit, onDelete, on
           </div>
         </div>
         <div className={styles.listRight}>
-          {priceStr && <div className={styles.listPrice}>{priceStr}</div>}
+          {priceStr && (
+            <div className={styles.listPrice}>
+              {priceStr}<span className={styles.gstTag}> +GST</span>
+            </div>
+          )}
           <span className={`${styles.statusBadge} ${isIn ? styles.inStock : styles.soldOut}`}>
             {isIn ? 'In Stock' : 'Sold Out'}
           </span>
@@ -112,7 +117,11 @@ export default function ProductCard({ product: p, viewMode, onEdit, onDelete, on
             <Gem size={9}/>{p.gold_carat}
           </div>
         )}
-        {priceStr && <div className={styles.price}>{priceStr}</div>}
+        {priceStr && (
+          <div className={styles.price}>
+            {priceStr}<span className={styles.gstTag}> +GST</span>
+          </div>
+        )}
       </div>
       <div className={styles.actions}>
         <button className={styles.actionBtn} onClick={onEdit}>

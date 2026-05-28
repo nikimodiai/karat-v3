@@ -129,3 +129,5 @@
   padding: 1px 5px;
   vertical-align: middle;
 }
+
+.gstTag { font-size: 10px; font-weight: 500; color: var(--ink-soft); letter-spacing: .02em; }

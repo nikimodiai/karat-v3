@@ -145,6 +145,39 @@ export function fmtINR(n) {
   return '₹' + v.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+// ── New jewellery price calculator (no GST, separate gold + silver) ──
+// Reads live per-gram rates from daily_metal_rates; owner specifies
+// gold grams and/or silver grams independently.
+export function calcJewelleryPrice({
+  goldGrams, goldRatePerGram,
+  silverGrams, silverRatePerGram,
+  making, makingMode,
+  stoneWeightCt, stoneRatePerCt, flatStoneCost,
+  hallmarkFee,
+}) {
+  const gG = num(goldGrams);
+  const sG = num(silverGrams);
+  const gR = num(goldRatePerGram);
+  const sR = num(silverRatePerGram);
+
+  const goldCost    = roundP(gG * gR);
+  const silverCost  = roundP(sG * sR);
+  const metalCost   = goldCost + silverCost;
+  const metalGrams  = gG + sG;
+
+  const makingVal   = num(making);
+  let makingCost = 0;
+  if      (makingMode === 'per_gram') makingCost = roundP(makingVal * metalGrams);
+  else if (makingMode === 'percent')  makingCost = roundP(metalCost * makingVal / 100);
+  else                                makingCost = roundP(makingVal);
+
+  const stoneCost = roundP(num(stoneWeightCt) * num(stoneRatePerCt) + num(flatStoneCost));
+  const hallmark  = roundP(num(hallmarkFee, DEFAULT_HALLMARK_FEE));
+  const total     = roundP(goldCost + silverCost + makingCost + stoneCost + hallmark);
+
+  return { goldCost, silverCost, metalCost, makingCost, stoneCost, hallmark, total };
+}
+
 // TODO (production): wire to a live gold-rate API. Options:
 //   - GoldAPI.io (paid, USD-based, convert via FX)
 //   - MetalPriceAPI

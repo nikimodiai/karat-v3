@@ -286,6 +286,7 @@
 .inStock  { background:rgba(21,128,61,.1);  color:#15803d; }
 .soldOut  { background:rgba(190,18,60,.09); color:#be123c; }
 .productPrice { font-size:12px; font-weight:600; color:var(--gold-dk); flex-shrink:0; }
+.gstTag { font-size:10px; font-weight:500; color:var(--ink-soft); letter-spacing:.02em; }
 
 /* Quick actions */
 .quickActions { display: flex; flex-direction: column; gap: 6px; }

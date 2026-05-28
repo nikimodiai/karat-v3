@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { X, Upload, Trash2, Calculator, Video, Image as ImageIcon } from 'lucide-react';
 import {
-  CATEGORIES, SUBCATEGORY_MAP, GOLD_CARATS, DIAMOND_PURITIES,
+  CATEGORIES, SUBCATEGORY_MAP, METAL_PURITY_GROUPS, DIAMOND_PURITIES,
   SILVER_CATEGORIES, MAX_IMAGE_BYTES,
 } from '../lib/config';
+
+const ALL_METAL_OPTIONS = METAL_PURITY_GROUPS.flatMap(g => g.options);
 import { PLAN_LABELS, planKey, hasFeature as hasF } from '../lib/plans';
 import PricingCalculator from './PricingCalculator';
 import VideoUpload from './VideoUpload';
@@ -75,7 +77,7 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
       const knownSubs = product.category ? (SUBCATEGORY_MAP[product.category] || []) : [];
       setCustomCatMode(!!product.category && !CATEGORIES.some(c => c.value === product.category));
       setCustomSubcatMode(!!product.sub_category && knownSubs.length > 0 && !knownSubs.includes(product.sub_category));
-      setCustomMetalMode(!!product.gold_carat && !GOLD_CARATS.includes(product.gold_carat));
+      setCustomMetalMode(!!product.gold_carat && !ALL_METAL_OPTIONS.includes(product.gold_carat));
       setCustomDiamondMode(!!product.diamond_purity && !DIAMOND_PURITIES.includes(product.diamond_purity));
     } else {
       setForm(EMPTY_FORM);
@@ -274,8 +276,12 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
                   if (e.target.value === '__custom__') { setCustomMetalMode(true); set('gold_carat', ''); }
                   else set('gold_carat', e.target.value);
                 }}>
-                  <option value="">Select…</option>
-                  {GOLD_CARATS.map(c => <option key={c} value={c}>{c}</option>)}
+                  <option value="">Select purity…</option>
+                  {METAL_PURITY_GROUPS.map(g => (
+                    <optgroup key={g.label} label={g.label}>
+                      {g.options.map(o => <option key={o} value={o}>{o}</option>)}
+                    </optgroup>
+                  ))}
                   <option disabled>──────────────</option>
                   <option value="__custom__">➕ Other / type your own…</option>
                 </select>
@@ -345,7 +351,7 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
                   className={styles.calcLink}
                   onClick={() => setShowCalc(s => !s)}
                 >
-                  <Calculator size={11}/> {showCalc ? 'Hide calculator' : 'Calculate from gold rate'}
+                  <Calculator size={11}/> {showCalc ? 'Hide calculator' : 'Calculate price'}
                 </button>
               </label>
               <input

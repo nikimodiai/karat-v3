@@ -1,280 +1,304 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Calculator, X, RefreshCw, Info, Check } from 'lucide-react';
-import {
-  calculatePrice, defaultRateFor, fmtINR,
-  MAKING_CHARGE_MODES, DEFAULT_HALLMARK_FEE, GST_RATE,
-  DEFAULT_LAB_DIAMOND_RATE,
-  metalType, parseGoldCarat, parseSilverFineness, isPlatinum,
-} from '../lib/pricing';
+import { Calculator, X, Info, Check, Zap, Tag } from 'lucide-react';
+import { calcJewelleryPrice, fmtINR, MAKING_CHARGE_MODES, DEFAULT_HALLMARK_FEE, DEFAULT_LAB_DIAMOND_RATE } from '../lib/pricing';
+import { METAL_PURITY_GROUPS } from '../lib/config';
 import { db } from '../lib/config';
 import styles from './PricingCalculator.module.css';
 
-// Find a rate in daily_metal_rates rows for a given carat string.
-// Handles various metal_key naming conventions (gold_22k, gold_916, etc.)
-function findDailyRate(carat, rows) {
-  if (!rows?.length || !carat) return null;
-  const g  = parseGoldCarat(carat);
-  const sf = parseSilverFineness(carat);
-  const pt = isPlatinum(carat);
-  const match = rows.find(r => {
-    const k = r.metal_key.toLowerCase().replace(/[\s-]/g, '_');
-    if (pt) return k.includes('plat');
-    if (g) {
-      const purity = Math.round(g / 24 * 1000);
-      return (
-        k === `gold_${g}k` || k === `gold_${purity}` ||
-        k.includes(`gold`) && (k.includes(`${g}k`) || k.includes(`${purity}`))
-      );
-    }
-    if (sf) {
-      const f = Math.round(sf * 1000);
-      return k.includes('silver') && (k.includes(String(f)) || k === 'silver');
-    }
-    return false;
-  });
-  return match ? Number(match.rate_inr) : null;
+const GOLD_OPTIONS   = METAL_PURITY_GROUPS.find(g => g.label === 'Gold Purity')?.options || [];
+const SILVER_OPTIONS = METAL_PURITY_GROUPS.find(g => g.label === 'Silver Purity')?.options || [];
+
+// Map a purity string to a daily_metal_rates metal_key for live rate lookup
+function purityToKey(purity) {
+  if (!purity) return null;
+  const m = purity.match(/^(\d+)K/);
+  if (m) {
+    const k = Number(m[1]);
+    const code = Math.round(k / 24 * 1000);
+    const map = { 24: 'gold_999', 22: 'gold_916', 18: 'gold_750', 14: 'gold_585', 9: 'gold_375' };
+    return map[k] || `gold_${code}`;
+  }
+  const s = purity.match(/^(\d{3})\s*Silver/i);
+  if (s) return `silver_${s[1]}`;
+  if (/plat/i.test(purity)) return 'platinum';
+  return null;
 }
 
-// ── PricingCalculator ────────────────────────────────────────────────
-// Embedded panel inside ProductModal. Owner enters today's rate, making
-// charges, stones — gets a live breakdown they can paste into the price
-// field. Modeled on how a real Indian jeweller calculates: metal cost
-// (rate × purity × weight) + making charges + stones + hallmark + GST.
-// ────────────────────────────────────────────────────────────────────
+// Find a row in daily_metal_rates that matches a purity string
+function findRate(purity, rows) {
+  if (!purity || !rows?.length) return null;
+  const key = purityToKey(purity);
+  if (!key) return null;
+  // Exact match first
+  let found = rows.find(r => r.metal_key === key);
+  if (found) return found;
+  // Fuzzy: same metal family + purity number contained in key
+  const [family, num] = key.split('_');
+  found = rows.find(r => r.metal_key.startsWith(family) && r.metal_key.includes(num || ''));
+  return found ?? null;
+}
 
-export default function PricingCalculator({
-  open, weight, carat, onApply, onClose,
-  initial = {},
-}) {
-  // ── State ─────────────────────────────────────────────────────────
-  const [ratePerGram,    setRatePerGram]    = useState(initial.ratePerGram ?? '');
-  const [making,         setMaking]         = useState(initial.making ?? '');
-  const [makingMode,     setMakingMode]     = useState(initial.makingMode || 'per_gram');
-  const [stoneWeightCt,  setStoneWeightCt]  = useState(initial.stoneWeightCt ?? '');
-  const [stoneRatePerCt, setStoneRatePerCt] = useState(initial.stoneRatePerCt ?? '');
-  const [flatStoneCost,  setFlatStoneCost]  = useState(initial.flatStoneCost ?? '');
-  const [hallmarkFee,    setHallmarkFee]    = useState(initial.hallmarkFee ?? DEFAULT_HALLMARK_FEE);
-  const [gstPct,         setGstPct]         = useState(initial.gstPct ?? GST_RATE * 100);
-  const [liveRates,      setLiveRates]      = useState([]);
-  const [usingLive,      setUsingLive]      = useState(false);
+// Convert daily_metal_rates.rate_inr to ₹ per gram
+function ratePerGram(row) {
+  if (!row) return 0;
+  return /silver/i.test(row.metal_key) ? row.rate_inr / 1000 : row.rate_inr / 10;
+}
 
-  // Fetch today's rates from daily_metal_rates when the calculator opens
+function Row({ label, value, bold, big }) {
+  if (!value) return null;
+  return (
+    <div className={`${styles.brkRow} ${bold ? styles.brkBold : ''} ${big ? styles.brkBig : ''}`}>
+      <span>{label}</span>
+      <span>{fmtINR(value)}</span>
+    </div>
+  );
+}
+
+export default function PricingCalculator({ open, weight, carat, onApply, onClose }) {
+  const [mode,         setMode]         = useState('dynamic'); // 'fixed' | 'dynamic'
+  const [fixedPrice,   setFixedPrice]   = useState('');
+
+  // Dynamic fields
+  const [goldPurity,   setGoldPurity]   = useState('');
+  const [goldGrams,    setGoldGrams]    = useState('');
+  const [silverPurity, setSilverPurity] = useState('');
+  const [silverGrams,  setSilverGrams]  = useState('');
+  const [making,       setMaking]       = useState('');
+  const [makingMode,   setMakingMode]   = useState('per_gram');
+  const [stoneWt,      setStoneWt]      = useState('');
+  const [stoneRate,    setStoneRate]    = useState('');
+  const [flatStone,    setFlatStone]    = useState('');
+  const [hallmark,     setHallmark]     = useState(DEFAULT_HALLMARK_FEE);
+
+  const [liveRates,    setLiveRates]    = useState([]);
+
+  // Fetch live rates from daily_metal_rates when calculator opens
   useEffect(() => {
     if (!open) return;
     db.from('daily_metal_rates')
       .select('rate_date, metal_key, rate_inr')
       .order('rate_date', { ascending: false })
-      .limit(20)                              // latest date's rows (≤ ~10 metals)
+      .limit(50)
       .then(({ data }) => {
         if (!data?.length) return;
-        // Keep only the most recent date's rows
         const latest = data[0].rate_date;
         setLiveRates(data.filter(r => r.rate_date === latest));
       });
   }, [open]);
 
-  // Helper: look up a rate from daily_metal_rates for a given carat string
-  const liveRateFor = (c) => findDailyRate(c, liveRates);
-
-  // Pre-fill rate from live DB rates (preferred), falling back to static defaults
+  // Pre-fill gold/silver purity and grams from the product's carat + weight
   useEffect(() => {
-    if (!ratePerGram && carat) {
-      const live = liveRateFor(carat);
-      if (live) { setRatePerGram(String(live)); setUsingLive(true); }
-      else {
-        const r = defaultRateFor(carat);
-        if (r) { setRatePerGram(String(r)); setUsingLive(false); }
-      }
-    }
-    // Pre-fill stone rate suggestion for lab-grown diamonds
-    if (!stoneRatePerCt && /lab[- ]grown/i.test(carat || '')) {
-      setStoneRatePerCt(String(DEFAULT_LAB_DIAMOND_RATE));
-    }
-  }, [carat, liveRates]);   // re-run when liveRates arrive after carat is already set
+    if (!carat) return;
+    const isGold   = GOLD_OPTIONS.includes(carat);
+    const isSilver = SILVER_OPTIONS.includes(carat);
+    if (isGold)   { setGoldPurity(carat);   setGoldGrams(weight ? String(weight) : ''); }
+    if (isSilver) { setSilverPurity(carat); setSilverGrams(weight ? String(weight) : ''); }
+    // Pre-fill lab diamond stone rate
+    if (!stoneRate && /lab[- ]grown/i.test(carat)) setStoneRate(String(DEFAULT_LAB_DIAMOND_RATE));
+  }, [carat, weight]);
 
-  const result = useMemo(() => calculatePrice({
-    weight, carat,
-    ratePerGram, making, makingMode,
-    stoneWeightCt, stoneRatePerCt, flatStoneCost,
-    hallmarkFee, gstPct,
-  }), [weight, carat, ratePerGram, making, makingMode, stoneWeightCt, stoneRatePerCt, flatStoneCost, hallmarkFee, gstPct]);
+  // Derived live rates per gram
+  const goldRow   = useMemo(() => findRate(goldPurity,   liveRates), [goldPurity,   liveRates]);
+  const silverRow = useMemo(() => findRate(silverPurity, liveRates), [silverPurity, liveRates]);
+  const goldRpg   = ratePerGram(goldRow);
+  const silverRpg = ratePerGram(silverRow);
 
-  // ── Derived UI hints ──────────────────────────────────────────────
-  const mt = metalType(carat);
-  const goldK = parseGoldCarat(carat);
-  const silverF = parseSilverFineness(carat);
-  const isPt = isPlatinum(carat);
-  const purityNote = mt === 'gold' && goldK
-    ? `${goldK}K → purity factor ${(goldK/24).toFixed(3)} (= ${goldK}/24)`
-    : mt === 'silver' && silverF
-    ? `${(silverF*1000).toFixed(0)} fineness → purity factor ${silverF.toFixed(3)}`
-    : isPt
-    ? `Platinum → purity factor 0.950 (PT950 standard)`
-    : 'Select a Gold Carat / Silver purity in the form above to begin.';
+  // Live calculation
+  const result = useMemo(() => calcJewelleryPrice({
+    goldGrams: goldGrams, goldRatePerGram: goldRpg,
+    silverGrams: silverGrams, silverRatePerGram: silverRpg,
+    making, makingMode,
+    stoneWeightCt: stoneWt, stoneRatePerCt: stoneRate, flatStoneCost: flatStone,
+    hallmarkFee: hallmark,
+  }), [goldGrams, goldRpg, silverGrams, silverRpg, making, makingMode, stoneWt, stoneRate, flatStone, hallmark]);
 
-  const handleApply = () => {
-    onApply?.(Math.round(result.total));
-    onClose?.();
-  };
+  const applyTotal = mode === 'fixed' ? Number(fixedPrice) : result.total;
 
   if (!open) return null;
 
   return (
     <div className={styles.wrap}>
+      {/* Header */}
       <div className={styles.head}>
         <div className={styles.headLeft}>
-          <Calculator size={15} color="#8B6914"/>
-          <span>Pricing Calculator</span>
-          <span className={styles.hint}>Indian jewellery formula · live</span>
+          <Calculator size={14} color="#8B6914"/>
+          <span>Price Calculator</span>
         </div>
         {onClose && (
-          <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
-            <X size={14}/>
-          </button>
+          <button className={styles.closeBtn} onClick={onClose}><X size={13}/></button>
         )}
       </div>
 
-      <div className={styles.formula}>
-        <strong>Formula:</strong>{' '}
-        <code>((Metal × Purity × Weight) + Making + Stones + Hallmark) × (1 + GST)</code>
-      </div>
-
-      <div className={styles.purityNote}>
-        <Info size={11}/> {purityNote}
-      </div>
-
-      {/* ── Inputs ─────────────────────────────────────────────────── */}
-      <div className={styles.row}>
-        <div className={styles.field}>
-          <label>Today's rate (₹/gram)</label>
-          <div className={styles.rateRow}>
-            <input
-              type="number" inputMode="decimal" min="0" step="1"
-              value={ratePerGram} onChange={e => setRatePerGram(e.target.value)}
-              placeholder="e.g. 7150"
-            />
-            <button
-              type="button"
-              className={styles.refreshBtn}
-              onClick={() => {
-                const live = liveRateFor(carat);
-                if (live) { setRatePerGram(String(live)); setUsingLive(true); }
-                else { setRatePerGram(String(defaultRateFor(carat) || '')); setUsingLive(false); }
-              }}
-              title={liveRateFor(carat) ? 'Reset to your saved rate' : 'Reset to indicative default'}
-            >
-              <RefreshCw size={11}/>
-            </button>
-          </div>
-          <small className={styles.smallHint}>
-            For {carat || '—'} ·{' '}
-            {usingLive
-              ? 'Auto-filled from your saved rate (Dashboard → Today\'s Metal Rates)'
-              : 'Enter today\'s market rate — save it on the Dashboard to auto-fill here next time'}
-          </small>
-        </div>
-        <div className={styles.field}>
-          <label>Weight (g)</label>
-          <input value={weight || ''} disabled readOnly />
-          <small className={styles.smallHint}>From the form above (auto-synced)</small>
-        </div>
-      </div>
-
-      <div className={styles.row}>
-        <div className={styles.field}>
-          <label>Making charge mode</label>
-          <select value={makingMode} onChange={e => setMakingMode(e.target.value)}>
-            {MAKING_CHARGE_MODES.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-          </select>
-        </div>
-        <div className={styles.field}>
-          <label>Making charge value</label>
-          <input
-            type="number" inputMode="decimal" min="0"
-            value={making} onChange={e => setMaking(e.target.value)}
-            placeholder={makingMode === 'per_gram' ? 'e.g. 450' : makingMode === 'percent' ? 'e.g. 12' : 'e.g. 5000'}
-          />
-          <small className={styles.smallHint}>
-            {makingMode === 'per_gram' && 'Charged per gram of metal'}
-            {makingMode === 'percent'  && '% of the pure metal cost'}
-            {makingMode === 'flat'     && 'Flat ₹ amount (handcraft, exclusive design, etc.)'}
-          </small>
-        </div>
-      </div>
-
-      <div className={styles.section}>Stones / Diamonds (optional)</div>
-      <div className={styles.row3}>
-        <div className={styles.field}>
-          <label>Total stone weight (ct)</label>
-          <input
-            type="number" inputMode="decimal" min="0" step="0.01"
-            value={stoneWeightCt} onChange={e => setStoneWeightCt(e.target.value)}
-            placeholder="e.g. 0.50"
-          />
-        </div>
-        <div className={styles.field}>
-          <label>Stone rate (₹/carat)</label>
-          <input
-            type="number" inputMode="decimal" min="0"
-            value={stoneRatePerCt} onChange={e => setStoneRatePerCt(e.target.value)}
-            placeholder="e.g. 18000"
-          />
-        </div>
-        <div className={styles.field}>
-          <label>Other stone cost (₹)</label>
-          <input
-            type="number" inputMode="decimal" min="0"
-            value={flatStoneCost} onChange={e => setFlatStoneCost(e.target.value)}
-            placeholder="pearls, enamel…"
-          />
-        </div>
-      </div>
-
-      <div className={styles.row}>
-        <div className={styles.field}>
-          <label>Hallmark fee (₹)</label>
-          <input
-            type="number" inputMode="decimal" min="0"
-            value={hallmarkFee} onChange={e => setHallmarkFee(e.target.value)}
-          />
-        </div>
-        <div className={styles.field}>
-          <label>GST (%)</label>
-          <input
-            type="number" inputMode="decimal" min="0" step="0.5"
-            value={gstPct} onChange={e => setGstPct(e.target.value)}
-          />
-          <small className={styles.smallHint}>3% is the standard rate on gold/silver jewellery in India</small>
-        </div>
-      </div>
-
-      {/* ── Breakdown ──────────────────────────────────────────────── */}
-      <div className={styles.breakdown}>
-        <Row label="Metal cost"                value={result.metalCost} />
-        <Row label="Making charges"            value={result.makingCost} />
-        <Row label="Stone / diamond cost"      value={result.stoneCost} />
-        <Row label="Hallmark fee"              value={result.hallmark} />
-        <div className={styles.brkLine}/>
-        <Row label="Subtotal"                  value={result.subtotal} bold />
-        <Row label={`GST @ ${Number(gstPct).toFixed(1)}%`} value={result.gst} />
-        <div className={styles.brkLine}/>
-        <Row label="FINAL PRICE" value={result.total} big />
-      </div>
-
-      <div className={styles.applyRow}>
-        <button type="button" className="btn-gold" onClick={handleApply}>
-          <Check size={13}/> Apply ₹{Math.round(result.total).toLocaleString('en-IN')} to Price field
+      {/* Mode tabs */}
+      <div className={styles.modeTabs}>
+        <button
+          type="button"
+          className={`${styles.modeTab} ${mode === 'fixed' ? styles.modeTabActive : ''}`}
+          onClick={() => setMode('fixed')}
+        >
+          <Tag size={12}/> Fixed Price
+        </button>
+        <button
+          type="button"
+          className={`${styles.modeTab} ${mode === 'dynamic' ? styles.modeTabActive : ''}`}
+          onClick={() => setMode('dynamic')}
+        >
+          <Zap size={12}/> Dynamic (Formula)
         </button>
       </div>
-    </div>
-  );
-}
 
-function Row({ label, value, bold, big }) {
-  return (
-    <div className={`${styles.brkRow} ${bold ? styles.brkBold : ''} ${big ? styles.brkBig : ''}`}>
-      <span>{label}</span>
-      <span>{fmtINR(value)}</span>
+      {/* ── Fixed mode ────────────────────────────────────────────── */}
+      {mode === 'fixed' && (
+        <div className={styles.fixedWrap}>
+          <div className={styles.field}>
+            <label>Final Price (₹ ex-GST)</label>
+            <input
+              type="number" min="0"
+              className={styles.fixedInput}
+              value={fixedPrice}
+              onChange={e => setFixedPrice(e.target.value)}
+              placeholder="e.g. 45000"
+              autoFocus
+            />
+            <small className={styles.smallHint}>Enter the price you want to set directly</small>
+          </div>
+        </div>
+      )}
+
+      {/* ── Dynamic mode ──────────────────────────────────────────── */}
+      {mode === 'dynamic' && (
+        <>
+          {/* Gold section */}
+          <div className={styles.section}>Gold (optional)</div>
+          <div className={styles.row}>
+            <div className={styles.field}>
+              <label>Gold Purity</label>
+              <select value={goldPurity} onChange={e => setGoldPurity(e.target.value)}>
+                <option value="">— none —</option>
+                {GOLD_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+              </select>
+              {goldPurity && (
+                <small className={styles.liveRate}>
+                  {goldRow
+                    ? <>Live: {fmtINR(goldRow.rate_inr)}/10g → <strong>{fmtINR(goldRpg)}/g</strong></>
+                    : <span style={{color:'#d97706'}}>Rate not in daily_metal_rates</span>}
+                </small>
+              )}
+            </div>
+            <div className={styles.field}>
+              <label>Gold Weight (grams)</label>
+              <input
+                type="number" min="0" step="0.01"
+                value={goldGrams}
+                onChange={e => setGoldGrams(e.target.value)}
+                placeholder="e.g. 5.20"
+              />
+            </div>
+          </div>
+
+          {/* Silver section */}
+          <div className={styles.section}>Silver (optional)</div>
+          <div className={styles.row}>
+            <div className={styles.field}>
+              <label>Silver Purity</label>
+              <select value={silverPurity} onChange={e => setSilverPurity(e.target.value)}>
+                <option value="">— none —</option>
+                {SILVER_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+              </select>
+              {silverPurity && (
+                <small className={styles.liveRate}>
+                  {silverRow
+                    ? <>Live: {fmtINR(silverRow.rate_inr)}/kg → <strong>{fmtINR(silverRpg)}/g</strong></>
+                    : <span style={{color:'#d97706'}}>Rate not in daily_metal_rates</span>}
+                </small>
+              )}
+            </div>
+            <div className={styles.field}>
+              <label>Silver Weight (grams)</label>
+              <input
+                type="number" min="0" step="0.01"
+                value={silverGrams}
+                onChange={e => setSilverGrams(e.target.value)}
+                placeholder="e.g. 10.00"
+              />
+            </div>
+          </div>
+
+          {/* Making charges */}
+          <div className={styles.section}>Making Charges</div>
+          <div className={styles.row}>
+            <div className={styles.field}>
+              <label>Mode</label>
+              <select value={makingMode} onChange={e => setMakingMode(e.target.value)}>
+                {MAKING_CHARGE_MODES.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+              </select>
+            </div>
+            <div className={styles.field}>
+              <label>Value</label>
+              <input
+                type="number" min="0"
+                value={making}
+                onChange={e => setMaking(e.target.value)}
+                placeholder={makingMode === 'per_gram' ? 'e.g. 450' : makingMode === 'percent' ? 'e.g. 12' : 'e.g. 5000'}
+              />
+              <small className={styles.smallHint}>
+                {makingMode === 'per_gram' && 'Per gram of total metal (gold + silver)'}
+                {makingMode === 'percent'  && '% of total metal cost'}
+                {makingMode === 'flat'     && 'Flat ₹ amount'}
+              </small>
+            </div>
+          </div>
+
+          {/* Stones / Diamonds */}
+          <div className={styles.section}>Stones / Diamonds (optional)</div>
+          <div className={styles.row3}>
+            <div className={styles.field}>
+              <label>Stone weight (ct)</label>
+              <input type="number" min="0" step="0.01" value={stoneWt} onChange={e => setStoneWt(e.target.value)} placeholder="e.g. 0.50"/>
+            </div>
+            <div className={styles.field}>
+              <label>Rate (₹/carat)</label>
+              <input type="number" min="0" value={stoneRate} onChange={e => setStoneRate(e.target.value)} placeholder="e.g. 18000"/>
+            </div>
+            <div className={styles.field}>
+              <label>Other stone cost (₹)</label>
+              <input type="number" min="0" value={flatStone} onChange={e => setFlatStone(e.target.value)} placeholder="pearls, enamel…"/>
+            </div>
+          </div>
+
+          {/* Other charges */}
+          <div className={styles.section}>Other Charges</div>
+          <div className={styles.row} style={{ maxWidth: '50%' }}>
+            <div className={styles.field}>
+              <label>Hallmark fee (₹)</label>
+              <input type="number" min="0" value={hallmark} onChange={e => setHallmark(e.target.value)}/>
+            </div>
+          </div>
+
+          {/* Breakdown */}
+          <div className={styles.breakdown}>
+            <Row label="Gold cost"         value={result.goldCost}   />
+            <Row label="Silver cost"       value={result.silverCost} />
+            <Row label="Making charges"    value={result.makingCost} />
+            <Row label="Stone / diamond"   value={result.stoneCost}  />
+            <Row label="Hallmark fee"      value={result.hallmark}   />
+            <div className={styles.brkLine}/>
+            <Row label="TOTAL (ex-GST)"    value={result.total}      big />
+          </div>
+          <div className={styles.gstNote}>
+            <Info size={11}/> Price stored ex-GST. "+GST" is shown on product listings.
+          </div>
+        </>
+      )}
+
+      {/* Apply button */}
+      {applyTotal > 0 && (
+        <div className={styles.applyRow}>
+          <button type="button" className="btn-gold" onClick={() => { onApply?.(Math.round(applyTotal)); onClose?.(); }}>
+            <Check size={13}/> Apply ₹{Math.round(applyTotal).toLocaleString('en-IN')} to Price field
+          </button>
+        </div>
+      )}
     </div>
   );
 }

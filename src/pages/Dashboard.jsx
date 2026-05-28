@@ -305,7 +305,11 @@ export default function Dashboard({ onNavigate }) {
                     <div className={`${styles.productStatus} ${p.in_stock===true?styles.inStock:styles.soldOut}`}>
                       {p.in_stock === true ? 'In Stock' : 'Sold Out'}
                     </div>
-                    {p.price && <div className={styles.productPrice}>{fmtINR(p.price)}</div>}
+                    {p.price && (
+                      <div className={styles.productPrice}>
+                        {fmtINR(p.price)}<span className={styles.gstTag}> +GST</span>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
