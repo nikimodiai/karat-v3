@@ -6,7 +6,6 @@ import {
   purityToMetalType, resolveMetalRate,
 } from '../lib/pricing';
 import { METAL_PURITY_GROUPS, db } from '../lib/config';
-import { useAuth } from '../hooks/useAuth';
 import styles from './DynamicPricingPanel.module.css';
 
 const GOLD_OPTIONS   = METAL_PURITY_GROUPS.find(g => g.label === 'Gold Purity')?.options || [];
@@ -20,7 +19,6 @@ const SILVER_OPTIONS = METAL_PURITY_GROUPS.find(g => g.label === 'Silver Purity'
 // is fired so the parent can keep its `price` field in sync.
 // ────────────────────────────────────────────────────────────────────
 export default function DynamicPricingPanel({ value, onChange, onTotalChange }) {
-  const { store } = useAuth();
   const v = value || {};
 
   // Persisted (parent-owned) fields ───────────────────────────────────
@@ -38,28 +36,24 @@ export default function DynamicPricingPanel({ value, onChange, onTotalChange }) 
 
   const patch = (delta) => onChange({ ...v, ...delta });
 
-  // Per-store live rates ──────────────────────────────────────────────
+  // Live rates from the shared metal_rates reference table ───────────
   const [rates,    setRates]    = useState([]);
   const [loading,  setLoading]  = useState(false);
   const [ratesErr, setRatesErr] = useState(null);
 
   useEffect(() => {
-    // metal_rates.store_id references stores.id (NOT auth.uid()). The
-    // earlier query used user.id and silently returned 0 rows for any
-    // store whose stores.id ≠ auth UID — which is the common case.
-    const storeId = store?.id;
-    if (!storeId) return;
+    // metal_rates is a shared reference table — common rows for all
+    // jewellery owners, no per-store filter. Pull every current row.
     setLoading(true);
     db.from('metal_rates')
       .select('metal_type, purity_factor, rate_per_gram, fetched_at')
-      .eq('store_id', storeId)
       .eq('is_current', true)
       .then(({ data, error }) => {
         if (error) { setRatesErr(error.message); setRates([]); }
         else       { setRatesErr(null);          setRates(data || []); }
         setLoading(false);
       });
-  }, [store?.id]);
+  }, []);
 
   const goldInfo   = useMemo(() => resolveMetalRate(goldPurity,   rates), [goldPurity, rates]);
   const silverInfo = useMemo(() => resolveMetalRate(silverPurity, rates), [silverPurity, rates]);
