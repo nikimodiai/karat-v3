@@ -116,7 +116,7 @@ export default function MetalRatesCard() {
             if (!groupRates.length) return null;
             const color = TYPE_COLOR[group] || TYPE_COLOR.Gold;
             return (
-              <div key={group} className={styles.group}>
+              <div key={group} className={styles.group} style={{ flexGrow: groupRates.length }}>
                 <div className={styles.groupLabel} style={{ color: color.text, borderBottomColor: color.unit }}>
                   {group}
                 </div>

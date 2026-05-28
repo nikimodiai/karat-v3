@@ -118,16 +118,4 @@
 .listIconBtn:hover { border-color:var(--navy); color:var(--navy); background:var(--cream); }
 .listIconBtnDanger:hover { border-color:var(--danger); color:var(--danger); background:var(--danger-bg); }
 
-/* Video badge — small pill rendered next to product name when a video exists */
-.videoBadge {
-  display: inline-flex;
-  align-items: center; justify-content: center;
-  margin-left: 6px;
-  background: rgba(124,58,237,.12);
-  color: #6d28d9;
-  border-radius: 4px;
-  padding: 1px 5px;
-  vertical-align: middle;
-}
-
 .gstTag { font-size: 10px; font-weight: 500; color: var(--ink-soft); letter-spacing: .02em; }

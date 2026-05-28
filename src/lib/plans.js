@@ -39,7 +39,6 @@ export const PLAN_LIMITS = {
       ai_models:       true,
       virtual_tryon:   true,
       analytics:       'PROFESSIONAL',
-      video_upload:    true,
     },
   },
   starter: {
@@ -57,7 +56,6 @@ export const PLAN_LIMITS = {
       ai_models:       false,
       virtual_tryon:   false,
       analytics:       'STARTER',
-      video_upload:    false,
     },
   },
   professional: {
@@ -75,7 +73,6 @@ export const PLAN_LIMITS = {
       ai_models:       true,
       virtual_tryon:   true,
       analytics:       'PROFESSIONAL',
-      video_upload:    true,
     },
   },
   enterprise: {
@@ -93,7 +90,6 @@ export const PLAN_LIMITS = {
       ai_models:       true,
       virtual_tryon:   true,
       analytics:       'ENTERPRISE',
-      video_upload:    true,
     },
   },
 };

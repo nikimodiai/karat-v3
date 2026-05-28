@@ -1,20 +1,18 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { X, Upload, Trash2, Tag, Zap, Video, Image as ImageIcon } from 'lucide-react';
+import { X, Upload, Trash2, Tag, Zap, Image as ImageIcon } from 'lucide-react';
 import {
   CATEGORIES, SUBCATEGORY_MAP, METAL_PURITY_GROUPS, DIAMOND_PURITIES,
   SILVER_CATEGORIES, MAX_IMAGE_BYTES,
 } from '../lib/config';
 
 const ALL_METAL_OPTIONS = METAL_PURITY_GROUPS.flatMap(g => g.options);
-import { PLAN_LABELS, planKey, hasFeature as hasF } from '../lib/plans';
 import DynamicPricingPanel from './DynamicPricingPanel';
-import VideoUpload from './VideoUpload';
 import styles from './ProductModal.module.css';
 
 // DB column names (Supabase schema):
 //   sku, name, category, sub_category, gold_carat, diamond_purity,
 //   material, occasion, weight, price, stock_qty, description, in_stock,
-//   images (array), primary_image_url, video_url (NEW), owner_id, is_current
+//   images (array), primary_image_url, owner_id, is_current
 //
 // AI fields (ai_title, ai_description, etc.) are intentionally NOT
 // referenced or sent — feature removed per Nikhil's spec #1.
@@ -22,7 +20,14 @@ import styles from './ProductModal.module.css';
 const EMPTY_FORM = {
   sku: '', name: '', category: '', sub_category: '',
   gold_carat: '', diamond_purity: '', material: '', occasion: '',
-  weight: '', price: '', stock_qty: 1,
+  weight: '',
+  // Two parallel price slots. `fixed_price` is what the owner types in
+  // Fixed mode; `price` is what gets persisted to products.price and is
+  // owned by the panel in Dynamic mode. We keep both in the form so a
+  // toggle Fixed→Dynamic→Fixed restores the typed value verbatim.
+  fixed_price: '',
+  price: '',
+  stock_qty: 1,
   description: '', in_stock: true,
   // Visibility
   visibility: 'all',
@@ -33,7 +38,7 @@ const EMPTY_FORM = {
   gold_weight_grams: '',
   silver_purity: '',
   silver_weight_grams: '',
-  // Charges (used in both modes when present)
+  // Charges (Dynamic mode only)
   metal_type: '',
   metal_weight_grams: '',
   wastage_percent: 0,
@@ -42,7 +47,7 @@ const EMPTY_FORM = {
   stone_value_inr: 0,
   diamond_value_inr: 0,
   hallmark_charge: 45,
-  // Optional stone breakdown — kept locally for recompute, not persisted as separate columns
+  // Optional stone breakdown — local-only, not persisted as separate columns
   stone_weight_ct: '',
   stone_rate_per_ct: '',
   flat_stone_cost: '',
@@ -52,8 +57,6 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
   const [form, setForm]             = useState(EMPTY_FORM);
   const [slotFiles, setSlotFiles]   = useState([null,null,null,null,null]);
   const [existingUrls, setExisting] = useState([null,null,null,null,null]);
-  const [videoFile, setVideoFile]   = useState(null);
-  const [existingVideoUrl, setExistingVideoUrl] = useState(null);
   const [skuError, setSkuError]     = useState('');
   const [saving, setSaving]         = useState(false);
   const [subcats, setSubcats]       = useState([]);
@@ -64,10 +67,6 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
   const [customSubcatMode,  setCustomSubcatMode]  = useState(false);
   const [customMetalMode,   setCustomMetalMode]   = useState(false);
   const [customDiamondMode, setCustomDiamondMode] = useState(false);
-
-  // Plan-based feature gates
-  const planName    = planKey(store);
-  const videoUnlocked = hasF(store, 'video_upload');
 
   useEffect(() => {
     if (product) {
@@ -81,6 +80,10 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
         material:       product.material       || '',
         occasion:       product.occasion       || '',
         weight:         product.weight         || '',
+        // For a saved fixed-price product, seed both slots with the stored value
+        // so toggling modes doesn't lose data. Dynamic-priced rows still keep it
+        // as a sensible fallback if the owner switches back to Fixed.
+        fixed_price:    product.dynamic_price ? '' : (product.price || ''),
         price:          product.price          || '',
         stock_qty:      product.stock_qty ?? 1,
         description:    product.description    || '',
@@ -108,8 +111,6 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
       urls.forEach((u, i) => { if (i < 5) existing[i] = u; });
       setExisting(existing);
       setSlotFiles([null,null,null,null,null]);
-      setExistingVideoUrl(product.video_url || null);
-      setVideoFile(null);
       if (product.category) setSubcats(SUBCATEGORY_MAP[product.category] || []);
       // Detect custom (not-in-list) values saved in older or manually-entered products
       const knownSubs = product.category ? (SUBCATEGORY_MAP[product.category] || []) : [];
@@ -121,7 +122,6 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
       setForm(EMPTY_FORM);
       setSlotFiles([null,null,null,null,null]);
       setExisting([null,null,null,null,null]);
-      setExistingVideoUrl(null); setVideoFile(null);
       setSubcats([]);
       setCustomCatMode(false); setCustomSubcatMode(false);
       setCustomMetalMode(false); setCustomDiamondMode(false);
@@ -193,10 +193,13 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
       if (!hasGold && !hasSilver) return alert('Dynamic pricing needs at least one metal (gold or silver) with a purity and weight.');
       if (!Number(form.price))    return alert('Live price is ₹0 — check that today\'s metal rates are loaded.');
     } else {
-      if (!form.price)        return alert('Price is required');
+      if (!form.fixed_price)    return alert('Price is required');
     }
     if (skuError)             return alert('Fix the SKU error first');
     if (imageCount === 0)     return alert('At least one product image is required');
+
+    // Persisted price column: computed (dynamic) or owner-typed (fixed)
+    const finalPrice = form.dynamic_price ? Number(form.price) : Number(form.fixed_price);
 
     setSaving(true);
     try {
@@ -204,13 +207,11 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
         form: {
           ...form,
           weight:    Number(form.weight),
-          price:     Number(form.price),
+          price:     finalPrice,
           stock_qty: Number(form.stock_qty) || 1,
         },
         slotFiles,
         existingUrls,
-        videoFile,
-        existingVideoUrl,
         isEdit,
       });
     } catch(err) {
@@ -429,21 +430,14 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
           </div>
 
           {!form.dynamic_price ? (
-            <div className="fg fg2" style={{ marginTop: 12 }}>
+            <div style={{ marginTop: 12 }}>
               <div className="fld">
                 <label className="lbl">Price (₹ ex-GST) <span className="req">*</span></label>
                 <input
                   className="inp" type="number" min="0"
-                  value={form.price} onChange={e => set('price', e.target.value)}
+                  value={form.fixed_price}
+                  onChange={e => set('fixed_price', e.target.value)}
                   placeholder="e.g. 45000"
-                />
-              </div>
-              <div className="fld">
-                <label className="lbl">Hallmark / BIS Fee (₹)</label>
-                <input
-                  className="inp" type="number" min="0"
-                  value={form.hallmark_charge}
-                  onChange={e => set('hallmark_charge', e.target.value)}
                 />
               </div>
             </div>
@@ -518,20 +512,6 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
           <p className={styles.imgNote}>
             First image is the primary photo sent to WhatsApp customers. JPG, PNG, WebP · Max 5 MB each.
           </p>
-
-          {/* ④ Video — Pro plan only */}
-          <div className="sec-label" style={{ marginTop: 20 }}>
-            <Video size={11} style={{verticalAlign: 'middle', marginRight: 4}}/> ④ Product Video (optional · max 10s)
-            <span className={styles.proBadge}>{PLAN_LABELS[planName] || 'Trial'}</span>
-          </div>
-          <VideoUpload
-            existingUrl={existingVideoUrl}
-            pendingFile={videoFile}
-            onFileSelect={setVideoFile}
-            onRemoveExisting={() => setExistingVideoUrl(null)}
-            locked={!videoUnlocked}
-            lockedMessage={`Video uploads are unlocked on the Professional plan (and Trial). You're on the ${PLAN_LABELS[planName]} plan.`}
-          />
 
           {/* Stock toggle */}
           <label className={styles.stockToggle}>

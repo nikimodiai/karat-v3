@@ -4,10 +4,10 @@ import {
   X, Grid, List, ArrowUpDown, Tag, Gem,
 } from 'lucide-react';
 import {
-  db, CLOUDINARY_CLOUD, CLOUDINARY_PRESET, CLOUDINARY_VIDEO_PRESET,
+  db, CLOUDINARY_CLOUD, CLOUDINARY_PRESET,
   CATEGORIES, GOLD_CARATS, MAX_IMAGE_BYTES,
 } from '../lib/config';
-import { effectiveLimit, planKey, PLAN_LABELS, hasFeature } from '../lib/plans';
+import { effectiveLimit, planKey, PLAN_LABELS } from '../lib/plans';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { useStoreData } from '../hooks/useStoreData';
@@ -63,28 +63,6 @@ async function uploadImageToCloudinary(file) {
   return json.secure_url || null;
 }
 
-async function uploadVideoToCloudinary(file) {
-  // Try video preset first, then fall back to the image preset.
-  // Use /auto/upload so Cloudinary detects the resource type itself.
-  const presetsToTry = [CLOUDINARY_VIDEO_PRESET, CLOUDINARY_PRESET].filter(Boolean);
-  let lastErr = '';
-  for (const preset of presetsToTry) {
-    const fd = new FormData();
-    fd.append('file', file);
-    fd.append('upload_preset', preset);
-    const res = await fetch(
-      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/auto/upload`,
-      { method: 'POST', body: fd },
-    );
-    if (res.ok) {
-      const json = await res.json();
-      if (json.secure_url) return json.secure_url;
-    }
-    lastErr = await res.text().catch(() => 'unknown');
-  }
-  throw new Error(lastErr.slice(0, 300) || 'Cloudinary rejected the upload');
-}
-
 // Rough storage estimate for images already uploaded (best-effort; the
 // real check belongs in a Supabase aggregate or Cloudinary API call,
 // but this catches the common "running well past plan" case).
@@ -95,7 +73,6 @@ function estimateStorageGB(products) {
   for (const p of products) {
     const n = Array.isArray(p.images) ? p.images.length : (p.images ? 1 : 0);
     imgBytes += n * 600 * 1024;
-    if (p.video_url) imgBytes += 4 * 1024 * 1024; // ~4 MB per 10s video
   }
   return imgBytes / (1024 * 1024 * 1024);
 }
@@ -153,7 +130,7 @@ export default function Inventory() {
   // Direct Supabase UPDATE on edit (one row per product — fixes
   // "multiple records per edit" bug). New products go through INSERT.
   // No n8n round-trip, no AI generation, no soft-insert duplicates.
-  const handleSave = useCallback(async ({ form, slotFiles, existingUrls, videoFile, existingVideoUrl, isEdit }) => {
+  const handleSave = useCallback(async ({ form, slotFiles, existingUrls, isEdit }) => {
     // 1) Upload any new images to Cloudinary
     const imageUrls = [...existingUrls];
     for (let i = 0; i < 5; i++) {
@@ -168,19 +145,7 @@ export default function Inventory() {
     }
     const finalImages = imageUrls.filter(Boolean);
 
-    // 2) Upload video if Pro plan + a video was chosen
-    let finalVideoUrl = existingVideoUrl || null;
-    if (videoFile && hasFeature(store, 'video_upload')) {
-      try {
-        finalVideoUrl = await uploadVideoToCloudinary(videoFile);
-      } catch (e) {
-        console.error('[VideoUpload]', e);
-        showToast(`Video upload failed: ${e.message?.slice(0,120) || 'unknown error'}`, '#C0392B');
-        finalVideoUrl = existingVideoUrl || null;
-      }
-    }
-
-    // 3) Build payload (DB column names only; AI fields excluded)
+    // 2) Build payload (DB column names only; AI fields excluded)
     const payload = {
       sku:            form.sku,
       name:           form.name,
@@ -198,7 +163,6 @@ export default function Inventory() {
       owner_id:       user.id,
       images:         finalImages,
       primary_image_url: finalImages[0] || null,
-      video_url:      finalVideoUrl,
       is_current:     true,
       // Visibility & dynamic pricing
       visibility:          form.visibility     || 'all',

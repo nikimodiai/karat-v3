@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Pencil, Trash2, PackageCheck, PackageX, Image, Gem, Video } from 'lucide-react';
+import { Pencil, Trash2, PackageCheck, PackageX, Image, Gem } from 'lucide-react';
 import styles from './ProductCard.module.css';
 
 function Slideshow({ urls }) {
@@ -63,10 +63,7 @@ export default function ProductCard({ product: p, viewMode, onEdit, onDelete, on
           }
         </div>
         <div className={styles.listInfo}>
-          <div className={styles.listName}>
-            {p.name}
-            {p.video_url && <span className={styles.videoBadge} title="Video available"><Video size={9}/></span>}
-          </div>
+          <div className={styles.listName}>{p.name}</div>
           <div className={styles.listMeta}>
             {p.sku} · {p.category}{p.sub_category ? ` · ${p.sub_category}` : ''} {weightStr ? `· ${weightStr}` : ''}
           </div>
@@ -107,10 +104,7 @@ export default function ProductCard({ product: p, viewMode, onEdit, onDelete, on
         <div className={styles.skuBadge}>{p.sku}</div>
       </div>
       <div className={styles.body}>
-        <div className={styles.name}>
-          {p.name}
-          {p.video_url && <span className={styles.videoBadge} title="Video available"><Video size={9}/></span>}
-        </div>
+        <div className={styles.name}>{p.name}</div>
         <div className={styles.meta}>{p.category}{p.sub_category ? ` · ${p.sub_category}` : ''}{weightStr ? ` · ${weightStr}` : ''}</div>
         {p.gold_carat && (
           <div className={styles.caratBadge}>

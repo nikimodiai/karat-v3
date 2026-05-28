@@ -63,6 +63,7 @@
 /* ── Rate strip ──────────────────────────────────────────────── */
 .strip {
   display: flex;
+  width: 100%;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
@@ -71,11 +72,16 @@
 .strip::-webkit-scrollbar { display: none; }
 
 /* ── Metal group (Gold / Silver / Platinum) ──────────────────── */
+/* Each group is flexed proportional to its chip count (set via inline
+   style in MetalRatesCard.jsx) so that the whole row spans the card
+   width and individual chips end up roughly the same size across
+   groups — Gold's 5 chips don't get squashed by Silver's lone chip. */
 .group {
   display: flex;
   flex-direction: column;
+  flex: 1 1 0;
+  min-width: 0;
   border-right: 2px solid var(--border);
-  padding-right: 0;
 }
 .group:last-child { border-right: none; }
 
@@ -87,16 +93,19 @@
   padding: 0 12px 6px;
   border-bottom: 2px solid transparent;
   margin-bottom: 4px;
+  text-align: center;
 }
 
 .groupChips {
   display: flex;
   flex: 1;
+  justify-content: space-around;
 }
 
 /* ── Chip ────────────────────────────────────────────────────── */
 .chip {
-  flex: 1 0 110px;
+  flex: 1 1 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -148,6 +157,7 @@
 
 /* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 640px) {
-  .chip    { flex: 0 0 100px; }
+  /* Drop into horizontal scroll mode so chips don't get crushed */
+  .chip    { flex: 0 0 110px; }
   .chipNum { font-size: 17px; }
 }

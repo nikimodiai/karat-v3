@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   Lock, Check, X, Crown, Store, Phone, Mail, MapPin, Wifi, Diamond,
-  ShoppingBag, Users, Cpu, Shirt, BarChart2, Camera, Video, MessageSquare, HardDrive,
+  ShoppingBag, Users, Cpu, Shirt, BarChart2, Camera, MessageSquare, HardDrive,
 } from 'lucide-react';
 import { db } from '../lib/config';
 import { useAuth } from '../hooks/useAuth';
@@ -88,7 +88,6 @@ export default function Profile() {
     { icon: Users,       label: 'Customer Tiers (VVIP/VIP)', active: hasFeature(store, 'customer_tiers') },
     { icon: Cpu,         label: 'Advanced AI Models',   active: hasFeature(store, 'ai_models') },
     { icon: Shirt,       label: 'Virtual Try-On',       active: hasFeature(store, 'virtual_tryon') },
-    { icon: Video,       label: 'Product Videos (Cloudinary)', active: hasFeature(store, 'video_upload'), note: 'max 10s' },
     { icon: BarChart2,   label: 'Analytics',            active: !!planSpec.features.analytics, note: planSpec.features.analytics },
   ];
 

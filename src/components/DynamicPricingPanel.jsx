@@ -20,7 +20,7 @@ const SILVER_OPTIONS = METAL_PURITY_GROUPS.find(g => g.label === 'Silver Purity'
 // is fired so the parent can keep its `price` field in sync.
 // ────────────────────────────────────────────────────────────────────
 export default function DynamicPricingPanel({ value, onChange, onTotalChange }) {
-  const { user } = useAuth();
+  const { store } = useAuth();
   const v = value || {};
 
   // Persisted (parent-owned) fields ───────────────────────────────────
@@ -44,18 +44,22 @@ export default function DynamicPricingPanel({ value, onChange, onTotalChange }) 
   const [ratesErr, setRatesErr] = useState(null);
 
   useEffect(() => {
-    if (!user?.id) return;
+    // metal_rates.store_id references stores.id (NOT auth.uid()). The
+    // earlier query used user.id and silently returned 0 rows for any
+    // store whose stores.id ≠ auth UID — which is the common case.
+    const storeId = store?.id;
+    if (!storeId) return;
     setLoading(true);
     db.from('metal_rates')
       .select('metal_type, purity_factor, rate_per_gram, fetched_at')
-      .eq('store_id', user.id)
+      .eq('store_id', storeId)
       .eq('is_current', true)
       .then(({ data, error }) => {
         if (error) { setRatesErr(error.message); setRates([]); }
         else       { setRatesErr(null);          setRates(data || []); }
         setLoading(false);
       });
-  }, [user?.id]);
+  }, [store?.id]);
 
   const goldInfo   = useMemo(() => resolveMetalRate(goldPurity,   rates), [goldPurity, rates]);
   const silverInfo = useMemo(() => resolveMetalRate(silverPurity, rates), [silverPurity, rates]);
@@ -235,18 +239,20 @@ function RateHint({ info, purity }) {
       </small>
     );
   }
+  const unit = info.unitLabel || '/g';
   if (info.source === 'derived') {
     return (
       <small className={styles.hint}>
         <TrendingUp size={10}/> Derived from 999 base:&nbsp;
-        <strong>{fmtINR(info.rate)}/g</strong>
-        <span className={styles.muted}>&nbsp;({fmtINR(info.baseRate)} × {info.ratio.toFixed(3)})</span>
+        <strong>{fmtINR(info.displayRate)}{unit}</strong>
+        <span className={styles.muted}>&nbsp;(per-gram: {fmtINR(info.rate)})</span>
       </small>
     );
   }
   return (
     <small className={styles.hint}>
-      <TrendingUp size={10}/> Today's rate: <strong>{fmtINR(info.rate)}/g</strong>
+      <TrendingUp size={10}/> Today's rate: <strong>{fmtINR(info.displayRate)}{unit}</strong>
+      <span className={styles.muted}>&nbsp;(per-gram: {fmtINR(info.rate)})</span>
     </small>
   );
 }

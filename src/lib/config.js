@@ -17,7 +17,6 @@ export const SUPABASE_KEY =
 
 export const CLOUDINARY_CLOUD = env.VITE_CLOUDINARY_CLOUD || 'jewelleryinventory';
 export const CLOUDINARY_PRESET = env.VITE_CLOUDINARY_PRESET || 'jewelleryupload';
-export const CLOUDINARY_VIDEO_PRESET = env.VITE_CLOUDINARY_VIDEO_PRESET || 'jewelleryvideoupload';
 
 export const N8N_BASE = env.VITE_N8N_BASE || 'https://n8n.srv1639765.hstgr.cloud/webhook';
 // Kept for backward compat with old workflow URLs (deprecated — add/edit is now direct).
@@ -178,6 +177,4 @@ export const LAB_DIAMOND_CATEGORIES = new Set(['Lab-Grown Diamond']);
 
 // ── Misc constants ──────────────────────────────────────────────────
 export const INACTIVITY_MS = 30 * 60 * 1000;
-export const MAX_VIDEO_SECONDS = 10;
-export const MAX_VIDEO_BYTES = 25 * 1024 * 1024; // 25 MB hard cap pre-Cloudinary
 export const MAX_IMAGE_BYTES = 5 * 1024 * 1024;  // 5 MB per image

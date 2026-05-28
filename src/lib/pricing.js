@@ -182,9 +182,18 @@ export function calcJewelleryPrice({
 // metal_rates rows look like:
 //   { metal_type: 'gold_916', purity_factor: '0.916', rate_per_gram: '12500', is_current: true, ... }
 //
-// purityToMetalType('22K Gold')         -> 'gold_917'   (22/24×1000 rounded)
-// purityToMetalType('970 Silver (T..)') -> 'silver_970'
-// purityToMetalType('Platinum')         -> 'platinum'
+// IMPORTANT — unit convention (matches how Indian jewellers actually
+// quote rates): the numeric value stored in rate_per_gram is treated as
+//   • per 10 grams  for gold/platinum rows  (e.g. ₹125,000 / 10g for 22K)
+//   • per kilogram  for silver rows         (e.g. ₹95,000 / 1kg)
+// We divide by the unit size when computing actual per-gram cost so the
+// owner can keep entering rates the way they're quoted in the market.
+export const RATE_UNIT = {
+  gold:     { perGramFactor: 10,   label: '/10g' },
+  platinum: { perGramFactor: 10,   label: '/10g' },
+  silver:   { perGramFactor: 1000, label: '/kg'  },
+};
+
 export function purityToMetalType(purity) {
   if (!purity) return null;
   const k = String(purity).match(/^(\d+)K/);
@@ -195,33 +204,64 @@ export function purityToMetalType(purity) {
   return null;
 }
 
-// Look up a per-gram rate for a purity. Falls back proportionally to the
-// 999 base when an exact row isn't available — so a shop that only
-// records gold_999 & silver_999 can still price 22K / 970-silver items.
+function metalFamily(key) {
+  if (!key) return null;
+  if (key.startsWith('gold'))   return 'gold';
+  if (key.startsWith('silver')) return 'silver';
+  if (key === 'platinum')       return 'platinum';
+  return null;
+}
+
+// Look up a per-gram rate for a purity. Stored rate is treated as
+// per-10g (gold/platinum) or per-kg (silver) and normalized to per-gram
+// for the calc. Falls back proportionally to the 999-purity base when
+// the exact purity is missing — so a shop that only records gold_999 &
+// silver_999 can still price 22K / 970-silver items.
 //
-// Returns: { rate, source: 'exact' | 'derived' | 'missing', baseRate, ratio }
+// Returns: {
+//   rate:         number — per-gram (for the calculator)
+//   displayRate:  number — as stored, in the owner's quoting unit
+//   unitLabel:    '/10g' | '/kg'
+//   source:       'exact' | 'derived' | 'missing'
+//   baseRate?:    number — per-gram base (when derived)
+//   ratio?:       number — target_purity / 999 (when derived)
+// }
 export function resolveMetalRate(purity, rows) {
-  if (!purity || !rows?.length) return { rate: 0, source: 'missing' };
+  const empty = { rate: 0, displayRate: 0, unitLabel: '', source: 'missing' };
+  if (!purity || !rows?.length) return empty;
   const targetKey = purityToMetalType(purity);
-  if (!targetKey) return { rate: 0, source: 'missing' };
+  if (!targetKey) return empty;
+
+  const family = metalFamily(targetKey);
+  const unit   = RATE_UNIT[family];
+  if (!unit) return empty;
 
   const exact = rows.find(r => r.metal_type === targetKey);
-  if (exact) return { rate: Number(exact.rate_per_gram), source: 'exact' };
+  if (exact) {
+    const stored = Number(exact.rate_per_gram);
+    return {
+      rate:        stored / unit.perGramFactor,
+      displayRate: stored,
+      unitLabel:   unit.label,
+      source:      'exact',
+    };
+  }
 
   // Derive from the 999-purity base of the same metal family
-  const isGold   = targetKey.startsWith('gold');
-  const isSilver = targetKey.startsWith('silver');
-  if (!isGold && !isSilver) return { rate: 0, source: 'missing' };
+  if (family !== 'gold' && family !== 'silver') return empty;
+  const base = rows.find(r => r.metal_type === (family === 'gold' ? 'gold_999' : 'silver_999'));
+  if (!base) return empty;
 
-  const base = rows.find(r => r.metal_type === (isGold ? 'gold_999' : 'silver_999'));
-  if (!base) return { rate: 0, source: 'missing' };
-
+  const baseStored   = Number(base.rate_per_gram);
+  const basePerGram  = baseStored / unit.perGramFactor;
   const targetPurity = Number(targetKey.split('_')[1]);   // e.g. 970
-  const ratio = targetPurity / 999;
+  const ratio        = targetPurity / 999;
   return {
-    rate: Number(base.rate_per_gram) * ratio,
-    source: 'derived',
-    baseRate: Number(base.rate_per_gram),
+    rate:        basePerGram * ratio,
+    displayRate: baseStored  * ratio,
+    unitLabel:   unit.label,
+    source:      'derived',
+    baseRate:    basePerGram,
     ratio,
   };
 }
