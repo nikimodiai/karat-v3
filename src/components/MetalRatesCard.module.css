@@ -4,7 +4,7 @@
   border: 1px solid var(--border-card);
   border-top: 3px solid rgba(201, 168, 76, 0.45);
   box-shadow: var(--shadow-card);
-  padding: 18px 20px 16px;
+  padding: 14px 16px 12px;
 }
 
 /* ── Header ──────────────────────────────────────────────────── */
@@ -12,19 +12,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .titleRow {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
 }
 
 .title {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--navy);
   font-family: var(--font-display);
@@ -33,14 +33,14 @@
 .dateTag {
   display: flex;
   align-items: center;
-  gap: 5px;
+  gap: 4px;
   font-size: 11px;
   font-weight: 500;
   color: var(--ink-soft);
   background: rgba(201, 168, 76, 0.07);
   border: 1px solid rgba(201, 168, 76, 0.2);
   border-radius: 99px;
-  padding: 3px 10px;
+  padding: 2px 9px;
   white-space: nowrap;
 }
 
@@ -49,15 +49,15 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 0 4px;
+  padding: 6px 0 2px;
   color: var(--ink-soft);
   font-size: 13px;
 }
 
 .emptyState {
-  padding: 16px 0 4px;
+  padding: 8px 0 2px;
   color: var(--ink-mid);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 /* ── Rate strip ──────────────────────────────────────────────── */
@@ -65,74 +65,64 @@
   display: flex;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
-  /* hide scrollbar but keep functionality */
   scrollbar-width: none;
-  margin: 0 -4px;
 }
 .strip::-webkit-scrollbar { display: none; }
 
-/* ── Individual chip ─────────────────────────────────────────── */
+/* ── Chip ────────────────────────────────────────────────────── */
 .chip {
-  flex: 1 0 130px;
+  flex: 1 0 110px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 5px;
-  padding: 10px 20px 8px;
+  gap: 3px;
+  padding: 6px 12px 8px;
   text-align: center;
   transition: background 0.15s;
-  border-radius: 8px;
+  border-radius: 6px;
 }
 .chip:hover { background: var(--cream); }
 
-.chipType {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 2px 8px;
-  border-radius: 99px;
-}
-
 .chipPurity {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  color: var(--navy);
-  opacity: 0.7;
+  color: var(--ink-mid);
+  letter-spacing: 0.02em;
 }
 
 .chipRate {
   display: flex;
   align-items: baseline;
-  gap: 3px;
-  margin-top: 2px;
+  gap: 2px;
+  margin-top: 1px;
 }
 
 .chipSym {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--navy);
 }
 
 .chipNum {
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   color: var(--navy);
   letter-spacing: -0.02em;
   font-family: var(--font-display);
 }
 
+/* Unit pill — intentionally visible */
 .chipUnit {
-  font-size: 10px;
-  color: var(--ink-soft);
-  font-weight: 500;
-  background: rgba(11, 24, 41, 0.05);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 2px 8px;
   border-radius: 99px;
-  padding: 1px 7px;
+  margin-top: 2px;
 }
 
 /* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 640px) {
-  .chip { flex: 0 0 120px; }
-  .chipNum { font-size: 18px; }
+  .chip    { flex: 0 0 100px; }
+  .chipNum { font-size: 17px; }
 }

@@ -3,7 +3,6 @@ import { TrendingUp, CalendarDays } from 'lucide-react';
 import { db } from '../lib/config';
 import styles from './MetalRatesCard.module.css';
 
-// Extract purity number from metal_key, e.g. "gold_916" → "916"
 function purityLabel(key) {
   const m = key.match(/(\d+)/);
   if (m) return `${m[1]} Purity`;
@@ -11,21 +10,29 @@ function purityLabel(key) {
   return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
-// "gold" / "silver" / "platinum"
 function metalType(key) {
   const k = key.toLowerCase();
-  if (k.includes('silver'))   return 'Silver';
-  if (k.includes('plat'))     return 'Platinum';
+  if (k.includes('silver')) return 'Silver';
+  if (k.includes('plat'))   return 'Platinum';
   return 'Gold';
 }
 
-// Convert raw rate_inr to ₹ per gram:
-//   Gold   → rate_inr is per 10g   → ÷ 10
-//   Silver → rate_inr is per 1 kg  → ÷ 1000
-//   Others → assume per 10g
-function ratePerGram(key, rate_inr) {
-  if (/silver/i.test(key)) return rate_inr / 1000;
-  return rate_inr / 10;
+// Gold rate_inr is per 10g — show as-is with "10 Gm" label
+// Silver rate_inr is per kg — show as-is with "1 Kg" label
+function unitLabel(key) {
+  return /silver/i.test(key) ? '1 Kg' : '10 Gm';
+}
+
+// Sort: gold first (purity desc), platinum, then silver (purity desc)
+function sortRates(rows) {
+  const TYPE_ORDER = { Gold: 0, Platinum: 1, Silver: 2 };
+  return [...rows].sort((a, b) => {
+    const tA = metalType(a.metal_key), tB = metalType(b.metal_key);
+    if (TYPE_ORDER[tA] !== TYPE_ORDER[tB]) return TYPE_ORDER[tA] - TYPE_ORDER[tB];
+    const pA = Number(a.metal_key.match(/(\d+)/)?.[1] || 0);
+    const pB = Number(b.metal_key.match(/(\d+)/)?.[1] || 0);
+    return pB - pA; // higher purity first
+  });
 }
 
 function fmtRateDate(dateStr) {
@@ -36,9 +43,9 @@ function fmtRateDate(dateStr) {
 }
 
 const TYPE_COLOR = {
-  Gold:     { bg: 'rgba(201,168,76,.1)',  text: '#8B6914' },
-  Silver:   { bg: 'rgba(120,120,140,.1)', text: '#5a5a72' },
-  Platinum: { bg: 'rgba(80,100,140,.1)',  text: '#3a4f7a' },
+  Gold:     { bg: 'rgba(201,168,76,.12)', text: '#8B6914', unit: 'rgba(201,168,76,.25)' },
+  Silver:   { bg: 'rgba(120,120,140,.1)', text: '#5a5a72', unit: 'rgba(120,120,140,.2)' },
+  Platinum: { bg: 'rgba(80,100,140,.1)',  text: '#3a4f7a', unit: 'rgba(80,100,140,.2)'  },
 };
 
 export default function MetalRatesCard() {
@@ -51,31 +58,26 @@ export default function MetalRatesCard() {
     async function load() {
       setLoading(true);
       setError(null);
-
       const { data, error: err } = await db
         .from('daily_metal_rates')
         .select('rate_date, metal_key, rate_inr')
         .order('rate_date', { ascending: false })
-        .order('metal_key',  { ascending: true })
         .limit(50);
-
       if (err) {
         console.error('[MetalRatesCard] query error:', err);
         setError(`Could not load rates — ${err.message}`);
         setLoading(false);
         return;
       }
-
-      if (!data || data.length === 0) {
+      if (!data?.length) {
         console.warn('[MetalRatesCard] daily_metal_rates returned no rows');
         setLoading(false);
         return;
       }
-
       const latestDate = data[0].rate_date;
-      const latestRows = data.filter(r => r.rate_date === latestDate);
-      console.log('[MetalRatesCard] loaded', latestRows.length, 'rates for', latestDate);
-      setRates(latestRows);
+      const sorted = sortRates(data.filter(r => r.rate_date === latestDate));
+      console.log('[MetalRatesCard] loaded', sorted.length, 'rates for', latestDate);
+      setRates(sorted);
       setRateDate(latestDate);
       setLoading(false);
     }
@@ -86,12 +88,12 @@ export default function MetalRatesCard() {
     <div className={styles.card}>
       <div className={styles.header}>
         <div className={styles.titleRow}>
-          <TrendingUp size={15} color="#C9A84C" />
+          <TrendingUp size={14} color="#C9A84C" />
           <span className={styles.title}>Today's Metal Rates</span>
         </div>
         {rateDate && (
           <span className={styles.dateTag}>
-            <CalendarDays size={12} />
+            <CalendarDays size={11} />
             Updated on {fmtRateDate(rateDate)}
           </span>
         )}
@@ -105,28 +107,33 @@ export default function MetalRatesCard() {
         <div className={styles.stateRow} style={{ color: 'var(--err)' }}>{error}</div>
       ) : rates.length === 0 ? (
         <div className={styles.emptyState}>
-          No rates found in <code>daily_metal_rates</code> — check the table has rows and
-          that RLS allows authenticated reads.
+          No rates in <code>daily_metal_rates</code> — check the table has rows and RLS allows authenticated reads.
         </div>
       ) : (
         <div className={styles.strip}>
           {rates.map((r, i) => {
             const type  = metalType(r.metal_key);
-            const rpg   = ratePerGram(r.metal_key, r.rate_inr);
             const color = TYPE_COLOR[type] || TYPE_COLOR.Gold;
+            const unit  = unitLabel(r.metal_key);
             return (
-              <div key={r.metal_key} className={styles.chip} style={i < rates.length - 1 ? { borderRight: '1px solid var(--border)' } : {}}>
-                <span className={styles.chipType} style={{ background: color.bg, color: color.text }}>
-                  {type}
-                </span>
+              <div
+                key={r.metal_key}
+                className={styles.chip}
+                style={i < rates.length - 1 ? { borderRight: '1px solid var(--border)' } : {}}
+              >
                 <span className={styles.chipPurity}>{purityLabel(r.metal_key)}</span>
                 <div className={styles.chipRate}>
                   <span className={styles.chipSym}>₹</span>
                   <span className={styles.chipNum}>
-                    {Math.round(rpg).toLocaleString('en-IN')}
+                    {Math.round(r.rate_inr).toLocaleString('en-IN')}
                   </span>
                 </div>
-                <span className={styles.chipUnit}>1 Gram</span>
+                <span
+                  className={styles.chipUnit}
+                  style={{ background: color.unit, color: color.text }}
+                >
+                  {unit}
+                </span>
               </div>
             );
           })}
