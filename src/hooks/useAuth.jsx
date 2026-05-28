@@ -68,7 +68,12 @@ export function AuthProvider({ children }) {
     loadedUidRef.current = u.id;
     setUser(u);
     resetInactivity();
-    await loadStore(u);
+    try {
+      await loadStore(u);
+    } catch(e) {
+      loadedUidRef.current = null;
+      setAuthStatus('login');
+    }
   }, [loadStore, resetInactivity]);
 
   useEffect(() => {
@@ -100,6 +105,7 @@ export function AuthProvider({ children }) {
       subscription.unsubscribe();
       events.forEach(e => document.removeEventListener(e, resetInactivity));
       clearTimeout(inactivityRef.current);
+      loadedUidRef.current = null;
     };
   }, [handleUser, resetInactivity]);
 
