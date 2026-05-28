@@ -54,7 +54,7 @@ export function AuthProvider({ children }) {
     try { await db.auth.signOut(); } catch(e) {}
     const keys = Object.keys(localStorage);
     keys.forEach(k => {
-      if (k.startsWith('sb-') || k.includes('supabase') || k === 'karat_cached_store') {
+      if (k.startsWith('sb-') || k.includes('supabase') || k.startsWith('karat_cached_')) {
         localStorage.removeItem(k);
       }
     });
