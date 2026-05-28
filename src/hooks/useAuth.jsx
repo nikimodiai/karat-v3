@@ -69,7 +69,10 @@ export function AuthProvider({ children }) {
     setUser(u);
     resetInactivity();
     try {
-      await loadStore(u);
+      const timeout = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('timeout')), 10000)
+      );
+      await Promise.race([loadStore(u), timeout]);
     } catch(e) {
       loadedUidRef.current = null;
       setAuthStatus('login');
@@ -77,25 +80,25 @@ export function AuthProvider({ children }) {
   }, [loadStore, resetInactivity]);
 
   useEffect(() => {
-    // Check session on mount
-    db.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        handleUser(session.user);
-      } else {
-        setAuthStatus('login');
-      }
-    }).catch(() => setAuthStatus('login'));
-
-    // Listen for auth changes
+    // Supabase v2 fires INITIAL_SESSION synchronously when the listener is
+    // registered — this is the reliable initial-load path and avoids waiting
+    // on getSession() which may hang if the access token needs a network refresh.
     const { data: { subscription } } = db.auth.onAuthStateChange(async (event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
+      if (session?.user) {
         await handleUser(session.user);
-      } else if (event === 'SIGNED_OUT') {
+      } else if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
         setUser(null); setStore(null);
         loadedUidRef.current = null;
         setAuthStatus('login');
       }
     });
+
+    // Belt-and-suspenders: getSession() covers edge cases where INITIAL_SESSION
+    // doesn't resolve auth state (e.g. older Supabase clients / token race).
+    db.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) handleUser(session.user);
+      else setAuthStatus(prev => prev === 'loading' ? 'login' : prev);
+    }).catch(() => setAuthStatus(prev => prev === 'loading' ? 'login' : prev));
 
     // Inactivity reset events
     const events = ['click','keydown','mousemove','touchstart','scroll'];
