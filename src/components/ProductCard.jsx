@@ -1,6 +1,35 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Pencil, Trash2, PackageCheck, PackageX, Image, Gem } from 'lucide-react';
+import { VARIANT_COLORS } from './VariantEditor';
 import styles from './ProductCard.module.css';
+
+function colorHex(colorName) {
+  const hit = VARIANT_COLORS.find(c => c.value === colorName);
+  return hit?.hex ?? null;
+}
+
+function ColorSwatches({ variants }) {
+  if (!variants?.length) return null;
+  // Deduplicate by color
+  const seen = new Set();
+  const unique = variants.filter(v => {
+    if (seen.has(v.color)) return false;
+    seen.add(v.color); return true;
+  });
+  return (
+    <div className={styles.swatchRow}>
+      {unique.slice(0, 6).map((v, i) => {
+        const hex = colorHex(v.color);
+        return hex
+          ? <span key={i} className={styles.swatchDot} style={{ background: hex }} title={v.color}/>
+          : <span key={i} className={styles.swatchDotTwoTone} title={v.color}/>;
+      })}
+      {variants.length > 1 && (
+        <span className={styles.variantCount}>{variants.length} variants</span>
+      )}
+    </div>
+  );
+}
 
 function Slideshow({ urls }) {
   const [idx, setIdx] = useState(0);
@@ -45,7 +74,7 @@ function Slideshow({ urls }) {
   );
 }
 
-export default function ProductCard({ product: p, viewMode, onEdit, onDelete, onToggleStock }) {
+export default function ProductCard({ product: p, variants = [], viewMode, onEdit, onDelete, onToggleStock }) {
   // DB uses in_stock (boolean); support both for safety
   const isIn = p.in_stock === true;
   const imgs = Array.isArray(p.images) ? p.images : [];
@@ -111,6 +140,7 @@ export default function ProductCard({ product: p, viewMode, onEdit, onDelete, on
             <Gem size={9}/>{p.gold_carat}
           </div>
         )}
+        <ColorSwatches variants={variants}/>
         {priceStr && (
           <div className={styles.price}>
             {priceStr}<span className={styles.gstTag}> +GST</span>

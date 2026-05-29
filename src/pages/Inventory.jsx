@@ -96,6 +96,8 @@ export default function Inventory() {
   const [editProduct, setEditProduct]   = useState(null);
   const [confirmOpen, setConfirmOpen]   = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  // variantMap: { [productId]: [{ color, carat }] } — for swatch display
+  const [variantMap, setVariantMap]     = useState({});
 
   // Limit-reached dialog state
   const [upgradeOpen, setUpgradeOpen]   = useState(null); // { feature, message } | null
@@ -106,6 +108,24 @@ export default function Inventory() {
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  // Load variant summaries for all products owned by this user
+  useEffect(() => {
+    if (!user?.id || !products.length) return;
+    db.from('product_variants')
+      .select('product_id, color, carat, is_in_stock')
+      .eq('owner_id', user.id)
+      .eq('is_active', true)
+      .then(({ data }) => {
+        if (!data?.length) return;
+        const map = {};
+        data.forEach(row => {
+          if (!map[row.product_id]) map[row.product_id] = [];
+          map[row.product_id].push({ color: row.color, carat: row.carat, is_in_stock: row.is_in_stock });
+        });
+        setVariantMap(map);
+      });
+  }, [user?.id, products.length]);
 
   // ── Limits ──────────────────────────────────────────────────────
   const prodLimit     = effectiveLimit(store, 'products');
@@ -130,7 +150,7 @@ export default function Inventory() {
   // Direct Supabase UPDATE on edit (one row per product — fixes
   // "multiple records per edit" bug). New products go through INSERT.
   // No n8n round-trip, no AI generation, no soft-insert duplicates.
-  const handleSave = useCallback(async ({ form, slotFiles, existingUrls, isEdit }) => {
+  const handleSave = useCallback(async ({ form, slotFiles, existingUrls, variants, isEdit }) => {
     // 1) Upload any new images to Cloudinary
     const imageUrls = [...existingUrls];
     for (let i = 0; i < 5; i++) {
@@ -183,6 +203,7 @@ export default function Inventory() {
       hallmark_charge:     Number(form.hallmark_charge)     ?? 45,
     };
 
+    let savedProductId;
     if (isEdit && editProduct) {
       // ── Direct UPDATE: 1 row per product ──────────────────────
       const { data, error } = await db
@@ -194,6 +215,7 @@ export default function Inventory() {
         .single();
       if (error) throw error;
       setProducts(prev => prev.map(p => p.id === data.id ? data : p));
+      savedProductId = data.id;
       showToast('Product updated!', '#166534');
     } else {
       // ── INSERT new product ────────────────────────────────────
@@ -204,7 +226,53 @@ export default function Inventory() {
         .single();
       if (error) throw error;
       setProducts(prev => [data, ...prev]);
+      savedProductId = data.id;
       showToast('Product added!', '#166534');
+    }
+
+    // 3) Persist variants ─────────────────────────────────────────
+    if (savedProductId && Array.isArray(variants)) {
+      // Soft-delete any saved variants no longer in the editor list
+      const keptIds = variants.filter(v => v.id).map(v => v.id);
+      if (isEdit) {
+        const { error: delErr } = await db
+          .from('product_variants')
+          .update({ is_active: false })
+          .eq('product_id', savedProductId)
+          .not('id', 'in', keptIds.length ? `(${keptIds.map(id => `'${id}'`).join(',')})` : "('00000000-0000-0000-0000-000000000000')");
+        if (delErr) console.error('[variants] soft-delete error', delErr);
+      }
+
+      for (const v of variants) {
+        const varPayload = {
+          product_id:          savedProductId,
+          owner_id:            user.id,
+          carat:               v.carat || '',
+          color:               v.color === '__custom__' ? (v.customColor || 'Custom') : (v.color || 'Yellow Gold'),
+          gross_weight:        Number(v.gross_weight)        || null,
+          gold_purity:         v.gold_purity        || null,
+          gold_weight_grams:   Number(v.gold_weight_grams)   || null,
+          silver_purity:       v.silver_purity      || null,
+          silver_weight_grams: Number(v.silver_weight_grams) || null,
+          wastage_percent:     Number(v.wastage_percent)      || 0,
+          making_charge_type:  v.making_charge_type  || 'per_gram',
+          making_charge_value: Number(v.making_charge_value) || 0,
+          hallmark_charge:     Number(v.hallmark_charge)      || 45,
+          stone_value_inr:     Number(v.stone_value_inr)      || 0,
+          dynamic_price:       v.dynamic_price ?? false,
+          price:               Number(v.price)       || null,
+          fixed_price:         Number(v.fixed_price) || null,
+          is_in_stock:         v.is_in_stock ?? true,
+          sort_order:          v.sort_order  || 0,
+          is_active:           true,
+        };
+
+        if (v.id) {
+          await db.from('product_variants').update(varPayload).eq('id', v.id);
+        } else {
+          await db.from('product_variants').insert(varPayload);
+        }
+      }
     }
 
     setModalOpen(false);
@@ -491,6 +559,7 @@ export default function Inventory() {
               <ProductCard
                 key={p.id}
                 product={p}
+                variants={variantMap[p.id] || []}
                 viewMode={viewMode}
                 onEdit={() => openEdit(p)}
                 onDelete={() => openDelete(p.id)}

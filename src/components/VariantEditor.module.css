@@ -1,0 +1,259 @@
+.editor {
+  margin-top: 8px;
+}
+
+.empty {
+  font-size: 12px;
+  color: var(--ink-soft);
+  padding: 10px 12px;
+  background: rgba(11,24,41,.03);
+  border-radius: 8px;
+  margin-bottom: 10px;
+  line-height: 1.6;
+}
+
+/* ── Variant row ──────────────────────────────────────────────────── */
+.row {
+  border: 1.5px solid rgba(201,168,76,.22);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  overflow: hidden;
+  transition: border-color .15s;
+}
+.rowExpanded {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201,168,76,.10);
+}
+
+/* ── Summary bar ────────────────────────────────────────────────── */
+.summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  cursor: pointer;
+  background: #fdfcf8;
+  user-select: none;
+}
+.summary:hover { background: rgba(201,168,76,.05); }
+
+.varIdx {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  min-width: 18px;
+}
+
+.swatch {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0,0,0,.12);
+  flex-shrink: 0;
+}
+.swatchTwoTone {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #C9A84C 50%, #D0D0D0 50%);
+  border: 1.5px solid rgba(0,0,0,.12);
+  flex-shrink: 0;
+}
+
+.varName {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--navy);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.colorLabel {
+  color: var(--ink-mid);
+  font-weight: 500;
+}
+
+.varMeta {
+  font-size: 11px;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.varPrice {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--navy);
+  white-space: nowrap;
+}
+
+.stockDot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.stockIn  { background: #16a34a; }
+.stockOut { background: #dc2626; }
+
+.removeBtn {
+  background: none; border: none; cursor: pointer;
+  color: var(--ink-soft); padding: 3px;
+  border-radius: 4px; display: flex;
+  transition: color .15s;
+}
+.removeBtn:hover { color: #dc2626; }
+
+.chevron {
+  color: var(--ink-soft);
+  display: flex;
+  flex-shrink: 0;
+}
+
+/* ── Detail panel ───────────────────────────────────────────────── */
+.detail {
+  padding: 12px 14px 14px;
+  border-top: 1px solid rgba(201,168,76,.18);
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dRow  { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.dRow3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+@media (max-width: 600px) {
+  .dRow, .dRow3 { grid-template-columns: 1fr; }
+}
+
+.dField { display: flex; flex-direction: column; gap: 4px; }
+.dField label {
+  font-size: 10px; font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--navy);
+}
+.dField input, .dField select {
+  border: 1.5px solid rgba(201,168,76,.22);
+  border-radius: 6px; padding: 7px 10px;
+  font-size: 13px; font-family: var(--font-body);
+  background: #fff; outline: none;
+  transition: border-color .15s;
+}
+.dField input:focus, .dField select:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px rgba(201,168,76,.12);
+}
+
+/* ── Color picker ───────────────────────────────────────────────── */
+.colorRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+.colorBtn {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 3px;
+  background: none; border: 1.5px solid rgba(201,168,76,.2);
+  border-radius: 7px; padding: 5px 8px;
+  cursor: pointer; font-size: 10px; font-weight: 600;
+  color: var(--ink-mid); font-family: var(--font-body);
+  transition: all .14s;
+}
+.colorBtn:hover { border-color: var(--gold); background: rgba(201,168,76,.06); }
+.colorBtnActive {
+  border-color: var(--navy);
+  background: rgba(11,24,41,.05);
+  color: var(--navy);
+}
+
+.colorCircle {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0,0,0,.15);
+  display: block;
+}
+.twoToneCircle {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  display: block;
+  border: 1.5px solid rgba(0,0,0,.15);
+}
+.colorCircleCustom {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--ink-soft);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; color: var(--ink-soft); font-weight: 400;
+}
+.customColorInput {
+  margin-top: 6px;
+  width: 100%;
+  border: 1.5px solid rgba(201,168,76,.35);
+  border-radius: 6px; padding: 7px 10px;
+  font-size: 13px; font-family: var(--font-body);
+  background: #fff; outline: none;
+}
+.customColorInput:focus { border-color: var(--gold); }
+
+/* ── Pricing mode toggle ────────────────────────────────────────── */
+.pricingModeRow {
+  display: flex; gap: 8px;
+}
+.modeBtn {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 7px 12px; border-radius: 7px;
+  border: 1.5px solid rgba(201,168,76,.25);
+  background: #fff; cursor: pointer;
+  font-size: 12px; font-weight: 600;
+  font-family: var(--font-body); color: var(--ink-mid);
+  transition: all .15s;
+}
+.modeBtn:hover { border-color: rgba(201,168,76,.55); }
+.modeBtnActive {
+  border-color: var(--gold);
+  background: rgba(201,168,76,.08);
+  color: var(--navy);
+}
+
+/* ── Dynamic pricing preview ────────────────────────────────────── */
+.dynPreview {
+  background: rgba(201,168,76,.05);
+  border: 1px solid rgba(201,168,76,.2);
+  border-radius: 8px;
+  padding: 10px 12px;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.dynRow {
+  display: flex; justify-content: space-between;
+  font-size: 12px; color: var(--ink-mid); padding: 3px 0;
+}
+.dynTotal {
+  font-weight: 700; color: var(--navy);
+  padding-top: 6px; margin-top: 2px;
+  border-top: 1px solid rgba(201,168,76,.2);
+  font-size: 14px;
+}
+.dynTotal strong { font-size: 16px; }
+
+/* ── Stock toggle ───────────────────────────────────────────────── */
+.stockToggle {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12.5px; color: var(--ink-mid); cursor: pointer;
+  margin-top: 4px;
+}
+
+/* ── Add button ─────────────────────────────────────────────────── */
+.addBtn {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 9px;
+  border: 1.5px dashed rgba(201,168,76,.4);
+  border-radius: 9px;
+  background: rgba(201,168,76,.04);
+  color: var(--navy); font-size: 12.5px; font-weight: 600;
+  font-family: var(--font-body); cursor: pointer;
+  transition: all .15s;
+}
+.addBtn:hover {
+  background: rgba(201,168,76,.10);
+  border-color: var(--gold);
+}

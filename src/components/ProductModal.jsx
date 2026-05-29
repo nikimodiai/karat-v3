@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { X, Upload, Trash2, Tag, Zap, Image as ImageIcon } from 'lucide-react';
+import { X, Upload, Trash2, Tag, Zap, Image as ImageIcon, Layers } from 'lucide-react';
 import {
   CATEGORIES, SUBCATEGORY_MAP, METAL_PURITY_GROUPS, DIAMOND_PURITIES,
-  SILVER_CATEGORIES, MAX_IMAGE_BYTES,
+  SILVER_CATEGORIES, MAX_IMAGE_BYTES, db,
 } from '../lib/config';
 
 const ALL_METAL_OPTIONS = METAL_PURITY_GROUPS.flatMap(g => g.options);
 import DynamicPricingPanel from './DynamicPricingPanel';
+import VariantEditor from './VariantEditor';
 import styles from './ProductModal.module.css';
 
 // DB column names (Supabase schema):
@@ -60,6 +61,7 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
   const [skuError, setSkuError]     = useState('');
   const [saving, setSaving]         = useState(false);
   const [subcats, setSubcats]       = useState([]);
+  const [variants, setVariants]     = useState([]);
   const fileRefs = useRef([null,null,null,null,null]);
   const isEdit   = !!product;
 
@@ -118,11 +120,35 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
       setCustomSubcatMode(!!product.sub_category && knownSubs.length > 0 && !knownSubs.includes(product.sub_category));
       setCustomMetalMode(!!product.gold_carat && !ALL_METAL_OPTIONS.includes(product.gold_carat));
       setCustomDiamondMode(!!product.diamond_purity && !DIAMOND_PURITIES.includes(product.diamond_purity));
+      // Load existing variants from DB
+      db.from('product_variants')
+        .select('*')
+        .eq('product_id', product.id)
+        .eq('is_active', true)
+        .order('sort_order')
+        .then(({ data }) => {
+          setVariants(
+            (data || []).map(row => ({
+              ...row,
+              _key:        row.id,
+              customColor: '',
+              fixed_price: row.fixed_price ?? row.price ?? '',
+              gross_weight:        row.gross_weight        ?? '',
+              gold_weight_grams:   row.gold_weight_grams   ?? '',
+              silver_weight_grams: row.silver_weight_grams ?? '',
+              wastage_percent:     row.wastage_percent      ?? 0,
+              making_charge_value: row.making_charge_value ?? 0,
+              hallmark_charge:     row.hallmark_charge      ?? 45,
+              stone_value_inr:     row.stone_value_inr      ?? 0,
+            }))
+          );
+        });
     } else {
       setForm(EMPTY_FORM);
       setSlotFiles([null,null,null,null,null]);
       setExisting([null,null,null,null,null]);
       setSubcats([]);
+      setVariants([]);
       setCustomCatMode(false); setCustomSubcatMode(false);
       setCustomMetalMode(false); setCustomDiamondMode(false);
     }
@@ -212,6 +238,7 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
         },
         slotFiles,
         existingUrls,
+        variants,
         isEdit,
       });
     } catch(err) {
@@ -523,6 +550,20 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
             />
             Mark as currently in stock
           </label>
+
+          {/* ⑤ Variants */}
+          <div className="sec-label" style={{ marginTop: 20 }}>
+            <Layers size={11} style={{ verticalAlign: 'middle', marginRight: 4 }}/>
+            ⑤ Variants
+            <span style={{ fontWeight: 400, textTransform: 'none', fontSize: 11, marginLeft: 8, color: 'var(--ink-soft)' }}>
+              — offer this design in multiple carats or colors
+            </span>
+          </div>
+          <VariantEditor
+            variants={variants}
+            onVariantsChange={setVariants}
+            productId={product?.id}
+          />
         </div>
 
         <div className={styles.footer}>
