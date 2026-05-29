@@ -256,6 +256,65 @@
   .priceModeRow { grid-template-columns: 1fr; }
 }
 
+/* ── Color picker (main product form) ─────────────────────────── */
+.colorRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+.colorChip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 5px 10px;
+  border: 1.5px solid rgba(201,168,76,.25);
+  border-radius: 99px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 12px; font-weight: 500;
+  font-family: var(--font-body);
+  color: var(--ink-mid);
+  transition: all .14s;
+  white-space: nowrap;
+}
+.colorChip:hover {
+  border-color: rgba(201,168,76,.55);
+  background: rgba(201,168,76,.06);
+}
+.colorChipActive {
+  border-color: var(--navy);
+  background: rgba(11,24,41,.06);
+  color: var(--navy);
+  font-weight: 600;
+}
+.colorChipCustom {
+  display: inline-flex; align-items: center;
+  padding: 5px 10px;
+  border: 1.5px dashed rgba(201,168,76,.35);
+  border-radius: 99px;
+  background: none;
+  cursor: pointer;
+  font-size: 12px; font-weight: 500;
+  font-family: var(--font-body);
+  color: var(--ink-soft);
+  transition: all .14s;
+}
+.colorChipCustom:hover { color: var(--navy); border-color: var(--gold); }
+.colorCircle {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(0,0,0,.12);
+  display: inline-block;
+  flex-shrink: 0;
+}
+.colorCircleTwoTone {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #C9A84C 50%, #D0D0D0 50%);
+  border: 1.5px solid rgba(0,0,0,.12);
+  display: inline-block;
+  flex-shrink: 0;
+}
+
 .proBadge {
   display: inline-block;
   margin-left: 8px;

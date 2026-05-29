@@ -172,6 +172,7 @@ export default function Inventory() {
       category:       form.category,
       sub_category:   form.sub_category || null,
       gold_carat:     form.gold_carat,
+      color:          form.color || null,
       diamond_purity: form.diamond_purity || null,
       material:       form.material || null,
       occasion:       form.occasion || null,

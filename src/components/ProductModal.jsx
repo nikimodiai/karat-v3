@@ -7,7 +7,7 @@ import {
 
 const ALL_METAL_OPTIONS = METAL_PURITY_GROUPS.flatMap(g => g.options);
 import DynamicPricingPanel from './DynamicPricingPanel';
-import VariantEditor from './VariantEditor';
+import VariantEditor, { VARIANT_COLORS } from './VariantEditor';
 import styles from './ProductModal.module.css';
 
 // DB column names (Supabase schema):
@@ -21,6 +21,7 @@ import styles from './ProductModal.module.css';
 const EMPTY_FORM = {
   sku: '', name: '', category: '', sub_category: '',
   gold_carat: '', diamond_purity: '', material: '', occasion: '',
+  color: '',
   weight: '',
   // Two parallel price slots. `fixed_price` is what the owner types in
   // Fixed mode; `price` is what gets persisted to products.price and is
@@ -81,6 +82,7 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
         diamond_purity: product.diamond_purity || '',
         material:       product.material       || '',
         occasion:       product.occasion       || '',
+        color:          product.color          || '',
         weight:         product.weight         || '',
         // For a saved fixed-price product, seed both slots with the stored value
         // so toggling modes doesn't lose data. Dynamic-priced rows still keep it
@@ -358,6 +360,46 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
                   <option value="__custom__">➕ Other / type your own…</option>
                 </select>
               )}
+            </div>
+          </div>
+
+          {/* Color — same swatch picker used in Variants */}
+          <div className="fld" style={{ marginTop: 14 }}>
+            <label className="lbl">Color</label>
+            <div className={styles.colorRow}>
+              {VARIANT_COLORS.map(c => {
+                const isActive = form.color === c.value;
+                return (
+                  <button
+                    key={c.value}
+                    type="button"
+                    title={c.label}
+                    className={`${styles.colorChip} ${isActive ? styles.colorChipActive : ''}`}
+                    onClick={() => set('color', isActive ? '' : c.value)}
+                  >
+                    {c.hex
+                      ? <span className={styles.colorCircle} style={{ background: c.hex }}/>
+                      : <span className={styles.colorCircleTwoTone}/>
+                    }
+                    {c.label}
+                  </button>
+                );
+              })}
+              {/* Custom color — shown only when color is typed outside the 5 presets */}
+              {form.color && !VARIANT_COLORS.find(c => c.value === form.color) && (
+                <span className={`${styles.colorChip} ${styles.colorChipActive}`}>
+                  {form.color} <button type="button" style={{ background:'none',border:'none',cursor:'pointer',fontSize:11,color:'var(--navy)',marginLeft:2 }} onClick={() => set('color','')}>×</button>
+                </span>
+              )}
+              <button
+                type="button"
+                className={styles.colorChipCustom}
+                onClick={() => {
+                  const c = window.prompt('Enter custom color name (e.g. Green Gold):');
+                  if (c?.trim()) set('color', c.trim());
+                }}
+                title="Custom color"
+              >+ Custom</button>
             </div>
           </div>
 
