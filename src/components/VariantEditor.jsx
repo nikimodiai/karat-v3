@@ -20,26 +20,26 @@ const ALL_PURITY_OPTIONS = METAL_PURITY_GROUPS.flatMap(g =>
   g.options.map(o => ({ group: g.label, value: o }))
 );
 
-function newVariant() {
+function newVariant(prefill = {}) {
   return {
     _key:               Math.random().toString(36).slice(2),
-    id:                 null,           // null = not yet saved to DB
-    carat:              '',
-    color:              'Yellow Gold',
+    id:                 null,
+    carat:              prefill.carat              ?? '',
+    color:              prefill.color              ?? 'Yellow Gold',
     customColor:        '',
-    gross_weight:       '',
-    gold_purity:        '',
-    gold_weight_grams:  '',
-    silver_purity:      '',
-    silver_weight_grams:'',
-    wastage_percent:    0,
-    making_charge_type: 'per_gram',
-    making_charge_value:0,
-    hallmark_charge:    DEFAULT_HALLMARK_FEE,
-    stone_value_inr:    0,
-    dynamic_price:      false,
-    fixed_price:        '',
-    price:              '',
+    gross_weight:       prefill.gross_weight       ?? '',
+    gold_purity:        prefill.gold_purity        ?? '',
+    gold_weight_grams:  prefill.gold_weight_grams  ?? '',
+    silver_purity:      prefill.silver_purity      ?? '',
+    silver_weight_grams:prefill.silver_weight_grams?? '',
+    wastage_percent:    prefill.wastage_percent     ?? 0,
+    making_charge_type: prefill.making_charge_type ?? 'per_gram',
+    making_charge_value:prefill.making_charge_value?? 0,
+    hallmark_charge:    prefill.hallmark_charge     ?? DEFAULT_HALLMARK_FEE,
+    stone_value_inr:    prefill.stone_value_inr     ?? 0,
+    dynamic_price:      prefill.dynamic_price       ?? false,
+    fixed_price:        prefill.fixed_price         ?? '',
+    price:              prefill.price               ?? '',
     is_in_stock:        true,
     sort_order:         0,
   };
@@ -49,7 +49,7 @@ function newVariant() {
 // Managed outside ProductModal state — parent calls onVariantsChange on
 // every edit. Accepts variants[] (including existing saved rows) and fires
 // onVariantsChange(newArray) on every mutation.
-export default function VariantEditor({ variants, onVariantsChange, productId }) {
+export default function VariantEditor({ variants, onVariantsChange, productId, productForm }) {
   const [expanded, setExpanded] = useState(null); // _key of expanded row
 
   // Fetch live rates once for per-variant dynamic pricing
@@ -76,7 +76,24 @@ export default function VariantEditor({ variants, onVariantsChange, productId })
   }, [variants, onVariantsChange]);
 
   const addRow = () => {
-    const v = newVariant();
+    // Pre-fill from parent product so owner only changes the differentiator
+    const prefill = productForm ? {
+      carat:               productForm.gold_carat        || productForm.gold_purity || '',
+      gold_purity:         productForm.gold_purity        || '',
+      gold_weight_grams:   productForm.gold_weight_grams  || '',
+      silver_purity:       productForm.silver_purity      || '',
+      silver_weight_grams: productForm.silver_weight_grams|| '',
+      gross_weight:        productForm.weight              || '',
+      wastage_percent:     productForm.wastage_percent     ?? 0,
+      making_charge_type:  productForm.making_charge_type  || 'per_gram',
+      making_charge_value: productForm.making_charge_value ?? 0,
+      hallmark_charge:     productForm.hallmark_charge     ?? DEFAULT_HALLMARK_FEE,
+      stone_value_inr:     productForm.stone_value_inr     ?? 0,
+      dynamic_price:       productForm.dynamic_price       ?? false,
+      fixed_price:         productForm.fixed_price         || '',
+      price:               productForm.price               || '',
+    } : {};
+    const v = newVariant(prefill);
     v.sort_order = variants.length;
     onVariantsChange([...variants, v]);
     setExpanded(v._key);

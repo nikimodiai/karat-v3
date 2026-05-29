@@ -563,6 +563,7 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
             variants={variants}
             onVariantsChange={setVariants}
             productId={product?.id}
+            productForm={form}
           />
         </div>
 

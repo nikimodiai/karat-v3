@@ -232,38 +232,48 @@ export default function Inventory() {
 
     // 3) Persist variants ─────────────────────────────────────────
     if (savedProductId && Array.isArray(variants)) {
-      // Soft-delete any saved variants no longer in the editor list
       const keptIds = variants.filter(v => v.id).map(v => v.id);
-      if (isEdit) {
+
+      // Soft-delete removed variants. When nothing is kept we delete all
+      // (can't use .not with an empty list).
+      if (keptIds.length > 0) {
         const { error: delErr } = await db
           .from('product_variants')
           .update({ is_active: false })
           .eq('product_id', savedProductId)
-          .not('id', 'in', keptIds.length ? `(${keptIds.map(id => `'${id}'`).join(',')})` : "('00000000-0000-0000-0000-000000000000')");
+          .not('id', 'in', `(${keptIds.join(',')})` );
         if (delErr) console.error('[variants] soft-delete error', delErr);
+      } else if (isEdit) {
+        // All variants removed — soft-delete every row for this product
+        const { error: delErr } = await db
+          .from('product_variants')
+          .update({ is_active: false })
+          .eq('product_id', savedProductId);
+        if (delErr) console.error('[variants] delete-all error', delErr);
       }
 
-      for (const v of variants) {
+      for (let i = 0; i < variants.length; i++) {
+        const v = variants[i];
         const varPayload = {
           product_id:          savedProductId,
           owner_id:            user.id,
           carat:               v.carat || '',
           color:               v.color === '__custom__' ? (v.customColor || 'Custom') : (v.color || 'Yellow Gold'),
-          gross_weight:        Number(v.gross_weight)        || null,
-          gold_purity:         v.gold_purity        || null,
-          gold_weight_grams:   Number(v.gold_weight_grams)   || null,
-          silver_purity:       v.silver_purity      || null,
-          silver_weight_grams: Number(v.silver_weight_grams) || null,
+          gross_weight:        v.gross_weight        ? Number(v.gross_weight)        : null,
+          gold_purity:         v.gold_purity         || null,
+          gold_weight_grams:   v.gold_weight_grams   ? Number(v.gold_weight_grams)   : null,
+          silver_purity:       v.silver_purity       || null,
+          silver_weight_grams: v.silver_weight_grams ? Number(v.silver_weight_grams) : null,
           wastage_percent:     Number(v.wastage_percent)      || 0,
           making_charge_type:  v.making_charge_type  || 'per_gram',
           making_charge_value: Number(v.making_charge_value) || 0,
           hallmark_charge:     Number(v.hallmark_charge)      || 45,
           stone_value_inr:     Number(v.stone_value_inr)      || 0,
           dynamic_price:       v.dynamic_price ?? false,
-          price:               Number(v.price)       || null,
-          fixed_price:         Number(v.fixed_price) || null,
+          price:               v.price       ? Number(v.price)       : null,
+          fixed_price:         v.fixed_price ? Number(v.fixed_price) : null,
           is_in_stock:         v.is_in_stock ?? true,
-          sort_order:          v.sort_order  || 0,
+          sort_order:          i,
           is_active:           true,
         };
 
@@ -273,11 +283,26 @@ export default function Inventory() {
           await db.from('product_variants').insert(varPayload);
         }
       }
+
+      // Refresh variant map so cards update immediately without a full reload
+      const { data: freshVars } = await db
+        .from('product_variants')
+        .select('product_id, color, carat, is_in_stock')
+        .eq('owner_id', user.id)
+        .eq('is_active', true);
+      if (freshVars) {
+        const map = {};
+        freshVars.forEach(row => {
+          if (!map[row.product_id]) map[row.product_id] = [];
+          map[row.product_id].push({ color: row.color, carat: row.carat, is_in_stock: row.is_in_stock });
+        });
+        setVariantMap(map);
+      }
     }
 
     setModalOpen(false);
     setEditProduct(null);
-  }, [user, store, editProduct, setProducts, showToast]);
+  }, [user, store, editProduct, setProducts, showToast, setVariantMap]);
 
   // ── Delete (soft) ───────────────────────────────────────────────
   // Pure client-side soft delete. Avoids the legacy n8n delete webhook.
