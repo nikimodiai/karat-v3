@@ -198,7 +198,7 @@ function VariantRow({ variant: v, index, expanded, onToggle, onChange, onRemove 
             )}
           </div>
 
-          {/* Carat / Purity */}
+          {/* Carat — always visible (shown in summary bar) */}
           <div className="fld" style={{ marginTop: 12 }}>
             <label className="lbl">Metal Purity / Carat</label>
             <select className="inp" value={v.carat} onChange={e => onChange({ carat: e.target.value })}>
@@ -211,53 +211,7 @@ function VariantRow({ variant: v, index, expanded, onToggle, onChange, onRemove 
             </select>
           </div>
 
-          {/* Weight row */}
-          <div className="fg fg3" style={{ marginTop: 12 }}>
-            <div className="fld">
-              <label className="lbl">Total Weight (g)</label>
-              <input className="inp" type="number" min="0" step="0.001"
-                value={v.gross_weight}
-                onChange={e => onChange({ gross_weight: e.target.value })} placeholder="e.g. 4.20"/>
-            </div>
-            <div className="fld">
-              <label className="lbl">Gold Weight (g)</label>
-              <input className="inp" type="number" min="0" step="0.001"
-                value={v.gold_weight_grams}
-                onChange={e => onChange({ gold_weight_grams: e.target.value })} placeholder="e.g. 3.80"/>
-            </div>
-            <div className="fld">
-              <label className="lbl">Silver Weight (g)</label>
-              <input className="inp" type="number" min="0" step="0.001"
-                value={v.silver_weight_grams}
-                onChange={e => onChange({ silver_weight_grams: e.target.value })} placeholder="optional"/>
-            </div>
-          </div>
-
-          {/* Purity row */}
-          <div className="fg fg2" style={{ marginTop: 12 }}>
-            <div className="fld">
-              <label className="lbl">Gold Purity</label>
-              <select className="inp" value={v.gold_purity}
-                onChange={e => onChange({ gold_purity: e.target.value })}>
-                <option value="">— none —</option>
-                {METAL_PURITY_GROUPS.find(g => g.label === 'Gold Purity')?.options.map(o =>
-                  <option key={o} value={o}>{o}</option>
-                )}
-              </select>
-            </div>
-            <div className="fld">
-              <label className="lbl">Silver Purity</label>
-              <select className="inp" value={v.silver_purity}
-                onChange={e => onChange({ silver_purity: e.target.value })}>
-                <option value="">— none —</option>
-                {METAL_PURITY_GROUPS.find(g => g.label === 'Silver Purity')?.options.map(o =>
-                  <option key={o} value={o}>{o}</option>
-                )}
-              </select>
-            </div>
-          </div>
-
-          {/* Pricing — same mode buttons + same DynamicPricingPanel */}
+          {/* Pricing mode toggle */}
           <div className="sec-label" style={{ marginTop: 16 }}>Pricing</div>
 
           <div className={modalStyles.priceModeRow}>
@@ -276,6 +230,7 @@ function VariantRow({ variant: v, index, expanded, onToggle, onChange, onRemove 
           </div>
 
           {!v.dynamic_price ? (
+            /* Fixed mode — just a price input, same as main product */
             <div style={{ marginTop: 12 }}>
               <div className="fld">
                 <label className="lbl">Price (₹ ex-GST)</label>
@@ -286,6 +241,8 @@ function VariantRow({ variant: v, index, expanded, onToggle, onChange, onRemove 
               </div>
             </div>
           ) : (
+            /* Dynamic mode — weight/purity inputs live inside DynamicPricingPanel,
+               exactly like the main product form */
             <>
               <DynamicPricingPanel
                 value={v}
