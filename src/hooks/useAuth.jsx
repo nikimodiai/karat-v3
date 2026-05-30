@@ -1,15 +1,35 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { db, N8N_SIGNUP_URL, INACTIVITY_MS } from '../lib/config';
 
-const AuthContext = createContext(null);
+// ── Session types ─────────────────────────────────────────────────────────────
+// 'owner'      – Google OAuth (Supabase Auth), full access
+// 'store_user' – username + password (store_users table RPC), role-limited
 
-// Helper to get initial auth state from localStorage to avoid flashing loading screen on refresh
+const AuthContext = createContext(null);
+const STORE_USER_KEY = 'karat_store_user_session';
+
 const getInitialAuthState = () => {
   let initialUser = null;
   let initialStore = null;
+  let initialStoreUser = null;
   let initialStatus = 'loading';
 
   try {
+    // Check store_user (staff) session first
+    const suStr = localStorage.getItem(STORE_USER_KEY);
+    if (suStr) {
+      const su = JSON.parse(suStr);
+      if (su?.id && su?.owner_id) {
+        const cachedStoreStr = localStorage.getItem('karat_cached_store');
+        if (cachedStoreStr) {
+          initialStore = JSON.parse(cachedStoreStr);
+          initialStoreUser = su;
+          initialStatus = 'app';
+          return { initialUser: null, initialStore, initialStoreUser, initialStatus };
+        }
+      }
+    }
+
     const storedStr = localStorage.getItem('karat-auth-v3');
     if (storedStr) {
       const parsed = JSON.parse(storedStr);
@@ -31,17 +51,18 @@ const getInitialAuthState = () => {
     // Fallback to loading
   }
 
-  return { initialUser, initialStore, initialStatus };
+  return { initialUser, initialStore, initialStoreUser: null, initialStatus };
 };
 
 export function AuthProvider({ children }) {
-  const { initialUser, initialStore, initialStatus } = getInitialAuthState();
-  const [user, setUser] = useState(initialUser);
-  const [store, setStore] = useState(initialStore);
+  const { initialUser, initialStore, initialStoreUser, initialStatus } = getInitialAuthState();
+  const [user, setUser]           = useState(initialUser);
+  const [store, setStore]         = useState(initialStore);
+  const [storeUser, setStoreUser] = useState(initialStoreUser); // staff member session
   const [authStatus, setAuthStatus] = useState(initialStatus); // loading | login | pending | app
   const [isAuthReady, setIsAuthReady] = useState(false);
   const inactivityRef = useRef(null);
-  const loadedUidRef = useRef(null);
+  const loadedUidRef  = useRef(null);
 
   const resetInactivity = useCallback(() => {
     clearTimeout(inactivityRef.current);
@@ -54,20 +75,27 @@ export function AuthProvider({ children }) {
     try { await db.auth.signOut(); } catch(e) {}
     const keys = Object.keys(localStorage);
     keys.forEach(k => {
-      if (k.startsWith('sb-') || k.includes('supabase') || k.startsWith('karat_cached_')) {
+      if (k.startsWith('sb-') || k.includes('supabase') || k.startsWith('karat_cached_') || k === STORE_USER_KEY) {
         localStorage.removeItem(k);
       }
     });
     try { sessionStorage.clear(); } catch(e) {}
-    setUser(null); setStore(null);
+    setUser(null); setStore(null); setStoreUser(null);
     loadedUidRef.current = null;
     setAuthStatus('login');
+  }, []);
+
+  const STORE_SELECT = 'id, owner_id, status, store_name, owner_name, customer_tiers, plan_name, subscription_status, plan_expires_at, phone, email, whatsapp_phone, owner_whatsapp, has_image_search, has_voice_search, ai_models, ai_models_limit, virtual_tryon, analytics, product_limit, image_storage_gb, conversation_limit, monthly_budget_inr, address, _conv_used, _ai_used, _vt_used, voice_profile, voice_profile_updated_at, voice_convo_count';
+
+  const loadStoreById = useCallback(async (storeId) => {
+    const { data } = await db.from('stores').select(STORE_SELECT).eq('id', storeId).single();
+    return data;
   }, []);
 
   const loadStore = useCallback(async (u) => {
     const { data: storeData } = await db
       .from('stores')
-      .select('id, status, store_name, owner_name, customer_tiers, plan_name, subscription_status, plan_expires_at, phone, email, whatsapp_phone, owner_whatsapp, has_image_search, has_voice_search, ai_models, ai_models_limit, virtual_tryon, analytics, product_limit, image_storage_gb, conversation_limit, monthly_budget_inr, address, _conv_used, _ai_used, _vt_used, voice_profile, voice_examples, voice_updated_at')
+      .select(STORE_SELECT)
       .eq('owner_id', u.id)
       .single();
 
@@ -123,6 +151,19 @@ export function AuthProvider({ children }) {
   }, [loadStore, resetInactivity]);
 
   useEffect(() => {
+    // If already in a staff session, skip Supabase OAuth listener
+    if (initialStoreUser) {
+      loadedUidRef.current = initialStoreUser.id;
+      setIsAuthReady(true);
+      const events = ['click','keydown','mousemove','touchstart','scroll'];
+      events.forEach(e => document.addEventListener(e, resetInactivity, { passive: true }));
+      resetInactivity();
+      return () => {
+        events.forEach(e => document.removeEventListener(e, resetInactivity));
+        clearTimeout(inactivityRef.current);
+      };
+    }
+
     // Supabase v2 fires INITIAL_SESSION synchronously when the listener is
     // registered — this is the reliable initial-load path and avoids waiting
     // on getSession() which may hang if the access token needs a network refresh.
@@ -130,10 +171,12 @@ export function AuthProvider({ children }) {
       if (session?.user) {
         await handleUser(session.user);
       } else if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
-        setUser(null); setStore(null);
-        loadedUidRef.current = null;
-        setAuthStatus('login');
-        setIsAuthReady(true);
+        if (!localStorage.getItem(STORE_USER_KEY)) {
+          setUser(null); setStore(null);
+          loadedUidRef.current = null;
+          setAuthStatus('login');
+          setIsAuthReady(true);
+        }
       }
     });
 
@@ -171,10 +214,47 @@ export function AuthProvider({ children }) {
     if (error) throw error;
   }, []);
 
+  // ── Username + password login (staff) ────────────────────────────────────
+
+  const loginWithCredentials = useCallback(async (username, password) => {
+    const { data, error } = await db.rpc('authenticate_store_user', {
+      p_username: username.trim(),
+      p_password: password,
+    });
+
+    if (error) throw new Error(error.message || 'Login failed');
+
+    const suRow = Array.isArray(data) ? data[0] : data;
+    if (!suRow || !suRow.id) throw new Error('Invalid username or password');
+
+    const storeData = await loadStoreById(suRow.store_id);
+    if (!storeData || storeData.status !== 'active') {
+      throw new Error('Store is not active. Contact the store owner.');
+    }
+
+    try {
+      localStorage.setItem(STORE_USER_KEY, JSON.stringify(suRow));
+      localStorage.setItem('karat_cached_store', JSON.stringify(storeData));
+    } catch(e) {}
+
+    setStoreUser(suRow);
+    setStore(storeData);
+    loadedUidRef.current = suRow.id;
+    resetInactivity();
+    setAuthStatus('app');
+  }, [loadStoreById, resetInactivity]);
+
   const refreshStore = useCallback(async () => {
-    if (!user) return;
-    await loadStore(user);
-  }, [user, loadStore]);
+    if (storeUser) {
+      const storeData = await loadStoreById(storeUser.store_id);
+      if (storeData) {
+        setStore(storeData);
+        try { localStorage.setItem('karat_cached_store', JSON.stringify(storeData)); } catch(e) {}
+      }
+      return;
+    }
+    if (user) await loadStore(user);
+  }, [user, storeUser, loadStore, loadStoreById]);
 
   const updateStore = useCallback((patch) => {
     setStore(prev => {
@@ -188,8 +268,20 @@ export function AuthProvider({ children }) {
     });
   }, []);
 
+  // ── Derived permission values ─────────────────────────────────────────────
+  // isOwner: Google OAuth session → full access, can manage users
+  // userRole: 'owner' | 'admin' | 'read_write' | 'read_only'
+  const isOwner  = !!user && !storeUser;
+  const userRole = isOwner ? 'owner' : (storeUser?.role || 'read_only');
+
   return (
-    <AuthContext.Provider value={{ user, store, authStatus, isAuthReady, loginWithGoogle, logout, refreshStore, updateStore }}>
+    <AuthContext.Provider value={{
+      user, store, storeUser,
+      authStatus, isAuthReady,
+      isOwner, userRole,
+      loginWithGoogle, loginWithCredentials,
+      logout, refreshStore, updateStore,
+    }}>
       {children}
     </AuthContext.Provider>
   );

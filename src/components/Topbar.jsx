@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LayoutGrid, Users, BarChart2, User, LogOut, ChevronDown, Gem, Menu, X, Home } from 'lucide-react';
+import { LayoutGrid, Users, BarChart2, User, LogOut, ChevronDown, Gem, Menu, X, Home, Shield } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import styles from './Topbar.module.css';
+
+const ROLE_LABELS = { owner: 'Owner', admin: 'Admin', read_write: 'Read & Write', read_only: 'Read Only' };
 
 const NAV_ITEMS = [
   { id: 'dashboard',  label: 'Dashboard',  icon: Home },
@@ -19,12 +21,16 @@ const PLAN_COLORS = {
 };
 
 export default function Topbar({ activeTab, onTabChange, productCount }) {
-  const { user, store, logout } = useAuth();
+  const { user, store, storeUser, logout, userRole } = useAuth();
   const [dropOpen, setDropOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const dropRef = useRef(null);
 
-  const name = store?.owner_name || user?.user_metadata?.full_name || user?.email || 'Owner';
+  // If logged in as staff, show their name; otherwise show owner name
+  const name = storeUser
+    ? storeUser.full_name
+    : (store?.owner_name || user?.user_metadata?.full_name || user?.email || 'Owner');
+  const displayEmail = storeUser ? `@${storeUser.username}` : (user?.email || '');
   const initial = name[0]?.toUpperCase() || '?';
   const planKey = (store?.plan_name || 'trial').toLowerCase();
   const planCfg = PLAN_COLORS[planKey] || PLAN_COLORS.trial;
@@ -85,8 +91,14 @@ export default function Topbar({ activeTab, onTabChange, productCount }) {
                   <div className={styles.ddAvatar}>{initial}</div>
                   <div>
                     <div className={styles.ddName}>{name}</div>
-                    <div className={styles.ddEmail}>{user?.email || ''}</div>
-                    <span className={styles.ddPlanBadge} style={{ background: planCfg.bg, color: planCfg.color }}>{planCfg.label} Plan</span>
+                    <div className={styles.ddEmail}>{displayEmail}</div>
+                    {storeUser ? (
+                      <span className={styles.ddPlanBadge} style={{ background: 'rgba(37,99,235,.1)', color: '#1d4ed8', display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                        <Shield size={9}/> {ROLE_LABELS[storeUser.role] || storeUser.role}
+                      </span>
+                    ) : (
+                      <span className={styles.ddPlanBadge} style={{ background: planCfg.bg, color: planCfg.color }}>{planCfg.label} Plan</span>
+                    )}
                   </div>
                 </div>
                 <div className={styles.ddDivider} />

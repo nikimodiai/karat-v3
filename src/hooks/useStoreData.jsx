@@ -42,7 +42,7 @@ const getCachedMonthlyUsage = () => {
 };
 
 export function StoreDataProvider({ children }) {
-  const { user, store, authStatus, isAuthReady } = useAuth();
+  const { user, store, storeUser, authStatus, isAuthReady } = useAuth();
 
   const [products,  setProducts]  = useState(getCachedProducts);
   const [customers, setCustomers] = useState(getCachedCustomers);
@@ -58,36 +58,35 @@ export function StoreDataProvider({ children }) {
   const loadedForUid = useRef(null);
 
   const loadAll = useCallback(async () => {
-    if (!user) return;
+    // Staff sessions have no Supabase Auth uid — use store.owner_id instead.
+    // The RLS migration adds a staff_read policy that allows anon to read
+    // rows where owner_id matches the value in the query filter.
+    const ownerId = storeUser ? storeUser.owner_id : user?.id;
+    if (!ownerId) return;
+
     setLoading(true);
     setError(null);
     try {
-      // Products: current versions only (is_current filter respects
-      // the soft-delete pattern used for product history).
       const productsP = db
         .from('products')
         .select('*')
-        .eq('owner_id', user.id)
+        .eq('owner_id', ownerId)
         .eq('is_current', true)
         .order('created_at', { ascending: false });
 
-      // Customers (will be empty if the plan doesn't include CRM; the
-      // page enforces gating before showing them).
       const customersP = db
         .from('customers')
         .select('*')
-        .eq('owner_id', user.id)
+        .eq('owner_id', ownerId)
         .order('created_at', { ascending: false });
 
-      // Current month's usage row, if the schema exposes it. We tolerate
-      // failure (table may not exist yet on fresh installs).
       const monthStart = new Date();
       monthStart.setDate(1);
       monthStart.setHours(0,0,0,0);
       const usageP = db
         .from('monthly_usage')
         .select('*')
-        .eq('owner_id', user.id)
+        .eq('owner_id', ownerId)
         .gte('month', monthStart.toISOString())
         .limit(1)
         .maybeSingle();
@@ -124,23 +123,22 @@ export function StoreDataProvider({ children }) {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, storeUser]);
 
-  // Auto-load when the user becomes available / changes.
+  // Auto-load when the user (owner or staff) becomes available / changes.
   useEffect(() => {
-    if (authStatus !== 'app' || !user || !isAuthReady) {
-      // Do not clear the data if it's already cached/loaded, but do not
-      // load from DB until auth is fully initialized and authenticated.
-      if (authStatus !== 'app' || !user) {
+    const sessionId = storeUser ? storeUser.id : user?.id;
+    if (authStatus !== 'app' || !sessionId || !isAuthReady) {
+      if (authStatus !== 'app' || !sessionId) {
         setProducts([]); setCustomers([]); setMonthlyUsage(null);
         loadedForUid.current = null;
       }
       return;
     }
-    if (loadedForUid.current === user.id) return;
-    loadedForUid.current = user.id;
+    if (loadedForUid.current === sessionId) return;
+    loadedForUid.current = sessionId;
     loadAll();
-  }, [authStatus, user, isAuthReady, loadAll]);
+  }, [authStatus, user, storeUser, isAuthReady, loadAll]);
 
   // ── Mutators used by Inventory / Customers pages ──────────────────
   const setProductsAndSync = useCallback((updater) => {

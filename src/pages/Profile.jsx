@@ -7,10 +7,12 @@ import { db } from '../lib/config';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { useStoreData } from '../hooks/useStoreData';
+import { usePermissions } from '../hooks/usePermissions';
 import {
   planKey, PLAN_LABELS, hasFeature, effectiveLimit, fmtLimit, PLAN_LIMITS,
 } from '../lib/plans';
 import VoiceStyleSection from '../components/VoiceStyleSection';
+import UserManagement from '../components/UserManagement';
 import styles from './Profile.module.css';
 
 function FeatureRow({ icon: Icon, label, active, note }) {
@@ -54,7 +56,8 @@ function LimitRow({ icon: Icon, label, used, limit }) {
 }
 
 export default function Profile() {
-  const { user, store, updateStore, refreshStore } = useAuth();
+  const { user, store, storeUser, updateStore, refreshStore } = useAuth();
+  const { canAdmin, isOwner } = usePermissions();
   const { showToast } = useToast();
   const { products } = useStoreData();
 
@@ -82,22 +85,25 @@ export default function Profile() {
   const productCount = products.length;
 
   const features = [
-    { icon: Wifi,        label: 'WhatsApp AI Chatbot',  active: hasFeature(store, 'whatsapp') },
-    { icon: ShoppingBag, label: 'Inventory Management', active: hasFeature(store, 'inventory') },
-    { icon: Camera,      label: 'Voice Search',         active: hasFeature(store, 'voice_search') },
-    { icon: Camera,      label: 'Image Search',         active: hasFeature(store, 'image_search') },
+    { icon: Wifi,        label: 'WhatsApp AI Chatbot',       active: hasFeature(store, 'whatsapp') },
+    { icon: ShoppingBag, label: 'Inventory Management',      active: hasFeature(store, 'inventory') },
+    { icon: Camera,      label: 'Voice Search',              active: hasFeature(store, 'voice_search') },
+    { icon: Camera,      label: 'Image Search',              active: hasFeature(store, 'image_search') },
     { icon: Users,       label: 'Customer Tiers (VVIP/VIP)', active: hasFeature(store, 'customer_tiers') },
-    { icon: Cpu,         label: 'Advanced AI Models',   active: hasFeature(store, 'ai_models') },
-    { icon: Shirt,       label: 'Virtual Try-On',       active: hasFeature(store, 'virtual_tryon') },
-    { icon: BarChart2,   label: 'Analytics',            active: !!planSpec.features.analytics, note: planSpec.features.analytics },
+    { icon: Cpu,         label: 'Advanced AI Models',        active: hasFeature(store, 'ai_models') },
+    { icon: Shirt,       label: 'Virtual Try-On',            active: hasFeature(store, 'virtual_tryon') },
+    { icon: BarChart2,   label: 'Analytics',                 active: !!planSpec.features.analytics, note: planSpec.features.analytics },
   ];
 
   const handleSave = async () => {
+    if (!canAdmin) return;
     setSaving(true);
     try {
-      const { error } = await db.from('stores')
-        .update({ store_name: storeName, phone, address })
-        .eq('owner_id', user.id);
+      // Owner: RLS matches owner_id = auth.uid(). Staff admin: filter by store.id (anon key + staff RLS policy).
+      const query = isOwner
+        ? db.from('stores').update({ store_name: storeName, phone, address }).eq('owner_id', user.id)
+        : db.from('stores').update({ store_name: storeName, phone, address }).eq('id', store.id);
+      const { error } = await query;
       if (error) throw error;
       updateStore({ store_name: storeName, phone, address });
       showToast('Profile saved!', '#166534');
@@ -148,28 +154,49 @@ export default function Profile() {
 
               <div className={styles.field}>
                 <div className={styles.fieldLabel}>
-                  Store Name <span className={styles.editable}>✎ editable</span>
+                  Store Name {canAdmin && <span className={styles.editable}>✎ editable</span>}
                 </div>
-                <input className="inp" value={storeName} onChange={e => setStoreName(e.target.value)} placeholder="Your jewellery store name" />
+                <input
+                  className="inp"
+                  value={storeName}
+                  onChange={e => canAdmin && setStoreName(e.target.value)}
+                  readOnly={!canAdmin}
+                  placeholder="Your jewellery store name"
+                />
               </div>
 
               <div className={styles.field}>
                 <div className={styles.fieldLabel}>
-                  Phone Number <span className={styles.editable}>✎ editable</span>
+                  Phone Number {canAdmin && <span className={styles.editable}>✎ editable</span>}
                 </div>
-                <input className="inp" type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+91 98765 43210" />
+                <input
+                  className="inp"
+                  type="tel"
+                  value={phone}
+                  onChange={e => canAdmin && setPhone(e.target.value)}
+                  readOnly={!canAdmin}
+                  placeholder="+91 98765 43210"
+                />
               </div>
 
               <div className={styles.field}>
                 <div className={styles.fieldLabel}>
-                  Store Address <span className={styles.editable}>✎ editable</span>
+                  Store Address {canAdmin && <span className={styles.editable}>✎ editable</span>}
                 </div>
-                <input className="inp" value={address} onChange={e => setAddress(e.target.value)} placeholder="Shop address" />
+                <input
+                  className="inp"
+                  value={address}
+                  onChange={e => canAdmin && setAddress(e.target.value)}
+                  readOnly={!canAdmin}
+                  placeholder="Shop address"
+                />
               </div>
 
-              <button className="btn-gold" style={{ marginTop: 20, width: '100%', justifyContent: 'center' }} onClick={handleSave} disabled={saving}>
-                {saving ? <><div className="spinner spinner-sm" /> Saving…</> : <><Check size={14} /> Save Changes</>}
-              </button>
+              {canAdmin && (
+                <button className="btn-gold" style={{ marginTop: 20, width: '100%', justifyContent: 'center' }} onClick={handleSave} disabled={saving}>
+                  {saving ? <><div className="spinner spinner-sm" /> Saving…</> : <><Check size={14} /> Save Changes</>}
+                </button>
+              )}
             </div>
           </div>
 
@@ -217,7 +244,7 @@ export default function Profile() {
               <div className={styles.featureList}>
                 {features.map((f, i) => <FeatureRow key={i} {...f} />)}
               </div>
-              {(planName === 'trial' || planName === 'starter') && (
+              {isOwner && (planName === 'trial' || planName === 'starter') && (
                 <a
                   href="mailto:nikimodi81@gmail.com?subject=KARAT Plan Upgrade"
                   className="btn-gold"
@@ -230,12 +257,27 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* ── AI Style Training ── */}
-        <VoiceStyleSection
-          store={store}
-          user={user}
-          onProfileUpdated={refreshStore}
-        />
+        {/* ── AI Style Training (owner only — needs Google auth for upload) ── */}
+        {isOwner && (
+          <VoiceStyleSection
+            store={store}
+            user={user}
+            onProfileUpdated={refreshStore}
+          />
+        )}
+
+        {/* ── Team / User Management ── */}
+        <div className={styles.card} style={{ marginTop: 24 }}>
+          <div className={styles.cardTitle}>
+            <Users size={14} color="#C9A84C" /> Team Members
+            {storeUser && !['admin'].includes(storeUser.role) && (
+              <span style={{ fontSize: 11, color: 'rgba(201,168,76,.5)', fontFamily: 'DM Sans', fontWeight: 400, marginLeft: 8 }}>
+                (owner or admin only)
+              </span>
+            )}
+          </div>
+          <UserManagement />
+        </div>
       </div>
     </div>
   );

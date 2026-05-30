@@ -4,6 +4,7 @@ import { db } from '../lib/config';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { useStoreData } from '../hooks/useStoreData';
+import { usePermissions } from '../hooks/usePermissions';
 import { planKey, PLAN_LABELS, hasFeature } from '../lib/plans';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { LockedCard } from '../components/UpgradeNotice';
@@ -29,6 +30,7 @@ const TIER_CONFIG = {
 
 export default function Customers() {
   const { user, store } = useAuth();
+  const { canWrite } = usePermissions();
   const { showToast } = useToast();
   const { customers, setCustomers, loading } = useStoreData();
 
@@ -82,9 +84,11 @@ export default function Customers() {
             />
             {search && <button className={styles.clearBtn} onClick={() => setSearch('')}><X size={12} /></button>}
           </div>
-          <button className="btn-gold" onClick={() => { setEditCust(null); setModalOpen(true); }}>
-            <Plus size={15} /> Add Customer
-          </button>
+          {canWrite && (
+            <button className="btn-gold" onClick={() => { setEditCust(null); setModalOpen(true); }}>
+              <Plus size={15} /> Add Customer
+            </button>
+          )}
         </div>
       </div>
 
@@ -133,12 +137,16 @@ export default function Customers() {
                   </td>
                   <td>
                     <div className={styles.rowActions}>
-                      <button className={styles.rowBtn} onClick={() => { setEditCust(c); setModalOpen(true); }} title="Edit">
-                        <Pencil size={13} />
-                      </button>
-                      <button className={`${styles.rowBtn} ${styles.rowBtnDanger}`} onClick={() => setConfirmId(c.id)} title="Delete">
-                        <Trash2 size={13} />
-                      </button>
+                      {canWrite && (
+                        <button className={styles.rowBtn} onClick={() => { setEditCust(c); setModalOpen(true); }} title="Edit">
+                          <Pencil size={13} />
+                        </button>
+                      )}
+                      {canWrite && (
+                        <button className={`${styles.rowBtn} ${styles.rowBtnDanger}`} onClick={() => setConfirmId(c.id)} title="Delete">
+                          <Trash2 size={13} />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>

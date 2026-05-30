@@ -11,6 +11,7 @@ import { effectiveLimit, planKey, PLAN_LABELS } from '../lib/plans';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { useStoreData } from '../hooks/useStoreData';
+import { usePermissions } from '../hooks/usePermissions';
 import ProductModal from '../components/ProductModal';
 import ProductCard from '../components/ProductCard';
 import ConfirmDialog from '../components/ConfirmDialog';
@@ -80,6 +81,7 @@ function estimateStorageGB(products) {
 
 export default function Inventory() {
   const { user, store } = useAuth();
+  const { canWrite } = usePermissions();
   const { showToast } = useToast();
   const { products, setProducts, reload } = useStoreData();
 
@@ -513,15 +515,19 @@ export default function Inventory() {
             </button>
           </div>
 
-          <button className={styles.importBtn} onClick={() => setBulkImportOpen(true)}>
-            <Sparkles size={14}/>
-            AI Bulk Import
-          </button>
+          {canWrite && (
+            <button className={styles.importBtn} onClick={() => setBulkImportOpen(true)}>
+              <Sparkles size={14}/>
+              AI Bulk Import
+            </button>
+          )}
 
-          <button className="btn-gold" onClick={openAdd}>
-            <Plus size={15} strokeWidth={2.5} />
-            Add Product
-          </button>
+          {canWrite && (
+            <button className="btn-gold" onClick={openAdd}>
+              <Plus size={15} strokeWidth={2.5} />
+              Add Product
+            </button>
+          )}
         </div>
       </div>
 
@@ -580,7 +586,7 @@ export default function Inventory() {
             <Package size={48} strokeWidth={1} color="rgba(13,27,42,.2)" />
             <h3>{search ? 'No results found' : 'No products yet'}</h3>
             <p>{search ? `No items match "${search}"` : 'Click Add Product to get started.'}</p>
-            {!search && (
+            {!search && canWrite && (
               <button className="btn-gold" style={{ marginTop: 16 }} onClick={openAdd}>
                 <Plus size={15} /> Add First Product
               </button>
@@ -594,9 +600,9 @@ export default function Inventory() {
                 product={p}
                 variants={variantMap[p.id] || []}
                 viewMode={viewMode}
-                onEdit={() => openEdit(p)}
-                onDelete={() => openDelete(p.id)}
-                onToggleStock={() => handleToggleStock(p)}
+                onEdit={canWrite ? () => openEdit(p) : null}
+                onDelete={canWrite ? () => openDelete(p.id) : null}
+                onToggleStock={canWrite ? () => handleToggleStock(p) : null}
               />
             ))}
           </div>

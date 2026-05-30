@@ -149,6 +149,84 @@
 }
 .btnGoogle:disabled { opacity:.55; cursor:not-allowed; transform:none; }
 
+/* Tab toggle: Owner / Staff */
+.loginTabs {
+  display: flex;
+  background: rgba(255,255,255,.06);
+  border-radius: 10px;
+  padding: 3px;
+  margin-bottom: 22px;
+  border: 1px solid rgba(201,168,76,.14);
+}
+.loginTab {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: rgba(255,255,255,.45);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all .2s;
+  letter-spacing: .04em;
+}
+.loginTabActive {
+  background: rgba(201,168,76,.18);
+  color: #E8CC7A;
+  box-shadow: 0 1px 6px rgba(0,0,0,.25);
+}
+
+/* Credential form */
+.credForm { display:flex; flex-direction:column; gap:12px; margin-bottom:14px; }
+.inputWrap { position: relative; }
+.credInput {
+  width: 100%;
+  background: rgba(255,255,255,.07);
+  border: 1.5px solid rgba(201,168,76,.2);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 14px;
+  font-family: var(--font-body);
+  color: #F5E9C5;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color .2s;
+}
+.credInput::placeholder { color: rgba(255,255,255,.3); }
+.credInput:focus { border-color: rgba(201,168,76,.55); }
+.credInputPwd { padding-right: 44px; }
+.eyeBtn {
+  position: absolute;
+  right: 12px; top: 50%;
+  transform: translateY(-50%);
+  background: none; border: none;
+  color: rgba(201,168,76,.5);
+  cursor: pointer; padding: 4px;
+  line-height: 1;
+}
+.eyeBtn:hover { color: rgba(201,168,76,.9); }
+
+/* Primary CTA button */
+.btnPrimary {
+  width: 100%;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  background: linear-gradient(135deg, #C9A84C, #A07A28);
+  border: none;
+  border-radius: 12px;
+  padding: 14px 24px;
+  font-size: 14px; font-weight: 700;
+  font-family: var(--font-body);
+  color: #0B1829;
+  cursor: pointer;
+  transition: all .22s;
+  box-shadow: 0 4px 16px rgba(201,168,76,.28);
+  margin-bottom: 14px;
+}
+.btnPrimary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(201,168,76,.38); }
+.btnPrimary:disabled { opacity: .55; cursor: not-allowed; transform: none; }
+
 .footer { text-align:center; font-size:11px; color:rgba(255,255,255,.22); margin:0; }
 
 @media (max-width:500px) {

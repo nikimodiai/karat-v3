@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
-import { Package, MessageSquare, Users, BarChart2, Sparkles } from 'lucide-react';
+import { Package, MessageSquare, Users, BarChart2, Eye, EyeOff } from 'lucide-react';
 import styles from './Login.module.css';
 
 const GoogleIcon = () => (
@@ -14,16 +14,20 @@ const GoogleIcon = () => (
 );
 
 const FEATURES = [
-  { icon: Package,      label: 'Smart Inventory', sub: 'Manage all SKUs' },
-  { icon: MessageSquare,label: 'WhatsApp AI Bot', sub: 'Customer engagement' },
-  { icon: Users,        label: 'Customer CRM',    sub: 'Tier management' },
-  { icon: BarChart2,    label: 'Analytics',        sub: 'Insights & charts' },
+  { icon: Package,       label: 'Smart Inventory' },
+  { icon: MessageSquare, label: 'WhatsApp AI Bot' },
+  { icon: Users,         label: 'Customer CRM'   },
+  { icon: BarChart2,     label: 'Analytics'       },
 ];
 
 export default function Login() {
-  const { loginWithGoogle } = useAuth();
+  const { loginWithGoogle, loginWithCredentials } = useAuth();
   const { showToast } = useToast();
+  const [tab, setTab]         = useState('owner');   // 'owner' | 'staff'
   const [loading, setLoading] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPwd, setShowPwd]   = useState(false);
 
   const handleGoogle = async () => {
     setLoading(true);
@@ -31,6 +35,18 @@ export default function Login() {
       await loginWithGoogle();
     } catch (err) {
       showToast('Login failed: ' + (err.message || 'Unknown error'), '#C0392B');
+      setLoading(false);
+    }
+  };
+
+  const handleCredentials = async (e) => {
+    e.preventDefault();
+    if (!username.trim() || !password) return;
+    setLoading(true);
+    try {
+      await loginWithCredentials(username, password);
+    } catch (err) {
+      showToast(err.message || 'Invalid credentials', '#C0392B');
       setLoading(false);
     }
   };
@@ -63,14 +79,11 @@ export default function Login() {
         {/* Hero */}
         <div className={styles.heroSection}>
           <h1 className={styles.heroTitle}>Your Jewellery Store,<br/><em>Beautifully Organised</em></h1>
-          <p className={styles.heroSub}>
-            Inventory management, WhatsApp customer engagement, and clear analytics — built for Indian jewellery stores.
-          </p>
         </div>
 
         {/* Feature icons */}
         <div className={styles.features}>
-          {FEATURES.map(({ icon: Icon, label, sub }) => (
+          {FEATURES.map(({ icon: Icon, label }) => (
             <div key={label} className={styles.featureItem}>
               <div className={styles.featureIcon}><Icon size={16} strokeWidth={1.5}/></div>
               <div className={styles.featureLabel}>{label}</div>
@@ -78,23 +91,68 @@ export default function Login() {
           ))}
         </div>
 
-        {/* Divider */}
-        <div className={styles.divider}>
-          <span className={styles.dividerLine}/>
-          <span className={styles.dividerText}>OWNER PORTAL</span>
-          <span className={styles.dividerLine}/>
+        {/* Tab toggle */}
+        <div className={styles.loginTabs}>
+          <button
+            className={`${styles.loginTab} ${tab === 'owner' ? styles.loginTabActive : ''}`}
+            onClick={() => { setTab('owner'); setLoading(false); }}
+          >
+            Owner Login
+          </button>
+          <button
+            className={`${styles.loginTab} ${tab === 'staff' ? styles.loginTabActive : ''}`}
+            onClick={() => { setTab('staff'); setLoading(false); }}
+          >
+            Staff Login
+          </button>
         </div>
 
-        {/* Google login */}
-        <button className={styles.btnGoogle} onClick={handleGoogle} disabled={loading}>
-          {loading
-            ? <div className="spinner spinner-sm" style={{ borderTopColor: '#333' }}/>
-            : <GoogleIcon/>
-          }
-          <span>{loading ? 'Signing in…' : 'Continue with Google'}</span>
-        </button>
-
-        <p className={styles.footer}>Access is by invitation only · Secure &amp; private</p>
+        {tab === 'owner' ? (
+          <>
+            <button className={styles.btnGoogle} onClick={handleGoogle} disabled={loading}>
+              {loading
+                ? <div className="spinner spinner-sm" style={{ borderTopColor: '#333' }}/>
+                : <GoogleIcon/>
+              }
+              <span>{loading ? 'Signing in…' : 'Continue with Google'}</span>
+            </button>
+            <p className={styles.footer}>Owner access · Google authentication</p>
+          </>
+        ) : (
+          <form onSubmit={handleCredentials} className={styles.credForm}>
+            <input
+              className={styles.credInput}
+              type="text"
+              placeholder="Username"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              autoComplete="username"
+              required
+            />
+            <div className={styles.inputWrap}>
+              <input
+                className={`${styles.credInput} ${styles.credInputPwd}`}
+                type={showPwd ? 'text' : 'password'}
+                placeholder="Password"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                autoComplete="current-password"
+                required
+              />
+              <button type="button" className={styles.eyeBtn} onClick={() => setShowPwd(p => !p)} tabIndex={-1}>
+                {showPwd ? <EyeOff size={16}/> : <Eye size={16}/>}
+              </button>
+            </div>
+            <button className={styles.btnPrimary} type="submit" disabled={loading || !username.trim() || !password}>
+              {loading
+                ? <div className="spinner spinner-sm" style={{ borderTopColor: '#0B1829' }}/>
+                : null
+              }
+              <span>{loading ? 'Signing in…' : 'Sign In'}</span>
+            </button>
+            <p className={styles.footer}>Staff access · Credentials provided by store owner</p>
+          </form>
+        )}
       </div>
     </div>
   );

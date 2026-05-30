@@ -59,7 +59,7 @@ export default function VoiceStyleSection({ store, user, onProfileUpdated }) {
   const [chosenAuthor,  setChosenAuthor]  = useState('');
   const fileRef = useRef(null);
 
-  const hasProfile = !!(store?.voice_profile || store?.voice_examples);
+  const hasProfile = !!store?.voice_profile;
 
   const toggleStep = (n) => setOpenStep(s => s === n ? null : n);
 
@@ -165,11 +165,11 @@ export default function VoiceStyleSection({ store, user, onProfileUpdated }) {
             <span className={styles.cpTitle}>Your current style profile</span>
           </div>
           <div className={styles.cpMeta}>
-            Last updated: <strong>{fmtDate(store.voice_updated_at)}</strong>
+            Last updated: <strong>{fmtDate(store.voice_profile_updated_at)}</strong>
           </div>
-          {(store.voice_profile || store.voice_examples) && (
+          {store.voice_profile && (
             <div className={styles.cpSnippet}>
-              "{String(store.voice_profile || store.voice_examples).slice(0, 120)}…"
+              "{String(store.voice_profile).slice(0, 120)}…"
             </div>
           )}
           <div className={styles.cpHint}>
