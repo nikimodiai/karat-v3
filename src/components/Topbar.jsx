@@ -1,17 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LayoutGrid, Users, BarChart2, User, LogOut, ChevronDown, Gem, Menu, X, Home, Shield, UserCog } from 'lucide-react';
+import { LayoutGrid, Users, BarChart2, User, LogOut, ChevronDown, Gem, Menu, X, Home, Shield, UserCog, Sparkles } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import styles from './Topbar.module.css';
 
 const ROLE_LABELS = { owner: 'Owner', admin: 'Admin', read_write: 'Read & Write', read_only: 'Read Only' };
 
 const NAV_ITEMS = [
-  { id: 'dashboard',  label: 'Dashboard',  icon: Home },
-  { id: 'inventory',  label: 'Inventory',  icon: LayoutGrid },
-  { id: 'customers',  label: 'Customers',  icon: Users },
-  { id: 'analytics',  label: 'Analytics',  icon: BarChart2 },
-  { id: 'team',       label: 'Team',       icon: UserCog },
-  { id: 'profile',    label: 'My Profile', icon: User },
+  { id: 'dashboard',  label: 'Dashboard',         icon: Home },
+  { id: 'inventory',  label: 'Inventory',          icon: LayoutGrid },
+  { id: 'customers',  label: 'Customers',          icon: Users },
+  { id: 'analytics',  label: 'Analytics',          icon: BarChart2 },
+  { id: 'team',       label: 'Team',               icon: UserCog },
+  { id: 'voice',      label: 'Teach AI Your Style', icon: Sparkles, isNew: true },
+  { id: 'profile',    label: 'My Profile',          icon: User },
 ];
 
 const PLAN_COLORS = {
@@ -57,10 +58,10 @@ export default function Topbar({ activeTab, onTabChange, productCount }) {
 
         {/* Nav tabs – desktop */}
         <nav className={styles.nav}>
-          {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
+          {NAV_ITEMS.map(({ id, label, icon: Icon, isNew }) => (
             <button
               key={id}
-              className={`${styles.navBtn} ${activeTab === id ? styles.navBtnActive : ''}`}
+              className={`${styles.navBtn} ${activeTab === id ? styles.navBtnActive : ''} ${isNew ? styles.navBtnNew : ''}`}
               onClick={() => onTabChange(id)}
             >
               <Icon size={14} strokeWidth={2} />
@@ -68,6 +69,7 @@ export default function Topbar({ activeTab, onTabChange, productCount }) {
               {id === 'inventory' && productCount > 0 && (
                 <span className={styles.badge}>{productCount > 99 ? '99+' : productCount}</span>
               )}
+              {isNew && <span className={styles.newPill}>New</span>}
             </button>
           ))}
         </nav>
@@ -124,7 +126,7 @@ export default function Topbar({ activeTab, onTabChange, productCount }) {
       {/* Mobile nav drawer */}
       {mobileOpen && (
         <div className={styles.mobileDrawer}>
-          {NAV_ITEMS.map(({ id, label, icon: Icon }) => (
+          {NAV_ITEMS.map(({ id, label, icon: Icon, isNew }) => (
             <button
               key={id}
               className={`${styles.mobileNavItem} ${activeTab === id ? styles.mobileNavActive : ''}`}
@@ -132,6 +134,7 @@ export default function Topbar({ activeTab, onTabChange, productCount }) {
             >
               <Icon size={16} strokeWidth={2} />
               <span>{label}</span>
+              {isNew && <span className={styles.newPill}>New</span>}
             </button>
           ))}
           <div className={styles.mobileDivider} />

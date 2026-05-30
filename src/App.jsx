@@ -12,6 +12,34 @@ import Profile from './pages/Profile';
 import TeamPage from './pages/TeamPage';
 import Topbar from './components/Topbar';
 import Footer from './components/Footer';
+import VoiceStyleSection from './components/VoiceStyleSection';
+
+function VoiceTab() {
+  const { user, store, refreshStore } = useAuth();
+  return (
+    <div style={{ flex: 1, overflowY: 'auto', padding: '32px 24px', maxWidth: 760, margin: '0 auto', width: '100%' }}>
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--navy)', margin: 0 }}>Teach AI Your Style</h1>
+          <span style={{
+            background: 'linear-gradient(135deg, #C9A84C, #e8b84b)',
+            color: '#0B1829',
+            fontSize: 10,
+            fontWeight: 800,
+            padding: '2px 8px',
+            borderRadius: 99,
+            letterSpacing: '.05em',
+            textTransform: 'uppercase',
+          }}>New</span>
+        </div>
+        <p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>
+          Upload voice samples so AI responds exactly the way you would — in your tone, your words, your style.
+        </p>
+      </div>
+      <VoiceStyleSection store={store} user={user} onProfileUpdated={refreshStore} />
+    </div>
+  );
+}
 
 function AppShell() {
   const { authStatus } = useAuth();
@@ -64,6 +92,7 @@ function Shell({ activeTab, setActiveTab }) {
         {activeTab === 'customers'  && <Customers />}
         {activeTab === 'analytics'  && <Analytics />}
         {activeTab === 'team'       && <TeamPage />}
+        {activeTab === 'voice'      && <VoiceTab />}
         {activeTab === 'profile'    && <Profile />}
       </div>
       <Footer />

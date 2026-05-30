@@ -236,6 +236,32 @@
 .mobileDivider { height: 1px; background: rgba(201,168,76,.12); margin: 6px 0; }
 .mobileNavDanger { color: #f87171; }
 
+/* "New" feature highlight */
+.newPill {
+  background: linear-gradient(135deg, #C9A84C, #e8b84b);
+  color: #0B1829;
+  font-size: 9px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 99px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  line-height: 1.6;
+  animation: newPulse 2.4s ease-in-out infinite;
+}
+
+.navBtnNew {
+  color: #E8CC7A !important;
+}
+.navBtnNew svg {
+  filter: drop-shadow(0 0 4px rgba(201,168,76,.6));
+}
+
+@keyframes newPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,76,.45); }
+  50%       { box-shadow: 0 0 0 4px rgba(201,168,76,0); }
+}
+
 @media (max-width: 768px) {
   .nav { display: none; }
   .planBadge { display: none; }
