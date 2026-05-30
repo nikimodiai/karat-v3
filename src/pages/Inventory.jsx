@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import {
   Search, SlidersHorizontal, Plus, Package, TrendingUp, TrendingDown,
-  X, Grid, List, ArrowUpDown, Tag, Gem,
+  X, Grid, List, ArrowUpDown, Tag, Gem, Sparkles,
 } from 'lucide-react';
 import {
   db, CLOUDINARY_CLOUD, CLOUDINARY_PRESET,
@@ -15,6 +15,7 @@ import ProductModal from '../components/ProductModal';
 import ProductCard from '../components/ProductCard';
 import ConfirmDialog from '../components/ConfirmDialog';
 import { UpgradeDialog } from '../components/UpgradeNotice';
+import BulkImportModal from '../components/BulkImportModal';
 import styles from './Inventory.module.css';
 
 const SORT_OPTIONS = [
@@ -98,6 +99,7 @@ export default function Inventory() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   // variantMap: { [productId]: [{ color, carat }] } — for swatch display
   const [variantMap, setVariantMap]     = useState({});
+  const [bulkImportOpen, setBulkImportOpen] = useState(false);
 
   // Limit-reached dialog state
   const [upgradeOpen, setUpgradeOpen]   = useState(null); // { feature, message } | null
@@ -511,6 +513,11 @@ export default function Inventory() {
             </button>
           </div>
 
+          <button className={styles.importBtn} onClick={() => setBulkImportOpen(true)}>
+            <Sparkles size={14}/>
+            AI Bulk Import
+          </button>
+
           <button className="btn-gold" onClick={openAdd}>
             <Plus size={15} strokeWidth={2.5} />
             Add Product
@@ -619,6 +626,12 @@ export default function Inventory() {
           recommendedPlan={planName === 'starter' ? 'Professional' : 'Enterprise'}
           message={upgradeOpen.message}
           onClose={() => setUpgradeOpen(null)}
+        />
+      )}
+      {bulkImportOpen && (
+        <BulkImportModal
+          onClose={() => setBulkImportOpen(false)}
+          onImportDone={() => { reload(); setBulkImportOpen(false); }}
         />
       )}
     </div>

@@ -100,6 +100,21 @@
 .searchClear:hover { color:var(--navy); }
 
 /* Icon buttons */
+.importBtn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 0 14px; height: 36px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(201,168,76,.45);
+  background: rgba(201,168,76,.08);
+  color: var(--navy); font-size: 13px; font-weight: 600;
+  font-family: var(--font-body); cursor: pointer;
+  transition: all .16s; white-space: nowrap;
+}
+.importBtn:hover {
+  background: rgba(201,168,76,.18);
+  border-color: var(--gold);
+}
+
 .iconBtn {
   width:36px; height:36px; border-radius:8px;
   border:1.5px solid var(--border-soft);
