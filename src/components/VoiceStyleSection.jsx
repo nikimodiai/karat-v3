@@ -223,7 +223,7 @@ export default function VoiceStyleSection({ store, user, onProfileUpdated }) {
             Last updated: <strong>{fmtDate(store.voice_updated_at)}</strong>
           </div>
           {store.voice_profile && (
-            <div className={styles.cpSnippet}>"{String(store.voice_profile).slice(0, 120)}…"</div>
+            <div className={styles.cpSnippet}>{String(store.voice_profile)}</div>
           )}
           <div className={styles.cpHint}>
             <RefreshCw size={11}/> Upload more chats below to keep improving it.
