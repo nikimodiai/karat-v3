@@ -334,30 +334,35 @@ export default function BulkImportModal({ onClose, onImportDone }) {
                 })}
               </div>
 
-              {/* 5-row preview */}
-              {analyzeData.preview?.length > 0 && (
-                <details className={styles.previewDetails}>
-                  <summary>Show raw data preview ({analyzeData.preview.length} rows)</summary>
-                  <div className={styles.previewScroll}>
-                    <table className={styles.previewTable}>
-                      <thead>
-                        <tr>
-                          {(analyzeData.columns || []).map(c => <th key={c}>{c}</th>)}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {(analyzeData.preview || []).slice(0, 5).map((row, i) => (
-                          <tr key={i}>
-                            {(analyzeData.columns || []).map(c => (
-                              <td key={c}>{row[c] ?? ''}</td>
+              {/* 5-row preview — preview rows are keyed by TARGET field names */}
+              {analyzeData.preview?.length > 0 && (() => {
+                const previewKeys = Object.keys(analyzeData.preview[0] || {});
+                return previewKeys.length > 0 && (
+                  <details className={styles.previewDetails}>
+                    <summary>Show mapped data preview ({analyzeData.preview.length} rows)</summary>
+                    <div className={styles.previewScroll}>
+                      <table className={styles.previewTable}>
+                        <thead>
+                          <tr>
+                            {previewKeys.map(k => (
+                              <th key={k}>{FIELD_LABELS[k] || k}</th>
                             ))}
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </details>
-              )}
+                        </thead>
+                        <tbody>
+                          {analyzeData.preview.slice(0, 5).map((row, i) => (
+                            <tr key={i}>
+                              {previewKeys.map(k => (
+                                <td key={k}>{row[k] != null ? String(row[k]) : ''}</td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </details>
+                );
+              })()}
 
               <div className={styles.footer}>
                 <button className="btn-ghost" onClick={reset}>
@@ -407,11 +412,14 @@ export default function BulkImportModal({ onClose, onImportDone }) {
 
 // ── Dry-run result view ────────────────────────────────────────────
 function DryRunStep({ dryResult, rowCount, importing, error, onBack, onCommit }) {
-  const result = dryResult?.result || {};
-  const inserted = result.inserted ?? result.products_inserted ?? null;
-  const updated  = result.updated  ?? result.products_updated  ?? null;
-  const skipped  = result.skipped  ?? result.products_skipped  ?? null;
-  const errors   = result.errors   ?? result.validation_errors ?? null;
+  // n8n returns the RPC result directly — field names vary by implementation:
+  // would_insert / would_update / would_skip  (karat_bulk_import_products dry-run)
+  // or inserted / updated / skipped (alternate naming)
+  const result = dryResult?.result || dryResult || {};
+  const inserted = result.would_insert ?? result.inserted ?? result.products_inserted ?? null;
+  const updated  = result.would_update ?? result.updated  ?? result.products_updated  ?? null;
+  const skipped  = result.would_skip   ?? result.skipped  ?? result.products_skipped  ?? null;
+  const errors   = result.would_fail   ?? result.errors   ?? result.validation_errors ?? null;
 
   return (
     <div className={styles.drySection}>
@@ -471,10 +479,11 @@ function SummaryCard({ label, value, color }) {
   );
 }
 
-function ImportResultSummary({ result }) {
-  if (!result) return null;
-  const inserted = result.inserted ?? result.products_inserted ?? null;
-  const updated  = result.updated  ?? result.products_updated  ?? null;
+function ImportResultSummary({ result: raw }) {
+  if (!raw) return null;
+  const result   = raw?.result || raw || {};
+  const inserted = result.inserted ?? result.products_inserted ?? result.would_insert ?? null;
+  const updated  = result.updated  ?? result.products_updated  ?? result.would_update ?? null;
   return (
     <div className={styles.summaryCards} style={{ marginTop: 20 }}>
       <SummaryCard label="Products created" value={inserted} color="#16a34a"/>
