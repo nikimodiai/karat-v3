@@ -67,7 +67,7 @@ export function AuthProvider({ children }) {
   const loadStore = useCallback(async (u) => {
     const { data: storeData } = await db
       .from('stores')
-      .select('id, status, store_name, owner_name, customer_tiers, plan_name, subscription_status, plan_expires_at, phone, email, whatsapp_phone, owner_whatsapp, has_image_search, has_voice_search, ai_models, ai_models_limit, virtual_tryon, analytics, product_limit, image_storage_gb, conversation_limit, monthly_budget_inr, address, _conv_used, _ai_used, _vt_used')
+      .select('id, status, store_name, owner_name, customer_tiers, plan_name, subscription_status, plan_expires_at, phone, email, whatsapp_phone, owner_whatsapp, has_image_search, has_voice_search, ai_models, ai_models_limit, virtual_tryon, analytics, product_limit, image_storage_gb, conversation_limit, monthly_budget_inr, address, _conv_used, _ai_used, _vt_used, voice_profile, voice_examples, voice_updated_at')
       .eq('owner_id', u.id)
       .single();
 
