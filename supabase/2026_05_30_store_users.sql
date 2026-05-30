@@ -3,8 +3,8 @@
 -- Passwords are hashed using pgcrypto (bcrypt). The app layer also hashes
 -- before sending, but we store the bcrypt hash for double safety.
 
--- Enable pgcrypto if not already enabled (needed for gen_random_uuid if not using uuid-ossp)
-create extension if not exists pgcrypto;
+-- Enable pgcrypto in the extensions schema (Supabase default location)
+create extension if not exists pgcrypto with schema extensions;
 
 -- ── store_users table ──────────────────────────────────────────────────────────
 create table if not exists public.store_users (
@@ -67,7 +67,7 @@ returns table (
 )
 language plpgsql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
 declare
   v_user  store_users%rowtype;
@@ -85,7 +85,7 @@ begin
   end if;
 
   -- Verify password
-  if v_user.password_hash != crypt(p_password, v_user.password_hash) then
+  if v_user.password_hash != extensions.crypt(p_password, v_user.password_hash) then
     return;
   end if;
 
@@ -118,9 +118,9 @@ create or replace function public.hash_password(p_password text)
 returns text
 language sql
 security definer
-set search_path = public
+set search_path = public, extensions
 as $$
-  select crypt(p_password, gen_salt('bf'::text, 10::int));
+  select extensions.crypt(p_password, extensions.gen_salt('bf'));
 $$;
 
 -- ── updated_at trigger ─────────────────────────────────────────────────────────
