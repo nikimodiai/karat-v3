@@ -102,9 +102,35 @@ export default function BulkImportModal({ onClose, onImportDone }) {
       const fd = new FormData();
       fd.append('file',     file);
       fd.append('owner_id', user.id);
-      const res  = await fetch(N8N_IMPORT_ANALYZE, { method: 'POST', body: fd });
-      if (!res.ok) throw new Error(`Analyze failed (${res.status})`);
-      const data = await res.json();
+
+      let res;
+      try {
+        res = await fetch(N8N_IMPORT_ANALYZE, {
+          method: 'POST',
+          body: fd,
+          credentials: 'omit',
+          mode: 'cors',
+        });
+      } catch (networkErr) {
+        throw new Error(
+          'Could not reach the import service. ' +
+          'Make sure the n8n workflow is active and the webhook URL is correct. ' +
+          '(Network error: ' + networkErr.message + ')'
+        );
+      }
+
+      const raw = await res.text();
+      if (!res.ok) {
+        throw new Error(`Import service returned ${res.status}: ${raw.slice(0, 300) || '(empty body)'}`);
+      }
+      if (!raw || !raw.trim()) {
+        throw new Error('Import service returned an empty response. Check that the n8n workflow is fully connected and the "Respond to Webhook" node fires at the end.');
+      }
+      let data;
+      try { data = JSON.parse(raw); }
+      catch (e) {
+        throw new Error(`Import service response is not valid JSON. Raw response: ${raw.slice(0, 300)}`);
+      }
       if (!data.import_id) throw new Error('Invalid response from import service.');
       setAnalyzeData(data);
       // Pre-fill mapping from LLM suggestion
@@ -126,9 +152,11 @@ export default function BulkImportModal({ onClose, onImportDone }) {
     setLoading(true); setError(null);
     try {
       const res = await fetch(N8N_IMPORT_COMMIT, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({
+        method:      'POST',
+        credentials: 'omit',
+        mode:        'cors',
+        headers:     { 'Content-Type': 'application/json' },
+        body:        JSON.stringify({
           import_id: analyzeData.import_id,
           owner_id:  user.id,
           mapping,
@@ -137,8 +165,11 @@ export default function BulkImportModal({ onClose, onImportDone }) {
           variant_mode: false,
         }),
       });
-      if (!res.ok) throw new Error(`Dry run failed (${res.status})`);
-      const data = await res.json();
+      const rawDry = await res.text();
+      if (!res.ok) throw new Error(`Dry run failed (${res.status}): ${rawDry.slice(0, 300) || '(empty)'}`);
+      if (!rawDry?.trim()) throw new Error('Dry run returned empty response from n8n.');
+      let data;
+      try { data = JSON.parse(rawDry); } catch { throw new Error(`Dry run non-JSON response: ${rawDry.slice(0, 300)}`); }
       setDryResult(data);
       setStep(3);
     } catch (e) {
@@ -148,14 +179,15 @@ export default function BulkImportModal({ onClose, onImportDone }) {
     }
   };
 
-  // ── Step 3: final import ─────────────────────────────────────────
   const runCommit = async () => {
     setImporting(true); setError(null);
     try {
       const res = await fetch(N8N_IMPORT_COMMIT, {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({
+        method:      'POST',
+        credentials: 'omit',
+        mode:        'cors',
+        headers:     { 'Content-Type': 'application/json' },
+        body:        JSON.stringify({
           import_id: analyzeData.import_id,
           owner_id:  user.id,
           mapping,
@@ -164,8 +196,11 @@ export default function BulkImportModal({ onClose, onImportDone }) {
           variant_mode: false,
         }),
       });
-      if (!res.ok) throw new Error(`Import failed (${res.status})`);
-      const data = await res.json();
+      const rawCommit = await res.text();
+      if (!res.ok) throw new Error(`Import failed (${res.status}): ${rawCommit.slice(0, 300) || '(empty)'}`);
+      if (!rawCommit?.trim()) throw new Error('Import returned empty response from n8n.');
+      let data;
+      try { data = JSON.parse(rawCommit); } catch { throw new Error(`Import non-JSON response: ${rawCommit.slice(0, 300)}`); }
       setImportDone(data);
     } catch (e) {
       setError(e.message || 'Import failed');
