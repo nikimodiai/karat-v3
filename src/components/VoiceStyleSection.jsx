@@ -167,9 +167,9 @@ export default function VoiceStyleSection({ store, user, onProfileUpdated }) {
           <div className={styles.cpMeta}>
             Last updated: <strong>{fmtDate(store.voice_updated_at)}</strong>
           </div>
-          {(store.voice_profile || store.voice_examples) && (
+          {store.voice_profile && (
             <div className={styles.cpSnippet}>
-              "{String(store.voice_profile || store.voice_examples).slice(0, 120)}…"
+              "{String(store.voice_profile).slice(0, 120)}…"
             </div>
           )}
           <div className={styles.cpHint}>
