@@ -157,7 +157,45 @@
 
 /* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 640px) {
-  /* Drop into horizontal scroll mode so chips don't get crushed */
-  .chip    { flex: 0 0 110px; }
-  .chipNum { font-size: 17px; }
+  /* Stack metal groups vertically, chips wrap inside each group */
+  .strip {
+    flex-direction: column;
+    overflow-x: visible;
+    gap: 10px;
+  }
+
+  .group {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 10px;
+  }
+  .group:last-child { border-bottom: none; padding-bottom: 0; }
+
+  .groupLabel {
+    text-align: left;
+    padding: 0 4px 6px;
+  }
+
+  .groupChips {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: 4px;
+  }
+
+  .chip {
+    flex: 0 0 auto;
+    width: calc(50% - 4px);   /* 2-per-row grid */
+    padding: 8px 10px;
+    align-items: flex-start;
+    text-align: left;
+    border-right: none !important;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--cream, #F8F5EE);
+  }
+
+  .chipNum { font-size: 16px; }
+  .chipPurity { font-size: 11px; }
+  .chipUnit { font-size: 10px; }
 }
