@@ -102,7 +102,11 @@ export default function VoiceStyleSection({ store, user, onProfileUpdated }) {
           continue;
         }
         let data;
-        try { data = JSON.parse(raw); }
+        try {
+          const parsed = JSON.parse(raw);
+          // n8n often wraps the response in an array — unwrap it
+          data = Array.isArray(parsed) ? parsed[0] : parsed;
+        }
         catch { newResults.push({ status: 'error', fileName: file.name, message: `Unexpected response: ${raw.slice(0, 200)}` }); continue; }
 
         const r = normaliseResult(file.name, data);
@@ -310,14 +314,15 @@ function normaliseResult(fileName, data) {
   if (status === 'partial' || data.warning) {
     return { status: 'partial', fileName, message: data.warning || data.message };
   }
-  // Catch "multiple participants" — n8n returns detectedAuthors in the body
-  const authors = data.detected_authors || data.detectedAuthors || data.authors || [];
+  // Catch "multiple participants" — n8n sets needsAuthorSelection:true
+  const authors = data.detectedAuthors || data.detected_authors || data.authors || [];
   if (
+    data.needsAuthorSelection === true ||
     status === 'wrong_author' ||
     data.error === 'no_shop_messages' ||
     (authors.length > 0 && data.success === false)
   ) {
-    return { status: 'wrong_author', fileName, authors };
+    return { status: 'wrong_author', fileName, authors, message: data.message || null };
   }
   if (data.error === 'not_zip' || status === 'bad_format') {
     return { status: 'bad_format', fileName };
@@ -370,14 +375,14 @@ function ResultCard({ result: r, authorChoices, chosenAuthor, setChosenAuthor, o
   }
 
   if (r.status === 'wrong_author') {
-    const authors = r.authors || authorChoices?.authors || [];
+    const authors = r.authors?.length ? r.authors : (authorChoices?.authors || []);
     return (
       <div className={`${styles.resultCard} ${styles.resultWarn}`}>
         <div className={styles.resultHead}>
           <AlertTriangle size={16} color="#d97706"/>
           <strong>Who is your shop in this chat?</strong>
         </div>
-        <p>We found <strong>{authors.length}</strong> participants in this chat. Select which name is your shop so the AI can learn from your replies.</p>
+        <p>{r.message || `We found ${authors.length} participants. Select which name is your shop so the AI learns the right voice.`}</p>
         {authors.length > 0 && (
           <div className={styles.authorPicker}>
             <div className={styles.authorRow}>
