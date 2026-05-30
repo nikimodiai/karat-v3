@@ -1,0 +1,36 @@
+.page {
+  flex: 1;
+  overflow-y: auto;
+  background: var(--cream, #F8F5EE);
+  padding: 0 0 40px;
+}
+
+.header {
+  padding: 24px 28px 16px;
+  border-bottom: 1px solid rgba(13,27,42,.08);
+  background: #fff;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--navy, #0D1B2A);
+  margin: 0 0 4px;
+}
+
+.sub {
+  font-size: 13px;
+  color: rgba(13,27,42,.5);
+  margin: 0;
+}
+
+.wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 28px 24px;
+}
+
+@media (max-width: 600px) {
+  .header { padding: 20px 16px 12px; }
+  .wrap   { padding: 20px 12px; }
+}

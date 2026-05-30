@@ -160,7 +160,7 @@ export default function Customers() {
         <CustomerModal
           customer={editCust}
           hasTiers={hasTiers}
-          userId={user.id}
+          userId={store.owner_id}
           onSave={async (payload) => {
             if (editCust) {
               const { error } = await db.from('customers').update(payload).eq('id', editCust.id);

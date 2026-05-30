@@ -78,7 +78,7 @@ export default function VoiceStyleSection({ store, user, onProfileUpdated }) {
     setAuthorChoices(null);
   };
 
-  const uploadFiles = async (shopName = null) => {
+  const uploadFiles = async (storeAuthorName = null) => {
     if (!files.length) return;
     setUploading(true);
     setResults([]);
@@ -90,7 +90,8 @@ export default function VoiceStyleSection({ store, user, onProfileUpdated }) {
         const fd = new FormData();
         fd.append('file',     file);
         fd.append('owner_id', user.id);
-        if (shopName) fd.append('shop_name', shopName);
+        // n8n field name is store_author_name
+        if (storeAuthorName) fd.append('store_author_name', storeAuthorName);
 
         const res = await fetch(N8N_VOICE_INGEST, {
           method: 'POST', body: fd, credentials: 'omit', mode: 'cors',
@@ -104,14 +105,9 @@ export default function VoiceStyleSection({ store, user, onProfileUpdated }) {
         try { data = JSON.parse(raw); }
         catch { newResults.push({ status: 'error', fileName: file.name, message: `Unexpected response: ${raw.slice(0, 200)}` }); continue; }
 
-        if (!res.ok) {
-          newResults.push({ status: 'error', fileName: file.name, message: data?.error || `Server error ${res.status}` });
-          continue;
-        }
-
-        // Map n8n response to a result shape
         const r = normaliseResult(file.name, data);
-        if (r.status === 'wrong_author') {
+        // Show author picker immediately when multiple participants detected
+        if (r.status === 'wrong_author' && r.authors.length > 0) {
           setAuthorChoices({ file, authors: r.authors });
         }
         newResults.push(r);
@@ -123,7 +119,6 @@ export default function VoiceStyleSection({ store, user, onProfileUpdated }) {
     setResults(newResults);
     setUploading(false);
 
-    // If any succeeded, notify parent to refresh store data
     if (newResults.some(r => r.status === 'success' || r.status === 'partial')) {
       onProfileUpdated?.();
     }
@@ -307,19 +302,22 @@ function normaliseResult(fileName, data) {
     return {
       status: 'success',
       fileName,
-      convoCount:     data.conversation_count || data.convo_count || null,
-      detectedAuthor: data.detected_author    || data.shop_name   || null,
-      authorConfirmed: data.author_confirmed  ?? true,
+      convoCount:      data.conversation_count || data.convo_count || null,
+      detectedAuthor:  data.detected_author    || data.shop_name   || null,
+      authorConfirmed: data.author_confirmed   ?? true,
     };
   }
   if (status === 'partial' || data.warning) {
     return { status: 'partial', fileName, message: data.warning || data.message };
   }
-  if (status === 'wrong_author' || data.error === 'no_shop_messages') {
-    return {
-      status: 'wrong_author', fileName,
-      authors: data.detected_authors || data.authors || [],
-    };
+  // Catch "multiple participants" — n8n returns detectedAuthors in the body
+  const authors = data.detected_authors || data.detectedAuthors || data.authors || [];
+  if (
+    status === 'wrong_author' ||
+    data.error === 'no_shop_messages' ||
+    (authors.length > 0 && data.success === false)
+  ) {
+    return { status: 'wrong_author', fileName, authors };
   }
   if (data.error === 'not_zip' || status === 'bad_format') {
     return { status: 'bad_format', fileName };
@@ -372,30 +370,32 @@ function ResultCard({ result: r, authorChoices, chosenAuthor, setChosenAuthor, o
   }
 
   if (r.status === 'wrong_author') {
+    const authors = r.authors || authorChoices?.authors || [];
     return (
-      <div className={`${styles.resultCard} ${styles.resultError}`}>
+      <div className={`${styles.resultCard} ${styles.resultWarn}`}>
         <div className={styles.resultHead}>
-          <XCircle size={16} color="#dc2626"/>
-          <strong>Could not read this chat</strong>
+          <AlertTriangle size={16} color="#d97706"/>
+          <strong>Who is your shop in this chat?</strong>
         </div>
-        <p>We couldn't find any shop replies in this file. This can happen if the chat was
-          exported from the customer's phone, or the name your shop uses doesn't match what
-          we detected.</p>
-        {authorChoices?.authors?.length > 0 && (
+        <p>We found <strong>{authors.length}</strong> participants in this chat. Select which name is your shop so the AI can learn from your replies.</p>
+        {authors.length > 0 && (
           <div className={styles.authorPicker}>
-            <label>Detected names in this file: <strong>{authorChoices.authors.join(', ')}</strong></label>
             <div className={styles.authorRow}>
-              <select value={chosenAuthor}
-                onChange={e => setChosenAuthor(e.target.value)}
-                className={styles.authorSelect}>
-                <option value="">Select your shop's name…</option>
-                {authorChoices.authors.map(a => <option key={a} value={a}>{a}</option>)}
-              </select>
-              <button type="button" className={styles.retryBtn}
-                disabled={!chosenAuthor} onClick={onRetry}>
-                Try Again
-              </button>
+              {authors.map(a => (
+                <button
+                  key={a}
+                  type="button"
+                  className={`${styles.authorChip} ${chosenAuthor === a ? styles.authorChipActive : ''}`}
+                  onClick={() => setChosenAuthor(a)}
+                >
+                  {a}
+                </button>
+              ))}
             </div>
+            <button type="button" className={styles.retryBtn}
+              disabled={!chosenAuthor} onClick={onRetry}>
+              Train AI with selected name
+            </button>
           </div>
         )}
       </div>

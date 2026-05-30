@@ -12,7 +12,6 @@ import {
   planKey, PLAN_LABELS, hasFeature, effectiveLimit, fmtLimit, PLAN_LIMITS,
 } from '../lib/plans';
 import VoiceStyleSection from '../components/VoiceStyleSection';
-import UserManagement from '../components/UserManagement';
 import styles from './Profile.module.css';
 
 function FeatureRow({ icon: Icon, label, active, note }) {
@@ -266,18 +265,6 @@ export default function Profile() {
           />
         )}
 
-        {/* ── Team / User Management ── */}
-        <div className={styles.card} style={{ marginTop: 24 }}>
-          <div className={styles.cardTitle}>
-            <Users size={14} color="#C9A84C" /> Team Members
-            {storeUser && !['admin'].includes(storeUser.role) && (
-              <span style={{ fontSize: 11, color: 'rgba(201,168,76,.5)', fontFamily: 'DM Sans', fontWeight: 400, marginLeft: 8 }}>
-                (owner or admin only)
-              </span>
-            )}
-          </div>
-          <UserManagement />
-        </div>
       </div>
     </div>
   );

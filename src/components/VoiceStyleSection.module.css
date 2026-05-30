@@ -227,6 +227,25 @@
 .retryBtn:disabled { opacity: .5; cursor: not-allowed; }
 .retryBtn:hover:not(:disabled) { background: #162840; }
 
+.authorChip {
+  padding: 6px 14px;
+  border-radius: 99px;
+  border: 1.5px solid rgba(13,27,42,.2);
+  background: #fafafa;
+  font-size: 13px;
+  font-family: var(--font-body, inherit);
+  color: var(--navy, #0D1B2A);
+  cursor: pointer;
+  transition: all .15s;
+}
+.authorChip:hover { border-color: #C9A84C; background: rgba(201,168,76,.07); }
+.authorChipActive {
+  background: rgba(201,168,76,.15);
+  border-color: #C9A84C;
+  color: #8B6914;
+  font-weight: 600;
+}
+
 /* ── Privacy note ────────────────────────────────────────────────── */
 .privacy {
   display: flex; align-items: flex-start; gap: 6px;

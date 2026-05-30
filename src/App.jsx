@@ -9,6 +9,7 @@ import Inventory from './pages/Inventory';
 import Customers from './pages/Customers';
 import Analytics from './pages/Analytics';
 import Profile from './pages/Profile';
+import TeamPage from './pages/TeamPage';
 import Topbar from './components/Topbar';
 import Footer from './components/Footer';
 
@@ -62,6 +63,7 @@ function Shell({ activeTab, setActiveTab }) {
         {activeTab === 'inventory'  && <Inventory />}
         {activeTab === 'customers'  && <Customers />}
         {activeTab === 'analytics'  && <Analytics />}
+        {activeTab === 'team'       && <TeamPage />}
         {activeTab === 'profile'    && <Profile />}
       </div>
       <Footer />

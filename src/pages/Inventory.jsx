@@ -118,7 +118,7 @@ export default function Inventory() {
     if (!user?.id || !products.length) return;
     db.from('product_variants')
       .select('product_id, color, carat, is_in_stock')
-      .eq('owner_id', user.id)
+      .eq('owner_id', store.owner_id)
       .eq('is_active', true)
       .then(({ data }) => {
         if (!data?.length) return;
@@ -144,7 +144,7 @@ export default function Inventory() {
     const { data } = await db.from('products')
       .select('id, owner_id')
       .eq('sku', sku)
-      .eq('owner_id', user.id)
+      .eq('owner_id', store.owner_id)
       .eq('is_current', true);
     if (!data) return true;
     return excludeId ? data.every(d => d.id === excludeId) : data.length === 0;
@@ -185,7 +185,7 @@ export default function Inventory() {
       stock_qty:      form.stock_qty,
       description:    form.description || null,
       in_stock:       form.in_stock,
-      owner_id:       user.id,
+      owner_id:       store.owner_id,
       images:         finalImages,
       primary_image_url: finalImages[0] || null,
       is_current:     true,
@@ -215,7 +215,7 @@ export default function Inventory() {
         .from('products')
         .update(payload)
         .eq('id', editProduct.id)
-        .eq('owner_id', user.id)
+        .eq('owner_id', store.owner_id)
         .select()
         .single();
       if (error) throw error;
@@ -261,7 +261,7 @@ export default function Inventory() {
         const v = variants[i];
         const varPayload = {
           product_id:          savedProductId,
-          owner_id:            user.id,
+          owner_id:            store.owner_id,
           carat:               v.carat || '',
           color:               v.color === '__custom__' ? (v.customColor || 'Custom') : (v.color || 'Yellow Gold'),
           gross_weight:        v.gross_weight        ? Number(v.gross_weight)        : null,
@@ -293,7 +293,7 @@ export default function Inventory() {
       const { data: freshVars } = await db
         .from('product_variants')
         .select('product_id, color, carat, is_in_stock')
-        .eq('owner_id', user.id)
+        .eq('owner_id', store.owner_id)
         .eq('is_active', true);
       if (freshVars) {
         const map = {};
@@ -319,7 +319,7 @@ export default function Inventory() {
         .from('products')
         .update({ is_current: false })
         .eq('id', deleteTarget)
-        .eq('owner_id', user.id);
+        .eq('owner_id', store.owner_id);
       if (error) throw error;
       setProducts(prev => prev.filter(p => p.id !== deleteTarget));
       showToast('Product deleted.', '#C0392B');
@@ -335,7 +335,7 @@ export default function Inventory() {
       .from('products')
       .update({ in_stock: newInStock })
       .eq('id', product.id)
-      .eq('owner_id', user.id);
+      .eq('owner_id', store.owner_id);
     if (!error) {
       setProducts(prev => prev.map(p => p.id === product.id ? { ...p, in_stock: newInStock } : p));
       showToast(`Marked as ${newInStock ? 'In Stock' : 'Sold Out'}`, newInStock ? '#166534' : '#C0392B');
