@@ -120,7 +120,7 @@ language sql
 security definer
 set search_path = public
 as $$
-  select crypt(p_password, gen_salt('bf', 10));
+  select crypt(p_password, gen_salt('bf'::text, 10::int));
 $$;
 
 -- ── updated_at trigger ─────────────────────────────────────────────────────────
