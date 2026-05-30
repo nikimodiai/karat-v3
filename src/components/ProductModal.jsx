@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { X, Upload, Trash2, Tag, Zap, Image as ImageIcon, Layers } from 'lucide-react';
+import { X, Upload, Trash2, Tag, Zap, Image as ImageIcon, Layers, Sparkles } from 'lucide-react';
 import {
   CATEGORIES, SUBCATEGORY_MAP, METAL_PURITY_GROUPS, DIAMOND_PURITIES,
   SILVER_CATEGORIES, MAX_IMAGE_BYTES, db,
@@ -8,6 +8,7 @@ import {
 const ALL_METAL_OPTIONS = METAL_PURITY_GROUPS.flatMap(g => g.options);
 import DynamicPricingPanel from './DynamicPricingPanel';
 import VariantEditor, { VARIANT_COLORS } from './VariantEditor';
+import AIModelPanel from './AIModelPanel';
 import styles from './ProductModal.module.css';
 
 // DB column names (Supabase schema):
@@ -197,6 +198,17 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
     const nf = [...slotFiles]; nf[i] = null; setSlotFiles(nf);
     const ne = [...existingUrls]; ne[i] = null; setExisting(ne);
   };
+
+  // Insert an AI-generated model URL into the first empty image slot
+  const handleAIImage = useCallback((url) => {
+    setExisting(prev => {
+      const ne = [...prev];
+      const emptyIdx = ne.findIndex((v, i) => !v && !slotFiles[i]);
+      const target = emptyIdx >= 0 ? emptyIdx : 4; // fallback to last slot
+      ne[target] = url;
+      return ne;
+    });
+  }, [slotFiles]);
 
   const previewSrc = (i) => {
     if (slotFiles[i]) return URL.createObjectURL(slotFiles[i]);
@@ -581,6 +593,15 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
           <p className={styles.imgNote}>
             First image is the primary photo sent to WhatsApp customers. JPG, PNG, WebP · Max 5 MB each.
           </p>
+
+          {/* ④ AI Model */}
+          <div className="sec-label" style={{ marginTop: 20 }}>
+            <Sparkles size={11} style={{ verticalAlign: 'middle', marginRight: 4 }} /> ④ AI Model Try-On
+            <span style={{ fontWeight: 400, textTransform: 'none', fontSize: 11, marginLeft: 8, color: 'var(--ink-soft)' }}>
+              — generate a campaign-quality model photo
+            </span>
+          </div>
+          <AIModelPanel category={form.category} onAddImage={handleAIImage} />
 
           {/* Stock toggle */}
           <label className={styles.stockToggle}>
