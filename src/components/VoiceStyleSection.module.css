@@ -1,0 +1,244 @@
+.section {
+  margin-top: 32px;
+  padding-top: 28px;
+  border-top: 1px solid rgba(201,168,76,.15);
+}
+
+/* ── Section header ──────────────────────────────────────────────── */
+.sectionHead {
+  display: flex; align-items: flex-start; gap: 14px;
+  margin-bottom: 18px;
+}
+.sectionIcon {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: rgba(201,168,76,.1);
+  border: 1px solid rgba(201,168,76,.22);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.sectionTitle {
+  font-family: var(--font-display);
+  font-size: 20px; font-weight: 700;
+  color: var(--navy);
+  margin-bottom: 3px;
+}
+.sectionSub { font-size: 13px; color: var(--ink-mid); line-height: 1.5; }
+
+/* ── Benefit card ────────────────────────────────────────────────── */
+.benefitCard {
+  background: linear-gradient(135deg, rgba(201,168,76,.12) 0%, rgba(201,168,76,.04) 100%);
+  border: 1px solid rgba(201,168,76,.28);
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+.benefitTitle {
+  font-size: 12px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: #8B6914; margin-bottom: 8px;
+}
+.benefitText {
+  font-size: 13.5px; color: var(--navy);
+  line-height: 1.7; margin: 0;
+}
+
+/* ── Current profile widget ──────────────────────────────────────── */
+.currentProfile {
+  background: rgba(21,128,61,.05);
+  border: 1px solid rgba(21,128,61,.2);
+  border-radius: 12px;
+  padding: 14px 18px;
+  margin-bottom: 20px;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.cpHeader { display: flex; align-items: center; gap: 7px; }
+.cpTitle { font-size: 13px; font-weight: 700; color: #15803d; }
+.cpMeta { font-size: 12px; color: var(--ink-mid); }
+.cpMeta strong { color: var(--navy); }
+.cpSnippet {
+  font-size: 12.5px; color: var(--ink-soft);
+  font-style: italic; line-height: 1.5;
+  border-left: 3px solid rgba(201,168,76,.3);
+  padding-left: 10px;
+}
+.cpHint { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--ink-soft); }
+
+/* ── Steps accordion ─────────────────────────────────────────────── */
+.steps { display: flex; flex-direction: column; gap: 1px; margin-bottom: 20px; }
+
+.step {
+  border: 1.5px solid rgba(201,168,76,.2);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+.stepOpen { border-color: rgba(201,168,76,.45); }
+
+.stepHead {
+  width: 100%; display: flex; align-items: center; gap: 12px;
+  padding: 13px 16px;
+  background: #fdfcf9; border: none; cursor: pointer;
+  text-align: left; font-family: var(--font-body);
+  transition: background .14s;
+}
+.stepHead:hover { background: rgba(201,168,76,.06); }
+.stepOpen .stepHead { background: rgba(201,168,76,.07); }
+
+.stepNum {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--navy); color: #fff;
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.stepTitle { flex: 1; font-size: 14px; font-weight: 600; color: var(--navy); }
+
+.stepBody {
+  padding: 14px 18px 16px;
+  font-size: 13.5px; color: var(--ink-mid); line-height: 1.7;
+  border-top: 1px solid rgba(201,168,76,.15);
+}
+.stepBody p { margin: 0 0 8px; }
+.stepBody p:last-child { margin-bottom: 0; }
+.stepBody code {
+  background: rgba(11,24,41,.06); border-radius: 4px;
+  padding: 1px 5px; font-size: 12px; color: var(--navy);
+}
+
+.tip {
+  background: rgba(201,168,76,.08);
+  border-left: 3px solid var(--gold);
+  border-radius: 0 6px 6px 0;
+  padding: 8px 12px;
+  font-size: 13px; color: var(--navy);
+  margin-top: 6px;
+}
+
+/* ── OS Tabs ─────────────────────────────────────────────────────── */
+.osTabs { margin-top: 8px; }
+.osTabBar {
+  display: flex; gap: 6px; margin-bottom: 12px;
+}
+.osTab {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 14px; border-radius: 7px;
+  border: 1.5px solid rgba(201,168,76,.22);
+  background: #fff; cursor: pointer;
+  font-size: 12px; font-weight: 600;
+  font-family: var(--font-body); color: var(--ink-mid);
+  transition: all .14s;
+}
+.osTab:hover { border-color: rgba(201,168,76,.5); }
+.osTabActive { border-color: var(--navy); background: var(--navy); color: #fff; }
+
+.instrList {
+  margin: 0; padding-left: 20px;
+  display: flex; flex-direction: column; gap: 8px;
+  font-size: 13.5px; color: var(--ink-mid);
+}
+.instrList strong { color: var(--navy); }
+
+.smallNote { font-size: 12px; color: var(--ink-soft); }
+
+/* ── Drop zone ───────────────────────────────────────────────────── */
+.dropZone {
+  border: 2px dashed rgba(201,168,76,.35);
+  border-radius: 12px;
+  padding: 28px 20px;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  cursor: pointer; text-align: center;
+  background: rgba(201,168,76,.03);
+  transition: all .18s;
+}
+.dropZone:hover, .dropActive {
+  border-color: var(--gold); background: rgba(201,168,76,.07);
+}
+.dropLabel { font-size: 13.5px; color: var(--ink-mid); }
+.browse { color: var(--gold); font-weight: 600; text-decoration: underline; }
+.fileNames { font-size: 12px; color: var(--ink-soft); max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+
+.uploadHint { font-size: 12px; color: var(--ink-soft); margin: 6px 0 14px; }
+
+/* ── Upload button ───────────────────────────────────────────────── */
+.uploadBtn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 12px;
+  background: var(--navy); color: #fff;
+  border: none; border-radius: 10px; cursor: pointer;
+  font-size: 14px; font-weight: 600; font-family: var(--font-body);
+  transition: background .15s;
+}
+.uploadBtn:hover:not(:disabled) { background: #162840; }
+.uploadBtn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── Spinner ─────────────────────────────────────────────────────── */
+.spin { animation: spin .8s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Results ─────────────────────────────────────────────────────── */
+.results { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+
+.resultCard {
+  border-radius: 10px; padding: 14px 16px;
+  font-size: 13.5px; line-height: 1.6;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.resultCard p { margin: 0; color: var(--ink-mid); }
+.resultHead {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 14px; font-weight: 700; color: var(--navy);
+}
+.resultNote { font-size: 12.5px; color: var(--ink-soft); }
+
+.resultSuccess {
+  background: rgba(21,128,61,.06);
+  border: 1px solid rgba(21,128,61,.22);
+}
+.resultWarn {
+  background: rgba(217,119,6,.06);
+  border: 1px solid rgba(217,119,6,.25);
+}
+.resultError {
+  background: rgba(220,38,38,.05);
+  border: 1px solid rgba(220,38,38,.2);
+}
+
+/* ── Author picker ───────────────────────────────────────────────── */
+.authorPicker {
+  margin-top: 8px;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.authorPicker label { font-size: 13px; color: var(--navy); }
+.authorRow { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.authorSelect {
+  flex: 1; min-width: 160px;
+  border: 1.5px solid rgba(201,168,76,.3);
+  border-radius: 7px; padding: 7px 10px;
+  font-size: 13px; font-family: var(--font-body);
+  background: #fff; outline: none;
+}
+.authorSelect:focus { border-color: var(--gold); }
+.retryBtn {
+  padding: 7px 16px; border-radius: 7px;
+  background: var(--navy); color: #fff; border: none;
+  font-size: 13px; font-weight: 600; font-family: var(--font-body);
+  cursor: pointer; transition: background .14s;
+}
+.retryBtn:disabled { opacity: .5; cursor: not-allowed; }
+.retryBtn:hover:not(:disabled) { background: #162840; }
+
+/* ── Privacy note ────────────────────────────────────────────────── */
+.privacy {
+  display: flex; align-items: flex-start; gap: 6px;
+  font-size: 12px; color: var(--ink-soft); line-height: 1.6;
+  margin-top: 14px;
+  padding: 10px 14px;
+  background: rgba(11,24,41,.03);
+  border-radius: 8px;
+}
+
+@media (max-width: 640px) {
+  .sectionHead { flex-direction: column; }
+  .stepHead { padding: 11px 12px; }
+  .stepBody { padding: 12px 14px; }
+}

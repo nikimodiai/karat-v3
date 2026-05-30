@@ -25,6 +25,7 @@ export const N8N_DELETE_URL = N8N_BASE + '/delete-product';
 export const N8N_SIGNUP_URL    = N8N_BASE + '/store-approval-request';
 export const N8N_IMPORT_ANALYZE = N8N_BASE + '/karat-import/analyze';
 export const N8N_IMPORT_COMMIT  = N8N_BASE + '/karat-import/commit';
+export const N8N_VOICE_INGEST   = N8N_BASE + '/karat-voice-ingest';
 
 export const db = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {

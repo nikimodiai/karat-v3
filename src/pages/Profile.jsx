@@ -10,6 +10,7 @@ import { useStoreData } from '../hooks/useStoreData';
 import {
   planKey, PLAN_LABELS, hasFeature, effectiveLimit, fmtLimit, PLAN_LIMITS,
 } from '../lib/plans';
+import VoiceStyleSection from '../components/VoiceStyleSection';
 import styles from './Profile.module.css';
 
 function FeatureRow({ icon: Icon, label, active, note }) {
@@ -53,7 +54,7 @@ function LimitRow({ icon: Icon, label, used, limit }) {
 }
 
 export default function Profile() {
-  const { user, store, updateStore } = useAuth();
+  const { user, store, updateStore, refreshStore } = useAuth();
   const { showToast } = useToast();
   const { products } = useStoreData();
 
@@ -228,6 +229,13 @@ export default function Profile() {
             </div>
           </div>
         </div>
+
+        {/* ── AI Style Training ── */}
+        <VoiceStyleSection
+          store={store}
+          user={user}
+          onProfileUpdated={refreshStore}
+        />
       </div>
     </div>
   );
