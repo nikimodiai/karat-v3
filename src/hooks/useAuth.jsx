@@ -9,11 +9,6 @@ const AuthContext = createContext(null);
 const STORE_USER_KEY = 'karat_store_user_session';
 
 const getInitialAuthState = () => {
-  let initialUser = null;
-  let initialStore = null;
-  let initialStoreUser = null;
-  let initialStatus = 'loading';
-
   try {
     // Check store_user (staff) session first
     const suStr = localStorage.getItem(STORE_USER_KEY);
@@ -22,10 +17,12 @@ const getInitialAuthState = () => {
       if (su?.id && su?.owner_id) {
         const cachedStoreStr = localStorage.getItem('karat_cached_store');
         if (cachedStoreStr) {
-          initialStore = JSON.parse(cachedStoreStr);
-          initialStoreUser = su;
-          initialStatus = 'app';
-          return { initialUser: null, initialStore, initialStoreUser, initialStatus };
+          return {
+            initialUser: null,
+            initialStore: JSON.parse(cachedStoreStr),
+            initialStoreUser: su,
+            initialStatus: 'app',
+          };
         }
       }
     }
@@ -35,23 +32,27 @@ const getInitialAuthState = () => {
       const parsed = JSON.parse(storedStr);
       const user = parsed?.user || parsed?.currentSession?.user;
       if (user) {
-        initialUser = user;
         const cachedStoreStr = localStorage.getItem('karat_cached_store');
-        if (cachedStoreStr) {
-          initialStore = JSON.parse(cachedStoreStr);
-          initialStatus = 'app';
-        }
-      } else {
-        initialStatus = 'login';
+        const initialStore = cachedStoreStr ? JSON.parse(cachedStoreStr) : null;
+        return {
+          initialUser: user,
+          initialStore,
+          initialStoreUser: null,
+          // Only skip loading screen if we have a cached store; otherwise let
+          // onAuthStateChange resolve it (avoids stuck-on-loading if cache is stale).
+          initialStatus: initialStore ? 'app' : 'loading',
+        };
       }
-    } else {
-      initialStatus = 'login';
     }
   } catch (e) {
-    // Fallback to loading
+    // Corrupt localStorage — clear it and start fresh
+    try {
+      localStorage.removeItem('karat_cached_store');
+      localStorage.removeItem(STORE_USER_KEY);
+    } catch (_) {}
   }
 
-  return { initialUser, initialStore, initialStoreUser: null, initialStatus };
+  return { initialUser: null, initialStore: null, initialStoreUser: null, initialStatus: 'login' };
 };
 
 export function AuthProvider({ children }) {
