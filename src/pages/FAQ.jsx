@@ -36,7 +36,7 @@ export default function FAQ() {
       .order('sort_order', { ascending: true });
 
     if (error) {
-      showToast('Failed to load FAQs', 'error');
+      showToast('Failed to load FAQs', '#C0392B');
       setLoading(false);
       return;
     }
@@ -80,7 +80,7 @@ export default function FAQ() {
   // Persist the whole draft into owner_faqs in one shot
   const saveAllDrafts = async () => {
     if (faqs.length === 0) {
-      showToast('Add at least one FAQ before saving', 'error');
+      showToast('Add at least one FAQ before saving', '#C0392B');
       return;
     }
     setSavingAll(true);
@@ -96,11 +96,11 @@ export default function FAQ() {
       .select()
       .order('sort_order', { ascending: true });
     setSavingAll(false);
-    if (error) { showToast(error.message || 'Save failed', 'error'); return; }
+    if (error) { showToast(error.message || 'Save failed', '#C0392B'); return; }
     setFaqs(data || []);
     setIsDraft(false);
     setEditingId(null);
-    showToast('Your FAQs are now live for customers', 'success');
+    showToast('Your FAQs are now live for customers', '#166534');
   };
 
   const startEdit = (faq) => {
@@ -116,7 +116,7 @@ export default function FAQ() {
 
   const saveEdit = async (id) => {
     if (!editForm.question.trim() || !editForm.answer.trim()) {
-      showToast('Question and answer are required', 'error');
+      showToast('Question and answer are required', '#C0392B');
       return;
     }
     // In draft mode, edits stay local until the owner saves everything.
@@ -131,25 +131,25 @@ export default function FAQ() {
       .update({ question: editForm.question.trim(), answer: editForm.answer.trim() })
       .eq('id', id);
     setSaving(false);
-    if (error) { showToast('Save failed', 'error'); return; }
+    if (error) { showToast('Save failed', '#C0392B'); return; }
     setFaqs(prev => prev.map(f => f.id === id ? { ...f, question: editForm.question.trim(), answer: editForm.answer.trim() } : f));
     setEditingId(null);
-    showToast('FAQ updated', 'success');
+    showToast('FAQ updated', '#166534');
   };
 
   const deleteFaq = async (id) => {
     if (!window.confirm('Delete this FAQ?')) return;
     if (isDraft) { deleteDraft(id); return; }
     const { error } = await db.from('owner_faqs').delete().eq('id', id);
-    if (error) { showToast('Delete failed', 'error'); return; }
+    if (error) { showToast('Delete failed', '#C0392B'); return; }
     setFaqs(prev => prev.filter(f => f.id !== id));
     if (expandedId === id) setExpandedId(null);
-    showToast('FAQ deleted', 'success');
+    showToast('FAQ deleted', '#166534');
   };
 
   const saveNew = async () => {
     if (!newForm.question.trim() || !newForm.answer.trim()) {
-      showToast('Question and answer are required', 'error');
+      showToast('Question and answer are required', '#C0392B');
       return;
     }
     // In draft mode, append locally — persisted on "Save all".
@@ -178,12 +178,12 @@ export default function FAQ() {
       .select()
       .single();
     setSaving(false);
-    if (error) { showToast('Save failed', 'error'); return; }
+    if (error) { showToast('Save failed', '#C0392B'); return; }
     setFaqs(prev => [...prev, data]);
     setNewForm({ question: '', answer: '' });
     setAddingNew(false);
     setExpandedId(data.id);
-    showToast('FAQ added', 'success');
+    showToast('FAQ added', '#166534');
   };
 
   if (loading) {
