@@ -1,6 +1,6 @@
 import React, { useCallback, useState } from 'react';
 import { Plus, Trash2, Zap, Tag, ChevronDown, ChevronUp } from 'lucide-react';
-import { METAL_PURITY_GROUPS } from '../lib/config';
+import { METAL_PURITY_GROUPS, DIAMOND_PURITIES } from '../lib/config';
 import { DEFAULT_HALLMARK_FEE } from '../lib/pricing';
 import DynamicPricingPanel from './DynamicPricingPanel';
 import modalStyles from './ProductModal.module.css';
@@ -26,6 +26,8 @@ function newVariant(prefill = {}) {
     carat:              prefill.carat              ?? '',
     color:              prefill.color              ?? 'Yellow Gold',
     customColor:        '',
+    diamond_purity:     prefill.diamond_purity     ?? '',
+    diamond_color:      prefill.diamond_color      ?? '',
     gross_weight:       prefill.gross_weight       ?? '',
     gold_purity:        prefill.gold_purity        ?? '',
     gold_weight_grams:  prefill.gold_weight_grams  ?? '',
@@ -35,6 +37,7 @@ function newVariant(prefill = {}) {
     making_charge_type: prefill.making_charge_type ?? 'per_gram',
     making_charge_value:prefill.making_charge_value?? 0,
     hallmark_charge:    prefill.hallmark_charge     ?? DEFAULT_HALLMARK_FEE,
+    diamond_cert_fee:   prefill.diamond_cert_fee   ?? 0,
     stone_value_inr:    prefill.stone_value_inr     ?? 0,
     dynamic_price:      prefill.dynamic_price       ?? false,
     fixed_price:        prefill.fixed_price         ?? '',
@@ -60,6 +63,8 @@ export default function VariantEditor({ variants, onVariantsChange, productId, p
     // Pre-fill from parent product so owner only changes the differentiator
     const prefill = productForm ? {
       carat:               productForm.gold_carat        || productForm.gold_purity || '',
+      diamond_purity:      productForm.diamond_purity     || '',
+      diamond_color:       productForm.diamond_color      || '',
       gold_purity:         productForm.gold_purity        || '',
       gold_weight_grams:   productForm.gold_weight_grams  || '',
       silver_purity:       productForm.silver_purity      || '',
@@ -69,6 +74,7 @@ export default function VariantEditor({ variants, onVariantsChange, productId, p
       making_charge_type:  productForm.making_charge_type  || 'per_gram',
       making_charge_value: productForm.making_charge_value ?? 0,
       hallmark_charge:     productForm.hallmark_charge     ?? DEFAULT_HALLMARK_FEE,
+      diamond_cert_fee:    productForm.diamond_cert_fee    ?? 0,
       stone_value_inr:     productForm.stone_value_inr     ?? 0,
       dynamic_price:       productForm.dynamic_price       ?? false,
       fixed_price:         productForm.fixed_price         || '',
@@ -209,6 +215,25 @@ function VariantRow({ variant: v, index, expanded, onToggle, onChange, onRemove 
                 </optgroup>
               ))}
             </select>
+          </div>
+
+          {/* Diamond fields */}
+          <div className="fg fg2" style={{ marginTop: 12 }}>
+            <div className="fld">
+              <label className="lbl">Diamond Purity</label>
+              <select className="inp" value={v.diamond_purity || ''} onChange={e => onChange({ diamond_purity: e.target.value })}>
+                <option value="">None / N/A</option>
+                {DIAMOND_PURITIES.map(d => <option key={d} value={d}>{d}</option>)}
+              </select>
+            </div>
+            <div className="fld">
+              <label className="lbl">Diamond Color</label>
+              <input className="inp"
+                value={v.diamond_color || ''}
+                onChange={e => onChange({ diamond_color: e.target.value })}
+                placeholder="e.g. D, E, F, G, H…"
+              />
+            </div>
           </div>
 
           {/* Pricing mode toggle */}

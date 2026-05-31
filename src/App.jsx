@@ -10,6 +10,7 @@ import Customers from './pages/Customers';
 import Analytics from './pages/Analytics';
 import Profile from './pages/Profile';
 import TeamPage from './pages/TeamPage';
+import FAQ from './pages/FAQ';
 import Topbar from './components/Topbar';
 import Footer from './components/Footer';
 import VoiceStyleSection from './components/VoiceStyleSection';
@@ -93,6 +94,7 @@ function Shell({ activeTab, setActiveTab }) {
         {activeTab === 'analytics'  && <Analytics />}
         {activeTab === 'team'       && <TeamPage />}
         {activeTab === 'voice'      && <VoiceTab />}
+        {activeTab === 'faq'        && <FAQ />}
         {activeTab === 'profile'    && <Profile />}
       </div>
       <Footer />

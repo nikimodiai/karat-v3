@@ -154,6 +154,7 @@ export function calcJewelleryPrice({
   making, makingMode,
   stoneWeightCt, stoneRatePerCt, flatStoneCost,
   hallmarkFee,
+  diamondCertFee,
 }) {
   const gG = num(goldGrams);
   const sG = num(silverGrams);
@@ -171,11 +172,12 @@ export function calcJewelleryPrice({
   else if (makingMode === 'percent')  makingCost = roundP(metalCost * makingVal / 100);
   else                                makingCost = roundP(makingVal);
 
-  const stoneCost = roundP(num(stoneWeightCt) * num(stoneRatePerCt) + num(flatStoneCost));
-  const hallmark  = roundP(num(hallmarkFee, DEFAULT_HALLMARK_FEE));
-  const total     = roundP(goldCost + silverCost + makingCost + stoneCost + hallmark);
+  const stoneCost    = roundP(num(stoneWeightCt) * num(stoneRatePerCt) + num(flatStoneCost));
+  const hallmark     = roundP(num(hallmarkFee, DEFAULT_HALLMARK_FEE));
+  const diamondCert  = roundP(num(diamondCertFee));
+  const total        = roundP(goldCost + silverCost + makingCost + stoneCost + hallmark + diamondCert);
 
-  return { goldCost, silverCost, metalCost, makingCost, stoneCost, hallmark, total };
+  return { goldCost, silverCost, metalCost, makingCost, stoneCost, hallmark, diamondCert, total };
 }
 
 // ── metal_rates lookup helpers ──────────────────────────────────────

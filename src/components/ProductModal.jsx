@@ -21,7 +21,7 @@ import styles from './ProductModal.module.css';
 
 const EMPTY_FORM = {
   sku: '', name: '', category: '', sub_category: '',
-  gold_carat: '', diamond_purity: '', material: '', occasion: '',
+  gold_carat: '', diamond_purity: '', diamond_color: '', material: '', occasion: '',
   color: '',
   weight: '',
   // Two parallel price slots. `fixed_price` is what the owner types in
@@ -50,6 +50,7 @@ const EMPTY_FORM = {
   stone_value_inr: 0,
   diamond_value_inr: 0,
   hallmark_charge: 45,
+  diamond_cert_fee: 0,
   // Optional stone breakdown — local-only, not persisted as separate columns
   stone_weight_ct: '',
   stone_rate_per_ct: '',
@@ -81,6 +82,7 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
         sub_category:   product.sub_category   || '',
         gold_carat:     product.gold_carat     || '',
         diamond_purity: product.diamond_purity || '',
+        diamond_color:  product.diamond_color  || '',
         material:       product.material       || '',
         occasion:       product.occasion       || '',
         color:          product.color          || '',
@@ -107,6 +109,7 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
         stone_value_inr:     product.stone_value_inr     ?? 0,
         diamond_value_inr:   product.diamond_value_inr   ?? 0,
         hallmark_charge:     product.hallmark_charge     ?? 45,
+        diamond_cert_fee:    product.diamond_cert_fee    ?? 0,
         stone_weight_ct:     '',
         stone_rate_per_ct:   '',
         flat_stone_cost:     '',
@@ -142,6 +145,9 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
               wastage_percent:     row.wastage_percent      ?? 0,
               making_charge_value: row.making_charge_value ?? 0,
               hallmark_charge:     row.hallmark_charge      ?? 45,
+              diamond_cert_fee:    row.diamond_cert_fee     ?? 0,
+              diamond_purity:      row.diamond_purity       ?? '',
+              diamond_color:       row.diamond_color        ?? '',
               stone_value_inr:     row.stone_value_inr      ?? 0,
             }))
           );
@@ -415,7 +421,7 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
             </div>
           </div>
 
-          <div className="fg fg3" style={{ marginTop: 14 }}>
+          <div className="fg fg2" style={{ marginTop: 14 }}>
             <div className="fld">
               <label className="lbl">Diamond Purity</label>
               {customDiamondMode ? (
@@ -440,6 +446,18 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
                 </select>
               )}
             </div>
+            <div className="fld">
+              <label className="lbl">Diamond Color</label>
+              <input
+                className="inp"
+                value={form.diamond_color}
+                onChange={e => set('diamond_color', e.target.value)}
+                placeholder="e.g. D, E, F, G, H…"
+              />
+            </div>
+          </div>
+
+          <div className="fg fg2" style={{ marginTop: 14 }}>
             <div className="fld">
               <label className="lbl">Stone / Material</label>
               <input

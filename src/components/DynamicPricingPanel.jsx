@@ -30,6 +30,7 @@ export default function DynamicPricingPanel({ value, onChange, onTotalChange }) 
   const makingMode         = v.making_charge_type   || 'per_gram';
   const makingValue        = v.making_charge_value  ?? '';
   const hallmark           = v.hallmark_charge      ?? DEFAULT_HALLMARK_FEE;
+  const diamondCertFee     = v.diamond_cert_fee     ?? 0;
   const stoneWeightCt      = v.stone_weight_ct      ?? '';
   const stoneRatePerCt     = v.stone_rate_per_ct    ?? '';
   const flatStoneCost      = v.flat_stone_cost      ?? '';
@@ -82,8 +83,9 @@ export default function DynamicPricingPanel({ value, onChange, onTotalChange }) 
     making: makingValue,  makingMode,
     stoneWeightCt, stoneRatePerCt, flatStoneCost,
     hallmarkFee: hallmark,
+    diamondCertFee,
   }), [goldGrams, goldRpgEff, silverGrams, silverInfo.rate,
-       makingValue, makingMode, stoneWeightCt, stoneRatePerCt, flatStoneCost, hallmark]);
+       makingValue, makingMode, stoneWeightCt, stoneRatePerCt, flatStoneCost, hallmark, diamondCertFee]);
 
   // Push the live total + persisted snapshot of metal_type/weight up to parent
   useEffect(() => {
@@ -192,16 +194,19 @@ export default function DynamicPricingPanel({ value, onChange, onTotalChange }) 
         </div>
       </details>
 
-      {/* Hallmark ──────────────────────────────────────── */}
-      <div className={styles.section}>Hallmark / BIS Fee</div>
+      {/* Hallmark + Diamond cert ───────────────────────── */}
+      <div className={styles.section}>Hallmark / BIS &amp; Diamond Certification</div>
       <div className={styles.row}>
         <div className={styles.field}>
           <label>Hallmark fee (₹)</label>
           <input type="number" min="0" value={hallmark}
             onChange={e => patch({ hallmark_charge: e.target.value })}/>
         </div>
-        <div className={styles.field} aria-hidden style={{ visibility: 'hidden' }}>
-          <label>.</label><input/>
+        <div className={styles.field}>
+          <label>Diamond certification fee (₹)</label>
+          <input type="number" min="0" value={diamondCertFee}
+            onChange={e => patch({ diamond_cert_fee: e.target.value })}
+            placeholder="e.g. 500"/>
         </div>
       </div>
 
@@ -212,6 +217,7 @@ export default function DynamicPricingPanel({ value, onChange, onTotalChange }) 
         <BrkRow label="Making charges" value={result.makingCost}/>
         <BrkRow label="Stones / diamonds" value={result.stoneCost}/>
         <BrkRow label="Hallmark"       value={result.hallmark}/>
+        <BrkRow label="Diamond cert"   value={result.diamondCert}/>
         <div className={styles.line}/>
         <BrkRow label="TOTAL (ex-GST)" value={result.total} big bold/>
       </div>
