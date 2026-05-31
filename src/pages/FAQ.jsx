@@ -21,7 +21,10 @@ export default function FAQ() {
   const [saving, setSaving] = useState(false);
   const [savingAll, setSavingAll] = useState(false);
 
-  const ownerId = store?.id || user?.id;
+  // owner_faqs.owner_id is a FK to auth.users(id) and RLS checks
+  // owner_id = auth.uid(), so we must use the auth user id — which is
+  // store.owner_id for staff sessions, or user.id for the owner directly.
+  const ownerId = store?.owner_id || user?.id;
 
   const load = useCallback(async () => {
     if (!ownerId) return;
@@ -93,7 +96,7 @@ export default function FAQ() {
       .select()
       .order('sort_order', { ascending: true });
     setSavingAll(false);
-    if (error) { showToast('Save failed', 'error'); return; }
+    if (error) { showToast(error.message || 'Save failed', 'error'); return; }
     setFaqs(data || []);
     setIsDraft(false);
     setEditingId(null);
