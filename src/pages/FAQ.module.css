@@ -62,6 +62,32 @@
 .addBtn:hover { opacity: .88; }
 .addBtn:disabled { opacity: .5; cursor: default; }
 
+/* Draft banner */
+.draftBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: linear-gradient(135deg, rgba(201,168,76,.1), rgba(201,168,76,.04));
+  border: 1px solid rgba(201,168,76,.35);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.draftBannerText {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--navy);
+  line-height: 1.5;
+  flex: 1;
+  min-width: 240px;
+}
+.draftBannerText strong { font-weight: 700; }
+
 /* FAQ card */
 .list {
   display: flex;

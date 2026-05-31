@@ -1,57 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Pencil, Trash2, Check, X, HelpCircle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, Pencil, Trash2, Check, X, HelpCircle, ChevronDown, ChevronUp, Sparkles, Save } from 'lucide-react';
 import { db } from '../lib/config';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import styles from './FAQ.module.css';
 
-const DEFAULT_FAQS = [
-  {
-    question: 'What is your return policy?',
-    answer: 'We accept returns within 7 days of delivery for unused, undamaged items in original packaging. Custom or engraved jewellery cannot be returned. Please contact us with your order details to initiate a return.',
-  },
-  {
-    question: 'How long does delivery take?',
-    answer: 'Standard delivery takes 5–7 business days. Express delivery (2–3 business days) is available at an additional charge. Custom and made-to-order pieces may take 10–15 business days.',
-  },
-  {
-    question: 'Do you offer free shipping?',
-    answer: 'Yes, we offer free shipping on all orders above ₹5,000. Orders below this amount have a flat shipping charge of ₹150.',
-  },
-  {
-    question: 'Is the jewellery BIS hallmarked?',
-    answer: 'Yes, all our gold jewellery is BIS hallmarked as per Government of India regulations. Each piece comes with a hallmark certificate ensuring purity.',
-  },
-  {
-    question: 'Can I get jewellery customised or made to order?',
-    answer: 'Absolutely! We specialise in custom jewellery. Share your design, reference photo, or idea with us on WhatsApp and we will provide a quote and timeline.',
-  },
-  {
-    question: 'Do you provide a certificate of authenticity for diamonds?',
-    answer: 'Yes, diamonds above 0.30 ct come with a GIA or IGI certification. Smaller stones are certified in-house. Certificate details are shared at the time of purchase.',
-  },
-  {
-    question: 'What payment methods do you accept?',
-    answer: 'We accept UPI, net banking, credit/debit cards, and cash on delivery (COD) for orders up to ₹10,000. EMI options are available on select items.',
-  },
-  {
-    question: 'Can I exchange old gold for new jewellery?',
-    answer: 'Yes, we offer gold exchange at current market rates. Bring your old gold jewellery to our store and our team will evaluate it and apply the value towards your new purchase.',
-  },
-  {
-    question: 'How do I care for and clean my jewellery?',
-    answer: 'Store jewellery in separate soft pouches to avoid scratches. Clean gold jewellery with mild soap and warm water using a soft brush. Avoid exposing jewellery to chemicals, perfume, or chlorine water.',
-  },
-  {
-    question: 'Do you offer repair and resizing services?',
-    answer: 'Yes, we offer ring resizing, chain repair, prong retipping, rhodium plating, and general servicing. Bring your piece to the store or courier it to us. Most repairs are completed within 3–5 business days.',
-  },
-];
-
 export default function FAQ() {
   const { user, store } = useAuth();
   const { showToast } = useToast();
   const [faqs, setFaqs] = useState([]);
+  // `draft` mode = the owner has no saved FAQs yet, so we show the global
+  // sample_faqs catalogue as an editable draft they can tweak then save.
+  const [isDraft, setIsDraft] = useState(false);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState(null);
   const [editingId, setEditingId] = useState(null);
@@ -59,6 +19,7 @@ export default function FAQ() {
   const [addingNew, setAddingNew] = useState(false);
   const [newForm, setNewForm] = useState({ question: '', answer: '' });
   const [saving, setSaving] = useState(false);
+  const [savingAll, setSavingAll] = useState(false);
 
   const ownerId = store?.id || user?.id;
 
@@ -78,27 +39,66 @@ export default function FAQ() {
     }
 
     if (!data || data.length === 0) {
-      // Seed default FAQs for this owner
-      const rows = DEFAULT_FAQS.map((f, i) => ({
-        owner_id: ownerId,
-        question: f.question,
-        answer: f.answer,
-        sort_order: i,
-      }));
-      const { data: inserted, error: insErr } = await db
-        .from('owner_faqs')
-        .insert(rows)
-        .select();
-      if (!insErr && inserted) {
-        setFaqs(inserted);
-      }
+      // No saved FAQs yet → pull the shared sample catalogue and show it
+      // as an editable draft. Nothing is persisted until the owner saves.
+      const { data: samples } = await db
+        .from('sample_faqs')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order', { ascending: true });
+
+      setFaqs(
+        (samples || []).map((s, i) => ({
+          id: `draft-${s.id || i}`,   // local-only key, never sent to DB
+          question: s.question,
+          answer: s.answer,
+          sort_order: i,
+        }))
+      );
+      setIsDraft(true);
     } else {
       setFaqs(data);
+      setIsDraft(false);
     }
     setLoading(false);
   }, [ownerId, showToast]);
 
   useEffect(() => { load(); }, [load]);
+
+  // ── Draft mode: local mutations (not persisted until "Save all") ──
+  const updateDraft = (id, patch) =>
+    setFaqs(prev => prev.map(f => f.id === id ? { ...f, ...patch } : f));
+
+  const deleteDraft = (id) => {
+    setFaqs(prev => prev.filter(f => f.id !== id));
+    if (expandedId === id) setExpandedId(null);
+  };
+
+  // Persist the whole draft into owner_faqs in one shot
+  const saveAllDrafts = async () => {
+    if (faqs.length === 0) {
+      showToast('Add at least one FAQ before saving', 'error');
+      return;
+    }
+    setSavingAll(true);
+    const rows = faqs.map((f, i) => ({
+      owner_id: ownerId,
+      question: f.question.trim(),
+      answer: f.answer.trim(),
+      sort_order: i,
+    }));
+    const { data, error } = await db
+      .from('owner_faqs')
+      .insert(rows)
+      .select()
+      .order('sort_order', { ascending: true });
+    setSavingAll(false);
+    if (error) { showToast('Save failed', 'error'); return; }
+    setFaqs(data || []);
+    setIsDraft(false);
+    setEditingId(null);
+    showToast('Your FAQs are now live for customers', 'success');
+  };
 
   const startEdit = (faq) => {
     setEditingId(faq.id);
@@ -116,6 +116,12 @@ export default function FAQ() {
       showToast('Question and answer are required', 'error');
       return;
     }
+    // In draft mode, edits stay local until the owner saves everything.
+    if (isDraft) {
+      updateDraft(id, { question: editForm.question.trim(), answer: editForm.answer.trim() });
+      setEditingId(null);
+      return;
+    }
     setSaving(true);
     const { error } = await db
       .from('owner_faqs')
@@ -130,6 +136,7 @@ export default function FAQ() {
 
   const deleteFaq = async (id) => {
     if (!window.confirm('Delete this FAQ?')) return;
+    if (isDraft) { deleteDraft(id); return; }
     const { error } = await db.from('owner_faqs').delete().eq('id', id);
     if (error) { showToast('Delete failed', 'error'); return; }
     setFaqs(prev => prev.filter(f => f.id !== id));
@@ -140,6 +147,20 @@ export default function FAQ() {
   const saveNew = async () => {
     if (!newForm.question.trim() || !newForm.answer.trim()) {
       showToast('Question and answer are required', 'error');
+      return;
+    }
+    // In draft mode, append locally — persisted on "Save all".
+    if (isDraft) {
+      const draft = {
+        id: `draft-new-${Date.now()}`,
+        question: newForm.question.trim(),
+        answer: newForm.answer.trim(),
+        sort_order: faqs.length,
+      };
+      setFaqs(prev => [...prev, draft]);
+      setNewForm({ question: '', answer: '' });
+      setAddingNew(false);
+      setExpandedId(draft.id);
       return;
     }
     setSaving(true);
@@ -193,6 +214,23 @@ export default function FAQ() {
             <Plus size={14} /> Add FAQ
           </button>
         </div>
+
+        {/* Draft banner — shown until the owner saves the sample set */}
+        {isDraft && faqs.length > 0 && (
+          <div className={styles.draftBanner}>
+            <div className={styles.draftBannerText}>
+              <Sparkles size={15} color="#8B6914" />
+              <span>
+                These are <strong>sample FAQs</strong> to get you started. Tweak the
+                wording to match your store, then save to make them live for customers.
+              </span>
+            </div>
+            <button className={styles.btnGold} onClick={saveAllDrafts} disabled={savingAll}>
+              {savingAll ? <div className="spinner spinner-sm" /> : <Save size={13} />}
+              Save all to my FAQs
+            </button>
+          </div>
+        )}
 
         {/* New FAQ form */}
         {addingNew && (
