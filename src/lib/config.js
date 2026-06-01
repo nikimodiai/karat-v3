@@ -19,14 +19,14 @@ export const CLOUDINARY_CLOUD = env.VITE_CLOUDINARY_CLOUD || 'jewelleryinventory
 export const CLOUDINARY_PRESET = env.VITE_CLOUDINARY_PRESET || 'jewelleryupload';
 
 export const N8N_BASE = env.VITE_N8N_BASE || 'https://n8n.srv1639765.hstgr.cloud/webhook';
-// Kept for backward compat with old workflow URLs (deprecated — add/edit is now direct).
-export const N8N_UPLOAD_URL = N8N_BASE + '/jewellery-upload';
-export const N8N_DELETE_URL = N8N_BASE + '/delete-product';
 export const N8N_SIGNUP_URL    = N8N_BASE + '/store-approval-request';
 export const N8N_IMPORT_ANALYZE = N8N_BASE + '/karat-import/analyze';
 export const N8N_IMPORT_COMMIT  = N8N_BASE + '/karat-import/commit';
 export const N8N_VOICE_INGEST   = N8N_BASE + '/karat-voice-ingest';
 export const N8N_AI_MODEL       = N8N_BASE + '/karat-ai-model';
+// Image-search vectorization: receives { product_id, primary_image_url },
+// generates an embedding for the main image, writes it back to the product row.
+export const N8N_ADD_PRODUCT_VECTOR = N8N_BASE + '/add_product_vector';
 
 export const db = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
