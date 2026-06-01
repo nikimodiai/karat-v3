@@ -26,7 +26,10 @@ export const N8N_VOICE_INGEST   = N8N_BASE + '/karat-voice-ingest';
 export const N8N_AI_MODEL       = N8N_BASE + '/karat-ai-model';
 // Image-search vectorization: receives { product_id, primary_image_url },
 // generates an embedding for the main image, writes it back to the product row.
-export const N8N_ADD_PRODUCT_VECTOR = N8N_BASE + '/add_product_vector';
+// NOTE: pointed at the n8n /webhook-test endpoint — only fires while the
+// workflow is open in the editor with "Listen for test event" active. Swap to
+// the production /webhook URL before going live.
+export const N8N_ADD_PRODUCT_VECTOR = 'https://n8n.srv1639765.hstgr.cloud/webhook-test/add_product_vector';
 
 export const db = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
