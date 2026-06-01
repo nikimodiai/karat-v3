@@ -6,6 +6,7 @@ import {
 import {
   db, CLOUDINARY_CLOUD, CLOUDINARY_PRESET,
   CATEGORIES, GOLD_CARATS, MAX_IMAGE_BYTES,
+  N8N_ADD_PRODUCT_VECTOR,
 } from '../lib/config';
 import { effectiveLimit, planKey, PLAN_LABELS } from '../lib/plans';
 import { useAuth } from '../hooks/useAuth';
@@ -63,6 +64,30 @@ async function uploadImageToCloudinary(file) {
   if (!res.ok) throw new Error('Image upload failed');
   const json = await res.json();
   return json.secure_url || null;
+}
+
+// ── Image-search vectorization ──────────────────────────────────────
+// Fire the n8n workflow that embeds the product's primary image and
+// writes the vector back to the row. Resolves true on success so the
+// caller can surface "ready for image search". Never throws — a failed
+// embedding must not block the product save that already succeeded.
+async function vectorizeProductImage(productId, primaryImageUrl) {
+  try {
+    const res = await fetch(N8N_ADD_PRODUCT_VECTOR, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product_id: productId, primary_image_url: primaryImageUrl }),
+      credentials: 'omit',
+      mode: 'cors',
+    });
+    if (!res.ok) return false;
+    // n8n may respond with {} or { success: true }. Treat 200 as success
+    // unless it explicitly reports a failure.
+    const data = await res.json().catch(() => ({}));
+    return data?.success !== false;
+  } catch {
+    return false;
+  }
 }
 
 // Rough storage estimate for images already uploaded (best-effort; the
@@ -232,7 +257,20 @@ export default function Inventory() {
       if (error) throw error;
       setProducts(prev => [data, ...prev]);
       savedProductId = data.id;
-      showToast('Product added!', '#166534');
+      showToast('Product saved — now vectorizing for image search…', '#1D4ED8');
+
+      // Embed the primary image so the product is searchable by photo.
+      // Runs after the row exists (we need product_id) and only when there's
+      // an image. Non-blocking failure: the product is already saved.
+      if (data.primary_image_url) {
+        vectorizeProductImage(data.id, data.primary_image_url).then(ok => {
+          showToast(
+            ok ? 'Vectorization complete — product ready for image search!'
+               : 'Saved, but image-search vectorization failed. You can re-save to retry.',
+            ok ? '#166534' : '#C0392B'
+          );
+        });
+      }
     }
 
     // 3) Persist variants ─────────────────────────────────────────
