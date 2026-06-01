@@ -68,9 +68,15 @@ async function uploadImageToCloudinary(file) {
 
 // ── Image-search vectorization ──────────────────────────────────────
 // Fire the n8n workflow that embeds the product's primary image and
-// writes the vector back to the row. Resolves true on success so the
-// caller can surface "ready for image search". Never throws — a failed
-// embedding must not block the product save that already succeeded.
+// writes the vector back to the row. Returns { ok, error } reflecting the
+// workflow's actual outcome. Never throws — a failed embedding must not
+// block the product save that already succeeded.
+//
+// The workflow only reaches its "Respond to Webhook" node (which returns
+// { success: true }) when every step — Gemini embed + Supabase PATCH —
+// succeeds. Any failure aborts the run before that node, so n8n returns a
+// non-2xx error instead. We therefore require an EXPLICIT success: true and
+// treat everything else as a failure, surfacing whatever message n8n gives.
 async function vectorizeProductImage(productId, primaryImageUrl) {
   try {
     const res = await fetch(N8N_ADD_PRODUCT_VECTOR, {
@@ -80,13 +86,25 @@ async function vectorizeProductImage(productId, primaryImageUrl) {
       credentials: 'omit',
       mode: 'cors',
     });
-    if (!res.ok) return false;
-    // n8n may respond with {} or { success: true }. Treat 200 as success
-    // unless it explicitly reports a failure.
-    const data = await res.json().catch(() => ({}));
-    return data?.success !== false;
-  } catch {
-    return false;
+
+    const raw = await res.text().catch(() => '');
+    let data = null;
+    try { data = raw ? JSON.parse(raw) : null; } catch { /* non-JSON body */ }
+
+    if (res.ok && data?.success === true) {
+      return { ok: true };
+    }
+
+    // Surface the workflow's actual error. n8n error responses usually carry
+    // a `message`; fall back to the raw body or the HTTP status.
+    const error =
+      data?.message ||
+      (data && data.success === false && 'workflow reported failure') ||
+      (raw && raw.slice(0, 200)) ||
+      `HTTP ${res.status}`;
+    return { ok: false, error };
+  } catch (e) {
+    return { ok: false, error: e.message || 'network error' };
   }
 }
 
@@ -263,10 +281,10 @@ export default function Inventory() {
       // Runs after the row exists (we need product_id) and only when there's
       // an image. Non-blocking failure: the product is already saved.
       if (data.primary_image_url) {
-        vectorizeProductImage(data.id, data.primary_image_url).then(ok => {
+        vectorizeProductImage(data.id, data.primary_image_url).then(({ ok, error }) => {
           showToast(
             ok ? 'Vectorization complete — product ready for image search!'
-               : 'Saved, but image-search vectorization failed. You can re-save to retry.',
+               : `Image-search vectorization failed: ${error}`,
             ok ? '#166534' : '#C0392B'
           );
         });
