@@ -196,10 +196,22 @@ export const RATE_UNIT = {
   silver:   { perGramFactor: 1000, label: '/kg'  },
 };
 
+// IBJA-standard fineness values for each karat (matches daily_metal_rates keys).
+// Using a lookup table avoids floating-point rounding (e.g. 22/24×1000 = 916.67
+// which Math.round gives 917, but IBJA publishes 916).
+const KARAT_TO_IBJA_FINENESS = {
+  8: 333, 9: 375, 10: 417, 14: 585, 16: 667,
+  18: 750, 20: 833, 21: 875, 22: 916, 23: 958, 24: 999,
+};
+
 export function purityToMetalType(purity) {
   if (!purity) return null;
-  const k = String(purity).match(/^(\d+)K/);
-  if (k) return `gold_${Math.round(Number(k[1]) / 24 * 1000)}`;
+  const k = String(purity).match(/^(\d+)K/i);
+  if (k) {
+    const karat = Number(k[1]);
+    const fineness = KARAT_TO_IBJA_FINENESS[karat] ?? Math.round(karat / 24 * 1000);
+    return `gold_${fineness}`;
+  }
   const s = String(purity).match(/^(\d{3})\s*Silver/i);
   if (s) return `silver_${s[1]}`;
   if (/plat/i.test(purity)) return 'platinum';
