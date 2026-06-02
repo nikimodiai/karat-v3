@@ -165,7 +165,7 @@ export default function Analytics() {
       const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
       out.push({
         month: d.toLocaleDateString('en-IN', { month: 'short' }),
-        conversations: i === 0 ? convUsed : 0,
+        credits: i === 0 ? convUsed : 0,
       });
     }
     return out;
@@ -200,7 +200,7 @@ export default function Analytics() {
         {!isPro && (
           <UpgradeBanner
             title="Unlock Full Analytics"
-            message="Professional plan adds customer tier analysis, conversation trends, AI usage breakdown, and category composition."
+            message="Professional plan adds customer tier analysis, credit usage trends, AI usage breakdown, and category composition."
             ctaLabel="Upgrade Plan"
           />
         )}
@@ -208,7 +208,7 @@ export default function Analytics() {
         {/* ── Usage This Month ───────────────────────────────────── */}
         <SectionTitle icon={Activity}>Usage This Month</SectionTitle>
         <div className={styles.usageGrid}>
-          <UsageCard icon={MessageSquare} label="Conversations" used={convUsed}        limit={convLimit}/>
+          <UsageCard icon={MessageSquare} label="Credits" used={convUsed}        limit={convLimit}/>
           <UsageCard icon={Package}       label="Products"      used={products.length} limit={prodLimit}/>
           {hasFeature(store, 'ai_models') && (
             <UsageCard icon={Cpu} label="AI Model Calls" used={aiUsed} limit={aiLimit}/>
@@ -328,7 +328,7 @@ export default function Analytics() {
                 ) : <EmptyChart icon={Users} text="No customers yet"/>}
               </ChartBox>
 
-              <ChartBox title="Conversation Trend (6 mo)" height={220}>
+              <ChartBox title="Credit Usage Trend (6 mo)" height={220}>
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={monthlyTrend} margin={{top:4,right:4,left:-20,bottom:0}}>
                     <defs>
@@ -341,7 +341,7 @@ export default function Analytics() {
                     <XAxis dataKey="month" tick={{fontSize:11,fontFamily:'DM Sans',fill:'rgba(11,24,41,.45)'}} axisLine={false} tickLine={false}/>
                     <YAxis tick={{fontSize:9,fontFamily:'DM Sans',fill:'rgba(11,24,41,.35)'}} axisLine={false} tickLine={false} allowDecimals={false}/>
                     <Tooltip content={<CustomTooltip/>}/>
-                    <Area type="monotone" dataKey="conversations" name="Conversations"
+                    <Area type="monotone" dataKey="credits" name="Credits"
                       stroke="#C9A84C" strokeWidth={2} fill="url(#convGrad)"
                       dot={{r:4,fill:'#C9A84C',strokeWidth:0}} activeDot={{r:6}}/>
                   </AreaChart>
@@ -413,7 +413,7 @@ export default function Analytics() {
         {/* ── Customer Interactions (Pro/Enterprise) ───────────── */}
         {showPro && (
           <>
-            <SectionTitle icon={MessageSquare}>Customer Interactions — Last 7 Days</SectionTitle>
+            <SectionTitle icon={MessageSquare}>Customer Chats</SectionTitle>
             <CustomerInsights />
           </>
         )}

@@ -131,6 +131,23 @@
 }
 .removeFile:hover { color: #dc2626; }
 
+/* Dynamic pricing toggle */
+.dynamicToggle {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  background: rgba(124,58,237,.05);
+  border: 1px solid rgba(124,58,237,.2);
+  border-radius: 10px;
+  font-size: 13px; font-weight: 600;
+  color: var(--navy); cursor: pointer;
+  flex-wrap: wrap;
+}
+.dynamicHint {
+  font-size: 11px; font-weight: 400;
+  color: var(--ink-soft); line-height: 1.4;
+}
+
 /* ── Mapping step ────────────────────────────────────────────── */
 .mappingSection { display: flex; flex-direction: column; }
 .mappingMeta {

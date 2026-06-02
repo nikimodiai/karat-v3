@@ -136,10 +136,10 @@ export default function AIModelPanel({ category, onAddImage }) {
 
       setResultUrl(url);
 
-      // Increment _ai_used in stores table
+      // Increment _ai_used in stores table (always stored as integer)
       await db
         .from('stores')
-        .update({ _ai_used: aiUsed + 1 })
+        .update({ _ai_used: Math.floor(aiUsed || 0) + 1 })
         .eq('owner_id', store.owner_id);
       await refreshStore();
     } catch (err) {
