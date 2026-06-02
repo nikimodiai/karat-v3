@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { X, Upload, Trash2, Tag, Zap, Image as ImageIcon, Layers, Sparkles } from 'lucide-react';
+import { X, Upload, Trash2, Tag, Zap, Image as ImageIcon, Layers, Sparkles, Camera } from 'lucide-react';
 import {
   CATEGORIES, SUBCATEGORY_MAP, METAL_PURITY_GROUPS, DIAMOND_PURITIES,
   SILVER_CATEGORIES, MAX_IMAGE_BYTES, db,
@@ -67,6 +67,7 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
   const [subcats, setSubcats]       = useState([]);
   const [variants, setVariants]     = useState([]);
   const fileRefs = useRef([null,null,null,null,null]);
+  const camRefs  = useRef([null,null,null,null,null]);
   const isEdit   = !!product;
 
   const [customCatMode,     setCustomCatMode]     = useState(false);
@@ -606,10 +607,15 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
                       {i === 0 && <span className={styles.imgPrimary}>Primary</span>}
                     </>
                   ) : (
-                    <button className={styles.imgAdd} onClick={() => fileRefs.current[i]?.click()}>
-                      <Upload size={16} strokeWidth={1.5} />
-                      <span>{i === 0 ? 'Primary image' : 'Add photo'}</span>
-                    </button>
+                    <div className={styles.imgAddWrap}>
+                      <button className={styles.imgAdd} onClick={() => fileRefs.current[i]?.click()}>
+                        <Upload size={15} strokeWidth={1.5} />
+                        <span>{i === 0 ? 'Primary image' : 'Add photo'}</span>
+                      </button>
+                      <button className={styles.imgCam} onClick={() => camRefs.current[i]?.click()} title="Take photo">
+                        <Camera size={13} strokeWidth={1.5} />
+                      </button>
+                    </div>
                   )}
                   <input
                     ref={el => fileRefs.current[i] = el}
@@ -618,12 +624,20 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
                     style={{ display: 'none' }}
                     onChange={e => handleFile(i, e.target.files?.[0])}
                   />
+                  <input
+                    ref={el => camRefs.current[i] = el}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    style={{ display: 'none' }}
+                    onChange={e => handleFile(i, e.target.files?.[0])}
+                  />
                 </div>
               );
             })}
           </div>
           <p className={styles.imgNote}>
-            Primary image (slot 1) must be a clear jewellery-only photo — plain background, no model — it is used for image search and sent to WhatsApp customers. JPG, PNG, WebP · Max 5 MB each.
+            Primary image (slot 1) must be a clear jewellery only photo — plain background, no model — it is used for image search for WhatsApp customers. Max 5 MB file size each.
           </p>
 
           {/* ④ AI Model */}

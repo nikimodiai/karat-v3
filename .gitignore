@@ -37,3 +37,4 @@ coverage/
 # n8n workflow JSON exports and SQL scripts — kept locally, not in public repo
 IBJA Metal Rate Scraper*.json
 replace_metal_rates.sql
+*.n8n.json
