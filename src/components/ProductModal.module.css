@@ -76,6 +76,7 @@
   position: relative;
   background: var(--cream);
   border: 1.5px dashed rgba(201,168,76,.25);
+  display: flex; align-items: center; justify-content: center;
 }
 
 .imgPreview {
@@ -132,6 +133,23 @@
   transition: color .15s, background .15s;
 }
 .imgAdd:hover { color: var(--navy); background: rgba(201,168,76,.06); }
+
+.imgAddWrap {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 6px; width: 100%; height: 100%;
+}
+.imgCam {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  background: rgba(23,48,90,.07);
+  border: 1px solid rgba(23,48,90,.2);
+  border-radius: 50%;
+  color: var(--navy);
+  cursor: pointer;
+  transition: all .15s;
+  flex-shrink: 0;
+}
+.imgCam:hover { background: rgba(23,48,90,.14); border-color: var(--navy); }
 
 .imgNote {
   font-size: 11.5px;

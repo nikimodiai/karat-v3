@@ -59,7 +59,8 @@ export default function DynamicPricingPanel({ value, onChange, onTotalChange }) 
         const normalized = rows
           .filter(r => r.rate_date === latestDate)
           .map(r => ({
-            metal_type:    r.metal_key.replace(/_pm$/i, ''),
+            // Strip the _am / _pm time-of-day suffix that IBJA appends
+            metal_type:    r.metal_key.replace(/_(am|pm)$/i, ''),
             rate_per_gram: Number(r.rate_inr),
           }));
         setRatesErr(null);
