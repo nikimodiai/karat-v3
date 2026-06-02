@@ -200,7 +200,7 @@ export default function Analytics() {
         {!isPro && (
           <UpgradeBanner
             title="Unlock Full Analytics"
-            message="Professional plan adds customer tier analysis, conversation trends, AI usage breakdown, and category composition."
+            message="Professional plan adds customer tier analysis, credit usage trends, AI usage breakdown, and category composition."
             ctaLabel="Upgrade Plan"
           />
         )}
@@ -413,7 +413,7 @@ export default function Analytics() {
         {/* ── Customer Interactions (Pro/Enterprise) ───────────── */}
         {showPro && (
           <>
-            <SectionTitle icon={MessageSquare}>Customer Interactions — Last 7 Days</SectionTitle>
+            <SectionTitle icon={MessageSquare}>Customer Chats</SectionTitle>
             <CustomerInsights />
           </>
         )}

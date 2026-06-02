@@ -201,7 +201,7 @@ export default function CustomerInsights() {
       <div className={styles.header}>
         <div className={styles.titleRow}>
           <MessageSquare size={16} strokeWidth={1.5} color="var(--gold-dk)"/>
-          <span className={styles.title}>Customer Conversations</span>
+          <span className={styles.title}>Customer Chats</span>
         </div>
         <div className={styles.headerRight}>
           <div className={styles.periodRow}>
@@ -227,11 +227,11 @@ export default function CustomerInsights() {
       </div>
 
       {loading ? (
-        <div className={styles.stateRow}><div className="spinner spinner-sm"/> Loading conversations…</div>
+        <div className={styles.stateRow}><div className="spinner spinner-sm"/> Loading chats…</div>
       ) : error ? (
         <div className={styles.stateRow} style={{ color: 'var(--err)' }}>{error}</div>
       ) : customers.length === 0 ? (
-        <div className={styles.stateRow}>No customer conversations in the selected period.</div>
+        <div className={styles.stateRow}>No customer chats in the selected period.</div>
       ) : (
         <div className={styles.list}>
           {customers.map(c => (

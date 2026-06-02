@@ -1,16 +1,21 @@
 .panel {
-  background: linear-gradient(180deg, rgba(201,168,76,.05) 0%, #fff 100%);
-  border: 1px solid rgba(201,168,76,.28);
+  background: linear-gradient(135deg, rgba(201,168,76,.13) 0%, rgba(255,248,228,.7) 40%, #fff 100%);
+  border: 2px solid rgba(201,168,76,.55);
   border-radius: 12px;
   padding: 14px 16px;
   margin-top: 12px;
+  box-shadow: 0 2px 14px rgba(201,168,76,.18);
 }
 
 .head {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 12px; font-weight: 600;
-  color: var(--navy);
-  margin-bottom: 6px;
+  display: flex; align-items: center; gap: 7px;
+  font-size: 12px; font-weight: 700;
+  color: #8B6914;
+  background: rgba(201,168,76,.18);
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(201,168,76,.3);
 }
 .muted { color: var(--ink-soft); font-weight: 500; }
 .warn  { color: #b45309; font-weight: 600; }

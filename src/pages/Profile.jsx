@@ -246,15 +246,19 @@ export default function Profile() {
                   <div className={styles.creditCost}><strong>1</strong> credit</div>
                 </div>
                 <div className={styles.creditItem}>
-                  <div className={styles.creditFeature}><Camera size={12} color="#8B6914"/> Image search query</div>
-                  <div className={styles.creditCost}><strong>2</strong> credits</div>
-                </div>
-                <div className={styles.creditItem}>
                   <div className={styles.creditFeature}><Camera size={12} color="#8B6914"/> Voice search query</div>
                   <div className={styles.creditCost}><strong>2</strong> credits</div>
                 </div>
                 <div className={styles.creditItem}>
+                  <div className={styles.creditFeature}><Camera size={12} color="#8B6914"/> Image search query</div>
+                  <div className={styles.creditCost}><strong>3</strong> credits</div>
+                </div>
+                <div className={styles.creditItem}>
                   <div className={styles.creditFeature}><Cpu size={12} color="#8B6914"/> AI model try-on</div>
+                  <div className={styles.creditCost}><strong>1</strong> AI credit <span className={styles.creditNote}>(separate pool)</span></div>
+                </div>
+                <div className={styles.creditItem}>
+                  <div className={styles.creditFeature}><Shirt size={12} color="#8B6914"/> Selfie try-on</div>
                   <div className={styles.creditCost}><strong>1</strong> AI credit <span className={styles.creditNote}>(separate pool)</span></div>
                 </div>
               </div>
