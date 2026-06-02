@@ -1,8 +1,14 @@
 import { useState, useEffect, useCallback } from 'react';
-import { MessageSquare, ChevronDown, ChevronUp, Sparkles, User, Clock, RefreshCw } from 'lucide-react';
+import { MessageSquare, ChevronDown, ChevronUp, Sparkles, User, Clock, RefreshCw, Bot } from 'lucide-react';
 import { db, N8N_BASE } from '../lib/config';
 import { useAuth } from '../hooks/useAuth';
 import styles from './CustomerInsights.module.css';
+
+const PERIODS = [
+  { label: '1 Hour',  value: '1h',  ms: 3600000 },
+  { label: '1 Day',   value: '1d',  ms: 86400000 },
+  { label: '7 Days',  value: '7d',  ms: 7 * 86400000 },
+];
 
 function fmtTime(iso) {
   if (!iso) return '';
@@ -68,13 +74,24 @@ function CustomerRow({ customer, onSummarise }) {
             )}
           </div>
 
-          {/* Message list */}
+          {/* Conversation thread */}
           <div className={styles.msgList}>
             {customer.messages.map((m, i) => (
-              <div key={i} className={styles.msgRow}>
+              <div key={i} className={styles.msgGroup}>
                 <div className={styles.msgTime}>{fmtTime(m.created_at)}</div>
-                <div className={styles.msgText}>{m.customer_message || <em style={{ color: 'var(--ink-soft)' }}>No message text</em>}</div>
-                {m.feature && <span className={styles.featureTag} style={{ marginLeft: 'auto', flexShrink: 0 }}>{m.feature}</span>}
+                {m.customer_message && (
+                  <div className={styles.msgBubbleCustomer}>
+                    <User size={10} style={{ flexShrink: 0 }}/>
+                    <span>{m.customer_message}</span>
+                  </div>
+                )}
+                {m.ai_reply && (
+                  <div className={styles.msgBubbleAI}>
+                    <Bot size={10} style={{ flexShrink: 0 }}/>
+                    <span>{m.ai_reply}</span>
+                  </div>
+                )}
+                {m.feature && <span className={styles.featureTag} style={{ marginLeft: 'auto', flexShrink: 0, alignSelf: 'flex-end' }}>{m.feature}</span>}
               </div>
             ))}
           </div>
@@ -89,16 +106,19 @@ export default function CustomerInsights() {
   const [customers, setCustomers] = useState([]);
   const [loading,   setLoading]   = useState(true);
   const [error,     setError]     = useState(null);
+  const [period,    setPeriod]    = useState('7d');
 
   const load = useCallback(async () => {
     if (!user?.id) return;
     setLoading(true);
     setError(null);
 
-    const since = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
+    const periodMs = PERIODS.find(p => p.value === period)?.ms ?? 7 * 86400000;
+    const since = new Date(Date.now() - periodMs).toISOString();
+
     const { data, error: err } = await db
       .from('whatsapp_logs')
-      .select('wa_from, wa_name, customer_message, feature, created_at')
+      .select('wa_from, wa_name, customer_message, ai_reply, sender, feature, created_at')
       .eq('owner_id', user.id)
       .gte('created_at', since)
       .order('created_at', { ascending: false })
@@ -132,22 +152,20 @@ export default function CustomerInsights() {
 
     setCustomers(list);
     setLoading(false);
-  }, [user?.id]);
+  }, [user?.id, period]);
 
   useEffect(() => { load(); }, [load]);
 
   const handleSummarise = async (customer) => {
-    // Mark as loading
     setCustomers(prev => prev.map(c =>
       c.phone === customer.phone ? { ...c, summarising: true } : c
     ));
 
     try {
-      // Call n8n webhook for AI summary (keeps API key server-side)
       const messages = customer.messages
         .map(m => m.customer_message)
         .filter(Boolean)
-        .slice(0, 50)  // cap at 50 messages for cost
+        .slice(0, 50)
         .join('\n');
 
       const res = await fetch(`${N8N_BASE}/customer-summary`, {
@@ -183,25 +201,37 @@ export default function CustomerInsights() {
       <div className={styles.header}>
         <div className={styles.titleRow}>
           <MessageSquare size={16} strokeWidth={1.5} color="var(--gold-dk)"/>
-          <span className={styles.title}>Customer Interactions</span>
-          <span className={styles.badge}>Last 7 days</span>
+          <span className={styles.title}>Customer Conversations</span>
         </div>
-        <div className={styles.stats}>
-          <span><strong>{customers.length}</strong> customers</span>
-          <span>·</span>
-          <span><strong>{totalMsgs}</strong> messages</span>
-          <button className={styles.refreshBtn} onClick={load} disabled={loading} title="Refresh">
-            <RefreshCw size={12} className={loading ? styles.spin : ''}/>
-          </button>
+        <div className={styles.headerRight}>
+          <div className={styles.periodRow}>
+            {PERIODS.map(p => (
+              <button
+                key={p.value}
+                className={`${styles.periodBtn} ${period === p.value ? styles.periodBtnActive : ''}`}
+                onClick={() => setPeriod(p.value)}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+          <div className={styles.stats}>
+            <span><strong>{customers.length}</strong> customers</span>
+            <span>·</span>
+            <span><strong>{totalMsgs}</strong> messages</span>
+            <button className={styles.refreshBtn} onClick={load} disabled={loading} title="Refresh">
+              <RefreshCw size={12} className={loading ? styles.spin : ''}/>
+            </button>
+          </div>
         </div>
       </div>
 
       {loading ? (
-        <div className={styles.stateRow}><div className="spinner spinner-sm"/> Loading interactions…</div>
+        <div className={styles.stateRow}><div className="spinner spinner-sm"/> Loading conversations…</div>
       ) : error ? (
         <div className={styles.stateRow} style={{ color: 'var(--err)' }}>{error}</div>
       ) : customers.length === 0 ? (
-        <div className={styles.stateRow}>No customer interactions in the last 7 days.</div>
+        <div className={styles.stateRow}>No customer conversations in the selected period.</div>
       ) : (
         <div className={styles.list}>
           {customers.map(c => (

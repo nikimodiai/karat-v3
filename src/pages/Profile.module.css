@@ -103,6 +103,24 @@
   .planHero { padding:20px; }
 }
 
+/* Credit usage guide */
+.creditGuide { display: flex; flex-direction: column; gap: 2px; }
+.creditItem {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 12px; border-radius: 8px; transition: background .12s;
+}
+.creditItem:hover { background: var(--cream); }
+.creditFeature {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 13px; color: var(--navy);
+}
+.creditCost {
+  font-size: 12px; color: var(--ink-mid);
+  display: flex; align-items: center; gap: 4px;
+}
+.creditCost strong { color: var(--navy); font-size: 14px; }
+.creditNote { font-size: 10px; color: var(--ink-soft); }
+
 /* Plan-limit rows */
 .limitRow { display: flex; flex-direction: column; gap: 5px; }
 .limitHead {

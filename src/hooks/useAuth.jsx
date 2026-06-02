@@ -38,9 +38,11 @@ const getInitialAuthState = () => {
           initialUser: user,
           initialStore,
           initialStoreUser: null,
-          // Only skip loading screen if we have a cached store; otherwise let
-          // onAuthStateChange resolve it (avoids stuck-on-loading if cache is stale).
-          initialStatus: initialStore ? 'app' : 'loading',
+          // Always start with 'loading' for Google OAuth — Supabase fires
+          // INITIAL_SESSION synchronously so the transition is fast, but this
+          // prevents the cached dashboard from briefly showing to users whose
+          // sessions have expired.
+          initialStatus: 'loading',
         };
       }
     }
