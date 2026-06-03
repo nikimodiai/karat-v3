@@ -90,7 +90,7 @@ export default function Profile() {
     { icon: Camera,      label: 'Image Search',              active: hasFeature(store, 'image_search') },
     { icon: Users,       label: 'Customer Tiers (VVIP/VIP)', active: hasFeature(store, 'customer_tiers') },
     { icon: Cpu,         label: 'Advanced AI Models',        active: hasFeature(store, 'ai_models') },
-    { icon: Shirt,       label: 'Virtual Try-On',            active: hasFeature(store, 'virtual_tryon') },
+    { icon: Shirt,       label: 'Selfie Try-On',             active: hasFeature(store, 'virtual_tryon') },
     { icon: BarChart2,   label: 'Analytics',                 active: !!planSpec.features.analytics, note: planSpec.features.analytics },
   ];
 
@@ -260,7 +260,7 @@ export default function Profile() {
                 <LimitRow icon={MessageSquare} label="Credits / month" used={convUsed}     limit={convLimit}/>
                 <LimitRow icon={ShoppingBag}   label="Products"              used={productCount} limit={prodLimit}/>
                 <LimitRow icon={Cpu}           label="AI Model Calls"        used={aiUsed}       limit={aiLimit}/>
-                <LimitRow icon={HardDrive}     label="Image Storage (GB)"    used={0}            limit={storageLimit}/>
+
               </div>
             </div>
 
