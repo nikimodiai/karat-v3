@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useState } from 'react';
 import {
   X, Upload, FileSpreadsheet, Sparkles, ChevronRight,
-  AlertTriangle, CheckCircle, Loader, RotateCcw, Package,
+  AlertTriangle, CheckCircle, Loader, RotateCcw, Package, Zap,
 } from 'lucide-react';
 import { N8N_IMPORT_ANALYZE, N8N_IMPORT_COMMIT } from '../lib/config';
 import { useAuth } from '../hooks/useAuth';
@@ -72,9 +72,10 @@ export default function BulkImportModal({ onClose, onImportDone }) {
   const [mapping,     setMapping]     = useState({});    // { targetField: sourceColumn }
 
   // Step 3 state
-  const [dryResult,   setDryResult]   = useState(null);
-  const [importing,   setImporting]   = useState(false);
-  const [importDone,  setImportDone]  = useState(null);
+  const [dryResult,     setDryResult]     = useState(null);
+  const [importing,     setImporting]     = useState(false);
+  const [importDone,    setImportDone]    = useState(null);
+  const [dynamicPricing, setDynamicPricing] = useState(false);
 
   const fileRef = useRef(null);
 
@@ -160,7 +161,7 @@ export default function BulkImportModal({ onClose, onImportDone }) {
           import_id: analyzeData.import_id,
           owner_id:  user.id,
           mapping,
-          defaults:  {},
+          defaults:  dynamicPricing ? { dynamic_price: true } : {},
           dry_run:   true,
           variant_mode: false,
         }),
@@ -191,7 +192,7 @@ export default function BulkImportModal({ onClose, onImportDone }) {
           import_id: analyzeData.import_id,
           owner_id:  user.id,
           mapping,
-          defaults:  {},
+          defaults:  dynamicPricing ? { dynamic_price: true } : {},
           dry_run:   false,
           variant_mode: false,
         }),
@@ -274,6 +275,21 @@ export default function BulkImportModal({ onClose, onImportDone }) {
               </div>
               <input ref={fileRef} type="file" accept=".csv,.xls,.xlsx,.ods" style={{ display:'none' }}
                 onChange={e => handleFile(e.target.files?.[0])}/>
+
+              {/* Dynamic pricing toggle */}
+              <label className={styles.dynamicToggle}>
+                <input
+                  type="checkbox"
+                  checked={dynamicPricing}
+                  onChange={e => setDynamicPricing(e.target.checked)}
+                  style={{ width: 15, height: 15, accentColor: 'var(--navy)', cursor: 'pointer' }}
+                />
+                <Zap size={13} color={dynamicPricing ? '#7c3aed' : 'var(--ink-soft)'}/>
+                <span>Enable Dynamic Pricing for all imported products</span>
+                <span className={styles.dynamicHint}>
+                  — price auto-updates with daily metal rates (map gold/silver weight columns in Step 2)
+                </span>
+              </label>
 
               <div className={styles.footer}>
                 <button className="btn-ghost" onClick={onClose}>Cancel</button>

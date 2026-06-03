@@ -32,15 +32,27 @@ const getInitialAuthState = () => {
       const parsed = JSON.parse(storedStr);
       const user = parsed?.user || parsed?.currentSession?.user;
       if (user) {
+        // Check JWT expiry without a network call (just decode the payload)
+        const accessToken = parsed?.access_token || parsed?.currentSession?.access_token;
+        let tokenStillValid = false;
+        if (accessToken) {
+          try {
+            const payload = JSON.parse(atob(accessToken.split('.')[1]));
+            tokenStillValid = (payload.exp * 1000) > (Date.now() + 60000); // 60s buffer
+          } catch {}
+        }
+
         const cachedStoreStr = localStorage.getItem('karat_cached_store');
         const initialStore = cachedStoreStr ? JSON.parse(cachedStoreStr) : null;
         return {
           initialUser: user,
           initialStore,
           initialStoreUser: null,
-          // Only skip loading screen if we have a cached store; otherwise let
-          // onAuthStateChange resolve it (avoids stuck-on-loading if cache is stale).
-          initialStatus: initialStore ? 'app' : 'loading',
+          // Fast path: show app immediately only if JWT is still valid AND store
+          // is cached — this restores near-instant load for active sessions.
+          // Expired tokens → 'loading' so Supabase refresh/reject runs before
+          // showing the dashboard, eliminating the "5-second flash then login" bug.
+          initialStatus: (tokenStillValid && initialStore) ? 'app' : 'loading',
         };
       }
     }

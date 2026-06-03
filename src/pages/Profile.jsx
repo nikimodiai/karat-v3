@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   Lock, Check, X, Crown, Store, Phone, Mail, MapPin, Wifi, Diamond,
-  ShoppingBag, Users, Cpu, Shirt, BarChart2, Camera, MessageSquare, HardDrive,
+  ShoppingBag, Users, Cpu, Shirt, BarChart2, Camera, MessageSquare, HardDrive, Zap,
 } from 'lucide-react';
 import { db } from '../lib/config';
 import { useAuth } from '../hooks/useAuth';
@@ -90,7 +90,7 @@ export default function Profile() {
     { icon: Camera,      label: 'Image Search',              active: hasFeature(store, 'image_search') },
     { icon: Users,       label: 'Customer Tiers (VVIP/VIP)', active: hasFeature(store, 'customer_tiers') },
     { icon: Cpu,         label: 'Advanced AI Models',        active: hasFeature(store, 'ai_models') },
-    { icon: Shirt,       label: 'Virtual Try-On',            active: hasFeature(store, 'virtual_tryon') },
+    { icon: Shirt,       label: 'Selfie Try-On',             active: hasFeature(store, 'virtual_tryon') },
     { icon: BarChart2,   label: 'Analytics',                 active: !!planSpec.features.analytics, note: planSpec.features.analytics },
   ];
 
@@ -140,8 +140,8 @@ export default function Profile() {
         </div>
 
         <div className={styles.grid}>
-          {/* Left: Editable */}
-          <div>
+          {/* Left: Editable + Credit Guide */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <div className={styles.card}>
               <div className={styles.cardTitle}><Store size={16} color="#C9A84C" /> Store Details</div>
 
@@ -197,6 +197,33 @@ export default function Profile() {
                 </button>
               )}
             </div>
+
+            {/* Credit usage guide — left column */}
+            <div className={styles.card}>
+              <div className={styles.cardTitle}><Zap size={14} color="#C9A84C" /> Credit Usage Guide</div>
+              <div className={styles.creditGuide}>
+                <div className={styles.creditItem}>
+                  <div className={styles.creditFeature}><MessageSquare size={12} color="#8B6914"/> WhatsApp text reply</div>
+                  <div className={styles.creditCost}><strong>1</strong> credit</div>
+                </div>
+                <div className={styles.creditItem}>
+                  <div className={styles.creditFeature}><Camera size={12} color="#8B6914"/> Voice search query</div>
+                  <div className={styles.creditCost}><strong>2</strong> credits</div>
+                </div>
+                <div className={styles.creditItem}>
+                  <div className={styles.creditFeature}><Camera size={12} color="#8B6914"/> Image search query</div>
+                  <div className={styles.creditCost}><strong>3</strong> credits</div>
+                </div>
+                <div className={styles.creditItem}>
+                  <div className={styles.creditFeature}><Cpu size={12} color="#8B6914"/> AI model try-on</div>
+                  <div className={styles.creditCost}><strong>1</strong> AI credit <span className={styles.creditNote}>(separate pool)</span></div>
+                </div>
+                <div className={styles.creditItem}>
+                  <div className={styles.creditFeature}><Shirt size={12} color="#8B6914"/> Selfie try-on</div>
+                  <div className={styles.creditCost}><strong>1</strong> AI credit <span className={styles.creditNote}>(separate pool)</span></div>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Right: Read-only contact + Plan limits + Features */}
@@ -230,10 +257,10 @@ export default function Profile() {
             <div className={styles.card}>
               <div className={styles.cardTitle}><Crown size={14} color="#C9A84C" /> Plan Limits & Usage</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 4 }}>
-                <LimitRow icon={MessageSquare} label="Conversations / month" used={convUsed}     limit={convLimit}/>
+                <LimitRow icon={MessageSquare} label="Credits / month" used={convUsed}     limit={convLimit}/>
                 <LimitRow icon={ShoppingBag}   label="Products"              used={productCount} limit={prodLimit}/>
                 <LimitRow icon={Cpu}           label="AI Model Calls"        used={aiUsed}       limit={aiLimit}/>
-                <LimitRow icon={HardDrive}     label="Image Storage (GB)"    used={0}            limit={storageLimit}/>
+
               </div>
             </div>
 

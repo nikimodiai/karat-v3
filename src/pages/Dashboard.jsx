@@ -91,7 +91,7 @@ export default function Dashboard({ onNavigate }) {
 
   // ── Alerts ─────────────────────────────────────────────────────
   const alerts = [];
-  if (convPct >= 90)  alerts.push({ type:'warn', msg:`WhatsApp conversations at ${convPct}% of monthly limit` });
+  if (convPct >= 90)  alerts.push({ type:'warn', msg:`WhatsApp credits at ${convPct}% of monthly limit` });
   if (prodPct >= 90)  alerts.push({ type:'warn', msg:`Product count at ${prodPct}% of plan limit` });
   if (soldOut > inStock && products.length > 0) alerts.push({ type:'info', msg:`${soldOut} items out of stock — consider restocking` });
   if (store?.plan_expires_at) {
@@ -172,7 +172,7 @@ export default function Dashboard({ onNavigate }) {
             color="#be123c" bg="rgba(190,18,60,.08)"
           />
           <StatCard
-            icon={MessageSquare} label="Conversations" value={convUsed}
+            icon={MessageSquare} label="Credits Used" value={convUsed}
             sub={`of ${fmtLimit(convLimit)} this month`}
             color="#17305A" bg="rgba(23,48,90,.09)"
           />
@@ -266,7 +266,7 @@ export default function Dashboard({ onNavigate }) {
             </div>
             <div className={styles.gaugeList}>
               <GaugeBar label="Products"      used={products.length} limit={prodLimit} color="#C9A84C"/>
-              <GaugeBar label="Conversations" used={convUsed}        limit={convLimit} color="#17305A"/>
+              <GaugeBar label="Credits" used={convUsed}        limit={convLimit} color="#17305A"/>
               {hasFeature(store, 'ai_models') && (
                 <GaugeBar label="AI Model Calls" used={aiUsed} limit={aiLimit} color="#7c3aed"/>
               )}

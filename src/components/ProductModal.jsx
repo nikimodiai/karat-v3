@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { X, Upload, Trash2, Tag, Zap, Image as ImageIcon, Layers, Sparkles } from 'lucide-react';
+import { X, Upload, Trash2, Tag, Zap, Image as ImageIcon, Layers, Sparkles, Camera } from 'lucide-react';
 import {
   CATEGORIES, SUBCATEGORY_MAP, METAL_PURITY_GROUPS, DIAMOND_PURITIES,
   SILVER_CATEGORIES, MAX_IMAGE_BYTES, db,
@@ -60,12 +60,14 @@ const EMPTY_FORM = {
 export default function ProductModal({ product, store, onSave, onClose, checkSKU, planLimits }) {
   const [form, setForm]             = useState(EMPTY_FORM);
   const [slotFiles, setSlotFiles]   = useState([null,null,null,null,null]);
+  const [slotBlobUrls, setSlotBlobUrls] = useState([null,null,null,null,null]);
   const [existingUrls, setExisting] = useState([null,null,null,null,null]);
   const [skuError, setSkuError]     = useState('');
   const [saving, setSaving]         = useState(false);
   const [subcats, setSubcats]       = useState([]);
   const [variants, setVariants]     = useState([]);
   const fileRefs = useRef([null,null,null,null,null]);
+  const camRefs  = useRef([null,null,null,null,null]);
   const isEdit   = !!product;
 
   const [customCatMode,     setCustomCatMode]     = useState(false);
@@ -119,6 +121,7 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
       urls.forEach((u, i) => { if (i < 5) existing[i] = u; });
       setExisting(existing);
       setSlotFiles([null,null,null,null,null]);
+      setSlotBlobUrls(prev => { prev.forEach(u => u && URL.revokeObjectURL(u)); return [null,null,null,null,null]; });
       if (product.category) setSubcats(SUBCATEGORY_MAP[product.category] || []);
       // Detect custom (not-in-list) values saved in older or manually-entered products
       const knownSubs = product.category ? (SUBCATEGORY_MAP[product.category] || []) : [];
@@ -155,6 +158,7 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
     } else {
       setForm(EMPTY_FORM);
       setSlotFiles([null,null,null,null,null]);
+      setSlotBlobUrls(prev => { prev.forEach(u => u && URL.revokeObjectURL(u)); return [null,null,null,null,null]; });
       setExisting([null,null,null,null,null]);
       setSubcats([]);
       setVariants([]);
@@ -196,11 +200,25 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
       alert('Please select an image file.');
       return;
     }
+    // Create a stable blob URL so re-renders don't flicker the image
+    const url = URL.createObjectURL(file);
+    setSlotBlobUrls(prev => {
+      const n = [...prev];
+      if (n[i]) URL.revokeObjectURL(n[i]);
+      n[i] = url;
+      return n;
+    });
     const newFiles = [...slotFiles]; newFiles[i] = file; setSlotFiles(newFiles);
     const newExisting = [...existingUrls]; newExisting[i] = null; setExisting(newExisting);
   };
 
   const removeSlot = (i) => {
+    setSlotBlobUrls(prev => {
+      const n = [...prev];
+      if (n[i]) URL.revokeObjectURL(n[i]);
+      n[i] = null;
+      return n;
+    });
     const nf = [...slotFiles]; nf[i] = null; setSlotFiles(nf);
     const ne = [...existingUrls]; ne[i] = null; setExisting(ne);
   };
@@ -216,10 +234,7 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
     });
   }, [slotFiles]);
 
-  const previewSrc = (i) => {
-    if (slotFiles[i]) return URL.createObjectURL(slotFiles[i]);
-    return existingUrls[i] || null;
-  };
+  const previewSrc = (i) => slotBlobUrls[i] || existingUrls[i] || null;
 
   // Has any image at all?
   const imageCount = useMemo(
@@ -592,10 +607,15 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
                       {i === 0 && <span className={styles.imgPrimary}>Primary</span>}
                     </>
                   ) : (
-                    <button className={styles.imgAdd} onClick={() => fileRefs.current[i]?.click()}>
-                      <Upload size={16} strokeWidth={1.5} />
-                      <span>{i === 0 ? 'Add cover' : 'Add photo'}</span>
-                    </button>
+                    <div className={styles.imgAddWrap}>
+                      <button className={styles.imgAdd} onClick={() => fileRefs.current[i]?.click()}>
+                        <Upload size={15} strokeWidth={1.5} />
+                        <span>{i === 0 ? 'Primary image' : 'Add photo'}</span>
+                      </button>
+                      <button className={styles.imgCam} onClick={() => camRefs.current[i]?.click()} title="Take photo">
+                        <Camera size={13} strokeWidth={1.5} />
+                      </button>
+                    </div>
                   )}
                   <input
                     ref={el => fileRefs.current[i] = el}
@@ -604,12 +624,20 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
                     style={{ display: 'none' }}
                     onChange={e => handleFile(i, e.target.files?.[0])}
                   />
+                  <input
+                    ref={el => camRefs.current[i] = el}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    style={{ display: 'none' }}
+                    onChange={e => handleFile(i, e.target.files?.[0])}
+                  />
                 </div>
               );
             })}
           </div>
           <p className={styles.imgNote}>
-            First image is the primary photo sent to WhatsApp customers. JPG, PNG, WebP · Max 5 MB each.
+            Primary image (slot 1) must be a clear jewellery only photo — plain background, no model — it is used for image search for WhatsApp customers. Max 5 MB file size each.
           </p>
 
           {/* ④ AI Model */}

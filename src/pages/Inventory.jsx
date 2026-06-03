@@ -6,6 +6,7 @@ import {
 import {
   db, CLOUDINARY_CLOUD, CLOUDINARY_PRESET,
   CATEGORIES, GOLD_CARATS, MAX_IMAGE_BYTES,
+  N8N_ADD_PRODUCT_VECTOR,
 } from '../lib/config';
 import { effectiveLimit, planKey, PLAN_LABELS } from '../lib/plans';
 import { useAuth } from '../hooks/useAuth';
@@ -63,6 +64,48 @@ async function uploadImageToCloudinary(file) {
   if (!res.ok) throw new Error('Image upload failed');
   const json = await res.json();
   return json.secure_url || null;
+}
+
+// ── Image-search vectorization ──────────────────────────────────────
+// Fire the n8n workflow that embeds the product's primary image and
+// writes the vector back to the row. Returns { ok, error } reflecting the
+// workflow's actual outcome. Never throws — a failed embedding must not
+// block the product save that already succeeded.
+//
+// The workflow only reaches its "Respond to Webhook" node (which returns
+// { success: true }) when every step — Gemini embed + Supabase PATCH —
+// succeeds. Any failure aborts the run before that node, so n8n returns a
+// non-2xx error instead. We therefore require an EXPLICIT success: true and
+// treat everything else as a failure, surfacing whatever message n8n gives.
+async function vectorizeProductImage(productId, primaryImageUrl) {
+  try {
+    const res = await fetch(N8N_ADD_PRODUCT_VECTOR, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ product_id: productId, primary_image_url: primaryImageUrl }),
+      credentials: 'omit',
+      mode: 'cors',
+    });
+
+    const raw = await res.text().catch(() => '');
+    let data = null;
+    try { data = raw ? JSON.parse(raw) : null; } catch { /* non-JSON body */ }
+
+    if (res.ok && data?.success === true) {
+      return { ok: true };
+    }
+
+    // Surface the workflow's actual error. n8n error responses usually carry
+    // a `message`; fall back to the raw body or the HTTP status.
+    const error =
+      data?.message ||
+      (data && data.success === false && 'workflow reported failure') ||
+      (raw && raw.slice(0, 200)) ||
+      `HTTP ${res.status}`;
+    return { ok: false, error };
+  } catch (e) {
+    return { ok: false, error: e.message || 'network error' };
+  }
 }
 
 // Rough storage estimate for images already uploaded (best-effort; the
@@ -232,7 +275,20 @@ export default function Inventory() {
       if (error) throw error;
       setProducts(prev => [data, ...prev]);
       savedProductId = data.id;
-      showToast('Product added!', '#166534');
+      showToast('Product saved — now vectorizing for image search…', '#1D4ED8');
+
+      // Embed the primary image so the product is searchable by photo.
+      // Runs after the row exists (we need product_id) and only when there's
+      // an image. Non-blocking failure: the product is already saved.
+      if (data.primary_image_url) {
+        vectorizeProductImage(data.id, data.primary_image_url).then(({ ok, error }) => {
+          showToast(
+            ok ? 'Vectorization complete — product ready for image search!'
+               : `Image-search vectorization failed: ${error}`,
+            ok ? '#166534' : '#C0392B'
+          );
+        });
+      }
     }
 
     // 3) Persist variants ─────────────────────────────────────────

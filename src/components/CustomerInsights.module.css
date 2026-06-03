@@ -7,8 +7,8 @@
 }
 
 .header {
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: 8px; margin-bottom: 16px;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  flex-wrap: wrap; gap: 10px; margin-bottom: 16px;
 }
 .titleRow {
   display: flex; align-items: center; gap: 8px;
@@ -21,6 +21,23 @@
   font-size: 10px; font-weight: 700; letter-spacing: .06em;
   background: rgba(201,168,76,.12); color: #8B6914;
   border-radius: 99px; padding: 2px 8px;
+}
+.headerRight {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+}
+.periodRow {
+  display: flex; gap: 4px;
+}
+.periodBtn {
+  background: rgba(11,24,41,.06); border: 1px solid var(--border);
+  border-radius: 6px; padding: 4px 10px;
+  font-size: 11px; font-weight: 600; font-family: var(--font-body);
+  color: var(--ink-mid); cursor: pointer; transition: all .15s;
+}
+.periodBtn:hover { border-color: var(--gold); color: var(--gold-dk); }
+.periodBtnActive {
+  background: rgba(201,168,76,.15); border-color: rgba(201,168,76,.4);
+  color: #8B6914;
 }
 .stats {
   display: flex; align-items: center; gap: 8px;
@@ -109,19 +126,38 @@
 .summariseBtn:hover { opacity: .88; }
 .summariseBtn:disabled { opacity: .55; cursor: not-allowed; }
 
-/* Message list */
-.msgList { display: flex; flex-direction: column; gap: 2px; }
+/* Message list — chat thread layout */
+.msgList { display: flex; flex-direction: column; gap: 12px; }
+
+.msgGroup {
+  display: flex; flex-direction: column; gap: 5px;
+  padding: 6px 4px;
+}
+.msgTime {
+  font-size: 10px; color: var(--ink-soft);
+  white-space: nowrap; margin-bottom: 2px;
+}
+.msgBubbleCustomer {
+  display: flex; align-items: flex-start; gap: 6px;
+  background: rgba(23,48,90,.07); border-radius: 0 8px 8px 8px;
+  padding: 7px 10px; font-size: 12px; color: var(--navy);
+  line-height: 1.5; max-width: 95%; align-self: flex-start;
+}
+.msgBubbleAI {
+  display: flex; align-items: flex-start; gap: 6px;
+  background: rgba(201,168,76,.1); border-radius: 8px 0 8px 8px;
+  padding: 7px 10px; font-size: 12px; color: #6B4E10;
+  line-height: 1.5; max-width: 95%; align-self: flex-end;
+}
+.msgBubbleCustomer svg, .msgBubbleAI svg { margin-top: 2px; flex-shrink: 0; opacity: .5; }
+
+/* legacy */
 .msgRow {
   display: flex; align-items: flex-start; gap: 10px;
   padding: 7px 8px; border-radius: 6px;
   transition: background .15s;
 }
 .msgRow:hover { background: var(--cream); }
-.msgTime {
-  font-size: 10px; color: var(--ink-soft);
-  white-space: nowrap; flex-shrink: 0; margin-top: 2px;
-  min-width: 100px;
-}
 .msgText { font-size: 12px; color: var(--ink); flex: 1; line-height: 1.5; }
 
 @keyframes spin { to { transform: rotate(360deg); } }

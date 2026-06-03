@@ -33,3 +33,8 @@ coverage/
 
 # n8n local exports (may contain credentials — handle with care)
 *.n8n.local.json
+
+# n8n workflow JSON exports and SQL scripts — kept locally, not in public repo
+IBJA Metal Rate Scraper*.json
+replace_metal_rates.sql
+*.n8n.json
