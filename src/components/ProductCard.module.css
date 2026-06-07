@@ -120,6 +120,59 @@
 
 .gstTag { font-size: 10px; font-weight: 500; color: var(--ink-soft); letter-spacing: .02em; }
 
+/* ── Selection mode ─────────────────────────────────────────────── */
+.cardSelectable { cursor: pointer; user-select: none; }
+.cardSelectable:hover { transform: translateY(-2px); box-shadow: var(--shadow-float); }
+.cardSelected {
+  outline: 2.5px solid var(--navy);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(23,48,90,.12), var(--shadow-float);
+}
+
+.selectOverlay {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 10;
+}
+.selectOverlayActive {}
+
+.checkBox {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  border: 2px solid rgba(255,255,255,.9);
+  background: rgba(0,0,0,.45);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,.25);
+  transition: all .14s;
+  color: #fff;
+}
+.checkBoxChecked {
+  background: var(--navy);
+  border-color: var(--navy);
+}
+
+/* List mode selection */
+.listCardSelectable { cursor: pointer; user-select: none; }
+.listCardSelected {
+  outline: 2px solid var(--navy);
+  outline-offset: 1px;
+  background: rgba(23,48,90,.04);
+}
+.listCheck {
+  width: 20px; height: 20px; flex-shrink: 0;
+  border-radius: 5px;
+  border: 2px solid var(--border-soft);
+  background: #fff;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .14s;
+  color: #fff;
+}
+.listCheckChecked {
+  background: var(--navy);
+  border-color: var(--navy);
+}
+
 /* ── Variant colour swatches ────────────────────────────────────── */
 .swatchRow {
   display: flex;

@@ -104,14 +104,6 @@ export const GOLD_CARATS = [
   '10K Gold',
   '9K Gold',
   '8K Gold',
-  // White Gold
-  '18K White Gold',
-  '14K White Gold',
-  '9K White Gold',
-  // Rose Gold
-  '18K Rose Gold',
-  '14K Rose Gold',
-  '9K Rose Gold',
   // Silver purities
   '999 Silver (Fine)',
   '970 Silver (Traditional)',
@@ -137,8 +129,6 @@ export const METAL_PURITY_GROUPS = [
     options: [
       '24K Gold', '23K Gold', '22K Gold', '21K Gold', '20K Gold',
       '18K Gold', '16K Gold', '14K Gold', '10K Gold', '9K Gold', '8K Gold',
-      '18K White Gold', '14K White Gold', '9K White Gold',
-      '18K Rose Gold', '14K Rose Gold', '9K Rose Gold',
     ],
   },
   {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Pencil, Trash2, PackageCheck, PackageX, Image, Gem } from 'lucide-react';
+import { Pencil, Trash2, PackageCheck, PackageX, Image, Gem, Check } from 'lucide-react';
 import { VARIANT_COLORS } from './VariantEditor';
 import styles from './ProductCard.module.css';
 
@@ -74,7 +74,11 @@ function Slideshow({ urls }) {
   );
 }
 
-export default function ProductCard({ product: p, variants = [], viewMode, onEdit, onDelete, onToggleStock }) {
+export default function ProductCard({
+  product: p, variants = [], viewMode,
+  onEdit, onDelete, onToggleStock,
+  selectable = false, selected = false, onSelect,
+}) {
   // DB uses in_stock (boolean); support both for safety
   const isIn = p.in_stock === true;
   const imgs = Array.isArray(p.images) ? p.images : [];
@@ -84,7 +88,15 @@ export default function ProductCard({ product: p, variants = [], viewMode, onEdi
 
   if (viewMode === 'list') {
     return (
-      <div className={styles.listCard}>
+      <div
+        className={`${styles.listCard} ${selectable ? styles.listCardSelectable : ''} ${selected ? styles.listCardSelected : ''}`}
+        onClick={selectable ? onSelect : undefined}
+      >
+        {selectable && (
+          <div className={`${styles.listCheck} ${selected ? styles.listCheckChecked : ''}`}>
+            {selected && <Check size={11} strokeWidth={3} />}
+          </div>
+        )}
         <div className={styles.listImgPlaceholder}>
           {imgs[0]
             ? <img src={imgs[0]} alt="" className={styles.listImg} loading="lazy"/>
@@ -97,33 +109,50 @@ export default function ProductCard({ product: p, variants = [], viewMode, onEdi
             {p.sku} · {p.category}{p.sub_category ? ` · ${p.sub_category}` : ''} {weightStr ? `· ${weightStr}` : ''}
           </div>
         </div>
-        <div className={styles.listRight}>
-          {priceStr && (
-            <div className={styles.listPrice}>
-              {priceStr}<span className={styles.gstTag}> +GST</span>
+        {!selectable && (
+          <div className={styles.listRight}>
+            {priceStr && (
+              <div className={styles.listPrice}>
+                {priceStr}<span className={styles.gstTag}> +GST</span>
+              </div>
+            )}
+            <span className={`${styles.statusBadge} ${isIn ? styles.inStock : styles.soldOut}`}>
+              {isIn ? 'In Stock' : 'Sold Out'}
+            </span>
+            <div className={styles.listActions}>
+              <button className={styles.listIconBtn} onClick={e => { e.stopPropagation(); onToggleStock?.(); }} title={isIn?'Mark Sold Out':'Mark In Stock'}>
+                {isIn ? <PackageX size={13}/> : <PackageCheck size={13}/>}
+              </button>
+              <button className={styles.listIconBtn} onClick={e => { e.stopPropagation(); onEdit?.(); }} title="Edit">
+                <Pencil size={13}/>
+              </button>
+              <button className={`${styles.listIconBtn} ${styles.listIconBtnDanger}`} onClick={e => { e.stopPropagation(); onDelete?.(); }} title="Delete">
+                <Trash2 size={13}/>
+              </button>
             </div>
-          )}
-          <span className={`${styles.statusBadge} ${isIn ? styles.inStock : styles.soldOut}`}>
-            {isIn ? 'In Stock' : 'Sold Out'}
-          </span>
-          <div className={styles.listActions}>
-            <button className={styles.listIconBtn} onClick={onToggleStock} title={isIn?'Mark Sold Out':'Mark In Stock'}>
-              {isIn ? <PackageX size={13}/> : <PackageCheck size={13}/>}
-            </button>
-            <button className={styles.listIconBtn} onClick={onEdit} title="Edit">
-              <Pencil size={13}/>
-            </button>
-            <button className={`${styles.listIconBtn} ${styles.listIconBtnDanger}`} onClick={onDelete} title="Delete">
-              <Trash2 size={13}/>
-            </button>
           </div>
-        </div>
+        )}
+        {selectable && priceStr && (
+          <div className={styles.listRight}>
+            <div className={styles.listPrice}>{priceStr}</div>
+          </div>
+        )}
       </div>
     );
   }
 
   return (
-    <div className={styles.card}>
+    <div
+      className={`${styles.card} ${selectable ? styles.cardSelectable : ''} ${selected ? styles.cardSelected : ''}`}
+      onClick={selectable ? onSelect : undefined}
+    >
+      {selectable && (
+        <div className={`${styles.selectOverlay} ${selected ? styles.selectOverlayActive : ''}`}>
+          <div className={`${styles.checkBox} ${selected ? styles.checkBoxChecked : ''}`}>
+            {selected && <Check size={11} strokeWidth={3} />}
+          </div>
+        </div>
+      )}
       <div className={`${styles.stripe} ${isIn ? '' : styles.stripeOut}`}/>
       <div className={styles.imgWrap}>
         <Slideshow urls={imgs}/>
@@ -147,22 +176,24 @@ export default function ProductCard({ product: p, variants = [], viewMode, onEdi
           </div>
         )}
       </div>
-      <div className={styles.actions}>
-        <button className={styles.actionBtn} onClick={onEdit}>
-          <Pencil size={12}/> Edit
-        </button>
-        <button
-          className={`${styles.actionBtn} ${styles.actionBtnStock}`}
-          style={{ color: isIn ? '#be123c' : '#15803d', borderColor: isIn ? 'rgba(190,18,60,.2)' : 'rgba(21,128,61,.2)', background: isIn ? 'rgba(190,18,60,.05)' : 'rgba(21,128,61,.05)' }}
-          onClick={onToggleStock}
-        >
-          {isIn ? <PackageX size={12}/> : <PackageCheck size={12}/>}
-          {isIn ? 'Sold Out' : 'Restore'}
-        </button>
-        <button className={`${styles.actionBtn} ${styles.actionBtnDanger}`} onClick={onDelete} title="Delete">
-          <Trash2 size={12}/>
-        </button>
-      </div>
+      {!selectable && (
+        <div className={styles.actions}>
+          <button className={styles.actionBtn} onClick={e => { e.stopPropagation(); onEdit?.(); }}>
+            <Pencil size={12}/> Edit
+          </button>
+          <button
+            className={`${styles.actionBtn} ${styles.actionBtnStock}`}
+            style={{ color: isIn ? '#be123c' : '#15803d', borderColor: isIn ? 'rgba(190,18,60,.2)' : 'rgba(21,128,61,.2)', background: isIn ? 'rgba(190,18,60,.05)' : 'rgba(21,128,61,.05)' }}
+            onClick={e => { e.stopPropagation(); onToggleStock?.(); }}
+          >
+            {isIn ? <PackageX size={12}/> : <PackageCheck size={12}/>}
+            {isIn ? 'Sold Out' : 'Restore'}
+          </button>
+          <button className={`${styles.actionBtn} ${styles.actionBtnDanger}`} onClick={e => { e.stopPropagation(); onDelete?.(); }} title="Delete">
+            <Trash2 size={12}/>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

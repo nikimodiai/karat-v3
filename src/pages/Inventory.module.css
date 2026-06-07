@@ -114,6 +114,43 @@
   background: rgba(201,168,76,.18);
   border-color: var(--gold);
 }
+.importBtn:disabled { opacity: .6; cursor: not-allowed; }
+.importBtnActive {
+  background: var(--navy);
+  border-color: var(--navy);
+  color: #fff;
+}
+.importBtnActive:hover { background: var(--navy-mid); border-color: var(--navy-mid); }
+
+/* Selection action bar */
+.selectionBar {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  padding: 10px 24px;
+  background: rgba(23,48,90,.05);
+  border-bottom: 1px solid rgba(23,48,90,.12);
+  flex-shrink: 0;
+  animation: slideUp .16s ease;
+}
+.selectionCheckAll {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 13px; font-weight: 600; color: var(--navy);
+  cursor: pointer; user-select: none;
+}
+.selectionCount {
+  font-size: 13px; color: var(--ink-mid);
+  flex: 1;
+}
+.selectionDeleteBtn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(190,18,60,.3);
+  background: rgba(190,18,60,.06);
+  color: #be123c; font-size: 13px; font-weight: 600;
+  font-family: var(--font-body); cursor: pointer;
+  transition: all .15s;
+}
+.selectionDeleteBtn:hover { background: rgba(190,18,60,.14); border-color: rgba(190,18,60,.5); }
 
 .iconBtn {
   width:36px; height:36px; border-radius:8px;

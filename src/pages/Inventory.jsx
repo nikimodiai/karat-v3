@@ -2,6 +2,7 @@ import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import {
   Search, SlidersHorizontal, Plus, Package, TrendingUp, TrendingDown,
   X, Grid, List, ArrowUpDown, Tag, Gem, Sparkles,
+  CheckSquare, Trash2, Download, ChevronDown,
 } from 'lucide-react';
 import {
   db, CLOUDINARY_CLOUD, CLOUDINARY_PRESET,
@@ -29,6 +30,141 @@ const SORT_OPTIONS = [
   { value: 'name-desc',  label: 'Name Z → A' },
   { value: 'weight-asc', label: 'Weight: Light → Heavy' },
 ];
+
+// Export columns in the exact order of the Add/Edit product form
+const EXPORT_COLS = [
+  { key: 'sku',                 label: 'SKU / Item Code' },
+  { key: 'name',                label: 'Item Name' },
+  { key: 'category',            label: 'Category' },
+  { key: 'sub_category',        label: 'Sub-category' },
+  { key: 'collection',          label: 'Collection' },
+  { key: 'size',                label: 'Size / Measurement' },
+  { key: 'gold_carat',          label: 'Metal Purity' },
+  { key: 'color',               label: 'Color' },
+  { key: 'diamond_purity',      label: 'Diamond Purity' },
+  { key: 'diamond_color',       label: 'Diamond Color' },
+  { key: 'diamond_weight',      label: 'Diamond Weight (ct)' },
+  { key: 'diamond_cut',         label: 'Diamond Cut' },
+  { key: 'diamond_shape',       label: 'Diamond Shape' },
+  { key: 'diamond_count',       label: 'No. of Diamonds' },
+  { key: 'material',            label: 'Stone / Material' },
+  { key: 'stone_count',         label: 'No. of Stones' },
+  { key: 'occasion',            label: 'Occasion' },
+  { key: 'huid',                label: 'HUID (BIS Hallmark UID)' },
+  { key: 'diamond_cert_issuer', label: 'Diamond Cert Issuer' },
+  { key: 'diamond_cert_no',     label: 'Diamond Certificate No.' },
+  { key: 'hallmark_cert_url',   label: 'Hallmark Certificate URL' },
+  { key: 'diamond_cert_url',    label: 'Diamond Certificate URL' },
+  { key: 'weight',              label: 'Gross Weight (g)' },
+  { key: 'net_weight_grams',    label: 'Net Metal Weight (g)' },
+  { key: 'stock_qty',           label: 'Stock Quantity' },
+  { key: 'visibility',          label: 'Visible To' },
+  { key: 'price',               label: 'Price (₹)' },
+  { key: 'dynamic_price',       label: 'Dynamic Pricing' },
+  { key: 'gold_purity',         label: 'Gold Purity' },
+  { key: 'gold_weight_grams',   label: 'Gold Weight (g)' },
+  { key: 'silver_purity',       label: 'Silver Purity' },
+  { key: 'silver_weight_grams', label: 'Silver Weight (g)' },
+  { key: 'wastage_percent',     label: 'Wastage %' },
+  { key: 'making_charge_type',  label: 'Making Charge Type' },
+  { key: 'making_charge_value', label: 'Making Charge Value' },
+  { key: 'stone_value_inr',     label: 'Stone Value (₹)' },
+  { key: 'diamond_value_inr',   label: 'Diamond Value (₹)' },
+  { key: 'hallmark_charge',     label: 'Hallmark Charge (₹)' },
+  { key: 'description',         label: 'Description / Notes' },
+  { key: 'in_stock',            label: 'In Stock' },
+  { key: 'created_at',          label: 'Created Date' },
+];
+
+const VISIBILITY_LABELS = {
+  all:      'All Customers',
+  vvip:     'VVIP Only',
+  vvip_vip: 'VVIP & VIP',
+};
+
+function mapProductToExportRow(p) {
+  const hallmarkCert = Array.isArray(p.cert_urls) ? (p.cert_urls.find(c => c.type === 'hallmark')?.url || '') : '';
+  const diamondCert  = Array.isArray(p.cert_urls) ? (p.cert_urls.find(c => c.type === 'diamond')?.url  || '') : '';
+  return {
+    sku:                 p.sku                 || '',
+    name:                p.name                || '',
+    category:            p.category            || '',
+    sub_category:        p.sub_category        || '',
+    collection:          p.collection          || '',
+    size:                p.size                || '',
+    gold_carat:          p.gold_carat          || '',
+    color:               p.color               || '',
+    diamond_purity:      p.diamond_purity      || '',
+    diamond_color:       p.diamond_color       || '',
+    diamond_weight:      p.diamond_weight      ?? '',
+    diamond_cut:         p.diamond_cut         || '',
+    diamond_shape:       p.diamond_shape       || '',
+    diamond_count:       p.diamond_count       ?? '',
+    material:            p.material            || '',
+    stone_count:         p.stone_count         ?? '',
+    occasion:            p.occasion            || '',
+    huid:                p.huid                || '',
+    diamond_cert_issuer: p.diamond_cert_issuer || '',
+    diamond_cert_no:     p.diamond_cert_no     || '',
+    hallmark_cert_url:   hallmarkCert,
+    diamond_cert_url:    diamondCert,
+    weight:              p.weight              ?? '',
+    net_weight_grams:    p.net_weight_grams    ?? '',
+    stock_qty:           p.stock_qty           ?? '',
+    visibility:          VISIBILITY_LABELS[p.visibility] || p.visibility || '',
+    price:               p.price               ?? '',
+    dynamic_price:       p.dynamic_price ? 'Yes' : 'No',
+    gold_purity:         p.gold_purity         || '',
+    gold_weight_grams:   p.gold_weight_grams   ?? '',
+    silver_purity:       p.silver_purity       || '',
+    silver_weight_grams: p.silver_weight_grams ?? '',
+    wastage_percent:     p.wastage_percent      ?? '',
+    making_charge_type:  p.making_charge_type  || '',
+    making_charge_value: p.making_charge_value ?? '',
+    stone_value_inr:     p.stone_value_inr     ?? '',
+    diamond_value_inr:   p.diamond_value_inr   ?? '',
+    hallmark_charge:     p.hallmark_charge     ?? '',
+    description:         p.description         || '',
+    in_stock:            p.in_stock ? 'Yes' : 'No',
+    created_at:          p.created_at ? new Date(p.created_at).toLocaleDateString('en-IN') : '',
+  };
+}
+
+function downloadCSV(rows, filename) {
+  const headers = EXPORT_COLS.map(c => c.label);
+  const csvData = rows.map(row =>
+    EXPORT_COLS.map(c => {
+      const val = row[c.key];
+      if (val === null || val === undefined) return '';
+      const str = String(val);
+      return str.includes(',') || str.includes('"') || str.includes('\n')
+        ? '"' + str.replace(/"/g, '""') + '"'
+        : str;
+    })
+  );
+  const csv = [headers, ...csvData].map(r => r.join(',')).join('\r\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = filename + '.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function downloadXLSX(rows, filename) {
+  const { utils, writeFile } = await import('xlsx');
+  const headers = EXPORT_COLS.map(c => c.label);
+  const dataRows = rows.map(row => EXPORT_COLS.map(c => {
+    const val = row[c.key];
+    return val === null || val === undefined ? '' : val;
+  }));
+  const ws = utils.aoa_to_sheet([headers, ...dataRows]);
+  // Auto column widths
+  ws['!cols'] = headers.map((h, i) => ({
+    wch: Math.max(h.length, ...dataRows.map(r => String(r[i] ?? '').length), 10),
+  }));
+  const wb = utils.book_new();
+  utils.book_append_sheet(wb, ws, 'Products');
+  writeFile(wb, filename + '.xlsx');
+}
 
 function matchesSearch(p, q) {
   if (!q) return true;
@@ -67,16 +203,6 @@ async function uploadImageToCloudinary(file) {
 }
 
 // ── Image-search vectorization ──────────────────────────────────────
-// Fire the n8n workflow that embeds the product's primary image and
-// writes the vector back to the row. Returns { ok, error } reflecting the
-// workflow's actual outcome. Never throws — a failed embedding must not
-// block the product save that already succeeded.
-//
-// The workflow only reaches its "Respond to Webhook" node (which returns
-// { success: true }) when every step — Gemini embed + Supabase PATCH —
-// succeeds. Any failure aborts the run before that node, so n8n returns a
-// non-2xx error instead. We therefore require an EXPLICIT success: true and
-// treat everything else as a failure, surfacing whatever message n8n gives.
 async function vectorizeProductImage(productId, primaryImageUrl) {
   try {
     const res = await fetch(N8N_ADD_PRODUCT_VECTOR, {
@@ -95,8 +221,6 @@ async function vectorizeProductImage(productId, primaryImageUrl) {
       return { ok: true };
     }
 
-    // Surface the workflow's actual error. n8n error responses usually carry
-    // a `message`; fall back to the raw body or the HTTP status.
     const error =
       data?.message ||
       (data && data.success === false && 'workflow reported failure') ||
@@ -108,12 +232,7 @@ async function vectorizeProductImage(productId, primaryImageUrl) {
   }
 }
 
-// Rough storage estimate for images already uploaded (best-effort; the
-// real check belongs in a Supabase aggregate or Cloudinary API call,
-// but this catches the common "running well past plan" case).
 function estimateStorageGB(products) {
-  // Cloudinary doesn't expose per-asset size cheaply on the client.
-  // Estimate ~0.6 MB / image as a reasonable jewellery-photo average.
   let imgBytes = 0;
   for (const p of products) {
     const n = Array.isArray(p.images) ? p.images.length : (p.images ? 1 : 0);
@@ -136,22 +255,31 @@ export default function Inventory() {
   const [showFilters, setShowFilters]   = useState(false);
   const [viewMode, setViewMode]         = useState('grid');
   const [sortOpen, setSortOpen]         = useState(false);
-  const sortRef = useRef(null);
+  const [exportOpen, setExportOpen]     = useState(false);
+  const sortRef   = useRef(null);
+  const exportRef = useRef(null);
+
+  // Multi-select state
+  const [selectMode, setSelectMode]     = useState(false);
+  const [selectedIds, setSelectedIds]   = useState(new Set());
+  const [bulkConfirmOpen, setBulkConfirmOpen] = useState(false);
+  const [exporting, setExporting]       = useState(false);
 
   const [modalOpen, setModalOpen]       = useState(false);
   const [editProduct, setEditProduct]   = useState(null);
   const [confirmOpen, setConfirmOpen]   = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  // variantMap: { [productId]: [{ color, carat }] } — for swatch display
   const [variantMap, setVariantMap]     = useState({});
   const [bulkImportOpen, setBulkImportOpen] = useState(false);
 
-  // Limit-reached dialog state
-  const [upgradeOpen, setUpgradeOpen]   = useState(null); // { feature, message } | null
+  const [upgradeOpen, setUpgradeOpen]   = useState(null);
 
-  // Close sort dropdown on outside click
+  // Close dropdowns on outside click
   useEffect(() => {
-    const handler = (e) => { if (sortRef.current && !sortRef.current.contains(e.target)) setSortOpen(false); };
+    const handler = (e) => {
+      if (sortRef.current && !sortRef.current.contains(e.target)) setSortOpen(false);
+      if (exportRef.current && !exportRef.current.contains(e.target)) setExportOpen(false);
+    };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
@@ -182,7 +310,7 @@ export default function Inventory() {
   const isProdLimitHit    = prodLimit !== Infinity && products.length >= prodLimit;
   const isStorageLimitHit = storageLimit !== Infinity && storageUsedGB >= storageLimit;
 
-  // SKU uniqueness check — current rows only
+  // SKU uniqueness check
   const checkSKU = useCallback(async (sku, excludeId) => {
     const { data } = await db.from('products')
       .select('id, owner_id')
@@ -194,9 +322,6 @@ export default function Inventory() {
   }, [user]);
 
   // ── Save handler ────────────────────────────────────────────────
-  // Direct Supabase UPDATE on edit (one row per product — fixes
-  // "multiple records per edit" bug). New products go through INSERT.
-  // No n8n round-trip, no AI generation, no soft-insert duplicates.
   const handleSave = useCallback(async ({ form, slotFiles, existingUrls, variants, isEdit, certFiles = {}, certExistingUrls = {} }) => {
     // 1) Upload any new images to Cloudinary
     const imageUrls = [...existingUrls];
@@ -227,7 +352,7 @@ export default function Inventory() {
       .filter(([, url]) => !!url)
       .map(([type, url]) => ({ type, url }));
 
-    // 2) Build payload (DB column names only; AI fields excluded)
+    // 2) Build payload
     const payload = {
       sku:            form.sku,
       name:           form.name,
@@ -260,15 +385,12 @@ export default function Inventory() {
       images:         finalImages,
       primary_image_url: finalImages[0] || null,
       is_current:     true,
-      // Visibility & dynamic pricing
       visibility:          form.visibility     || 'all',
       dynamic_price:       form.dynamic_price  ?? false,
-      // Dual-metal breakdown (NEW — see 2026_05_28_dynamic_pricing.sql)
       gold_purity:         form.gold_purity         || null,
       gold_weight_grams:   form.gold_weight_grams   ? Number(form.gold_weight_grams)   : null,
       silver_purity:       form.silver_purity       || null,
       silver_weight_grams: form.silver_weight_grams ? Number(form.silver_weight_grams) : null,
-      // Legacy single-metal snapshot fields (kept for back-compat / search)
       metal_type:          form.metal_type     || null,
       metal_weight_grams:  form.metal_weight_grams ? Number(form.metal_weight_grams) : null,
       wastage_percent:     Number(form.wastage_percent)    || 0,
@@ -281,7 +403,6 @@ export default function Inventory() {
 
     let savedProductId;
     if (isEdit && editProduct) {
-      // ── Direct UPDATE: 1 row per product ──────────────────────
       const { data, error } = await db
         .from('products')
         .update(payload)
@@ -294,7 +415,6 @@ export default function Inventory() {
       savedProductId = data.id;
       showToast('Product updated!', '#166534');
     } else {
-      // ── INSERT new product ────────────────────────────────────
       const { data, error } = await db
         .from('products')
         .insert(payload)
@@ -305,9 +425,6 @@ export default function Inventory() {
       savedProductId = data.id;
       showToast('Product saved — now vectorizing for image search…', '#1D4ED8');
 
-      // Embed the primary image so the product is searchable by photo.
-      // Runs after the row exists (we need product_id) and only when there's
-      // an image. Non-blocking failure: the product is already saved.
       if (data.primary_image_url) {
         vectorizeProductImage(data.id, data.primary_image_url).then(({ ok, error }) => {
           showToast(
@@ -319,12 +436,10 @@ export default function Inventory() {
       }
     }
 
-    // 3) Persist variants ─────────────────────────────────────────
+    // 3) Persist variants
     if (savedProductId && Array.isArray(variants)) {
       const keptIds = variants.filter(v => v.id).map(v => v.id);
 
-      // Soft-delete removed variants. When nothing is kept we delete all
-      // (can't use .not with an empty list).
       if (keptIds.length > 0) {
         const { error: delErr } = await db
           .from('product_variants')
@@ -333,7 +448,6 @@ export default function Inventory() {
           .not('id', 'in', `(${keptIds.join(',')})` );
         if (delErr) console.error('[variants] soft-delete error', delErr);
       } else if (isEdit) {
-        // All variants removed — soft-delete every row for this product
         const { error: delErr } = await db
           .from('product_variants')
           .update({ is_active: false })
@@ -379,7 +493,6 @@ export default function Inventory() {
         }
       }
 
-      // Refresh variant map so cards update immediately without a full reload
       const { data: freshVars } = await db
         .from('product_variants')
         .select('product_id, color, carat, is_in_stock')
@@ -400,7 +513,6 @@ export default function Inventory() {
   }, [user, store, editProduct, setProducts, showToast, setVariantMap]);
 
   // ── Delete (soft) ───────────────────────────────────────────────
-  // Pure client-side soft delete. Avoids the legacy n8n delete webhook.
   const handleDelete = useCallback(async () => {
     if (!deleteTarget) return;
     setConfirmOpen(false);
@@ -418,6 +530,71 @@ export default function Inventory() {
     }
     setDeleteTarget(null);
   }, [deleteTarget, user, setProducts, showToast]);
+
+  // ── Bulk delete ─────────────────────────────────────────────────
+  const handleBulkDelete = useCallback(async () => {
+    if (!selectedIds.size) return;
+    setBulkConfirmOpen(false);
+    const ids = [...selectedIds];
+    try {
+      const { error } = await db
+        .from('products')
+        .update({ is_current: false })
+        .in('id', ids)
+        .eq('owner_id', store.owner_id);
+      if (error) throw error;
+      setProducts(prev => prev.filter(p => !selectedIds.has(p.id)));
+      setSelectedIds(new Set());
+      setSelectMode(false);
+      showToast(`${ids.length} product${ids.length !== 1 ? 's' : ''} deleted.`, '#C0392B');
+    } catch (err) {
+      showToast('Bulk delete failed: ' + err.message, '#C0392B');
+    }
+  }, [selectedIds, store, setProducts, showToast]);
+
+  const toggleSelectMode = () => {
+    setSelectMode(p => !p);
+    setSelectedIds(new Set());
+  };
+
+  const toggleSelect = useCallback((id) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
+  // ── Export ──────────────────────────────────────────────────────
+  const handleExport = useCallback(async (format) => {
+    setExportOpen(false);
+    setExporting(true);
+    showToast('Preparing export…', '#1D4ED8');
+    try {
+      const { data, error } = await db
+        .from('products')
+        .select('*')
+        .eq('owner_id', store.owner_id)
+        .eq('is_current', true)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+
+      const rows = (data || []).map(mapProductToExportRow);
+      const filename = `karat_products_${new Date().toISOString().slice(0, 10)}`;
+
+      if (format === 'csv') {
+        downloadCSV(rows, filename);
+      } else {
+        await downloadXLSX(rows, filename);
+      }
+      showToast(`Exported ${rows.length} products as ${format.toUpperCase()}`, '#166534');
+    } catch (err) {
+      showToast('Export failed: ' + err.message, '#C0392B');
+    } finally {
+      setExporting(false);
+    }
+  }, [store, showToast]);
 
   const handleToggleStock = useCallback(async (product) => {
     const newInStock = !product.in_stock;
@@ -476,6 +653,8 @@ export default function Inventory() {
   const totalIn  = useMemo(() => products.filter(p => p.in_stock === true).length, [products]);
   const totalOut = useMemo(() => products.filter(p => p.in_stock === false).length, [products]);
   const hasFilters = stockFilter !== 'All' || caratFilter;
+
+  const allFilteredSelected = filtered.length > 0 && filtered.every(p => selectedIds.has(p.id));
 
   return (
     <div className={styles.page}>
@@ -605,6 +784,41 @@ export default function Inventory() {
             </button>
           </div>
 
+          {/* Export dropdown */}
+          <div className={styles.sortWrap} ref={exportRef}>
+            <button
+              className={styles.importBtn}
+              onClick={() => setExportOpen(p => !p)}
+              disabled={exporting}
+              title="Export products"
+            >
+              <Download size={14} />
+              Export
+              <ChevronDown size={12} />
+            </button>
+            {exportOpen && (
+              <div className={styles.sortDropdown} style={{ minWidth: 150 }}>
+                <button className={styles.sortOpt} onClick={() => handleExport('csv')}>
+                  Export as CSV
+                </button>
+                <button className={styles.sortOpt} onClick={() => handleExport('xlsx')}>
+                  Export as Excel (XLSX)
+                </button>
+              </div>
+            )}
+          </div>
+
+          {canWrite && (
+            <button
+              className={`${styles.importBtn} ${selectMode ? styles.importBtnActive : ''}`}
+              onClick={toggleSelectMode}
+              title={selectMode ? 'Exit select mode' : 'Select products'}
+            >
+              <CheckSquare size={14} />
+              {selectMode ? 'Cancel' : 'Select'}
+            </button>
+          )}
+
           {canWrite && (
             <button className={styles.importBtn} onClick={() => setBulkImportOpen(true)}>
               <Sparkles size={14}/>
@@ -620,6 +834,35 @@ export default function Inventory() {
           )}
         </div>
       </div>
+
+      {/* Selection action bar */}
+      {selectMode && (
+        <div className={styles.selectionBar}>
+          <label className={styles.selectionCheckAll}>
+            <input
+              type="checkbox"
+              checked={allFilteredSelected}
+              onChange={e => setSelectedIds(e.target.checked ? new Set(filtered.map(p => p.id)) : new Set())}
+              style={{ accentColor: 'var(--navy)', width: 15, height: 15, cursor: 'pointer' }}
+            />
+            {allFilteredSelected ? 'Deselect All' : 'Select All'}
+          </label>
+          <span className={styles.selectionCount}>
+            {selectedIds.size > 0
+              ? `${selectedIds.size} item${selectedIds.size !== 1 ? 's' : ''} selected`
+              : 'Click products to select'}
+          </span>
+          {selectedIds.size > 0 && (
+            <button
+              className={styles.selectionDeleteBtn}
+              onClick={() => setBulkConfirmOpen(true)}
+            >
+              <Trash2 size={13} />
+              Delete {selectedIds.size} selected
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Filter panel */}
       {showFilters && (
@@ -690,9 +933,12 @@ export default function Inventory() {
                 product={p}
                 variants={variantMap[p.id] || []}
                 viewMode={viewMode}
-                onEdit={canWrite ? () => openEdit(p) : null}
-                onDelete={canWrite ? () => openDelete(p.id) : null}
-                onToggleStock={canWrite ? () => handleToggleStock(p) : null}
+                onEdit={canWrite && !selectMode ? () => openEdit(p) : null}
+                onDelete={canWrite && !selectMode ? () => openDelete(p.id) : null}
+                onToggleStock={canWrite && !selectMode ? () => handleToggleStock(p) : null}
+                selectable={selectMode}
+                selected={selectedIds.has(p.id)}
+                onSelect={() => toggleSelect(p.id)}
               />
             ))}
           </div>
@@ -713,6 +959,13 @@ export default function Inventory() {
           message="Delete this product? This cannot be undone."
           onConfirm={handleDelete}
           onCancel={() => { setConfirmOpen(false); setDeleteTarget(null); }}
+        />
+      )}
+      {bulkConfirmOpen && (
+        <ConfirmDialog
+          message={`Delete ${selectedIds.size} selected product${selectedIds.size !== 1 ? 's' : ''}? This cannot be undone.`}
+          onConfirm={handleBulkDelete}
+          onCancel={() => setBulkConfirmOpen(false)}
         />
       )}
       {upgradeOpen && (
