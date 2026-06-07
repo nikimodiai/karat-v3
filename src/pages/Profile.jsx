@@ -70,7 +70,8 @@ export default function Profile() {
   const [phone, setPhone]                   = useState(store?.phone || '');
   const [address, setAddress]               = useState(store?.address || '');
   const [selfieTryonTier, setSelfieTryonTier] = useState(store?.selfie_tryon_tier || 'vvip');
-  const [saving, setSaving]                 = useState(false);
+  const [reminderDays, setReminderDays]       = useState(store?.reminder_days ?? 0);
+  const [saving, setSaving]                   = useState(false);
 
   const ownerName    = store?.owner_name || user?.user_metadata?.full_name || user?.email || 'Owner';
   const planName     = planKey(store);
@@ -109,7 +110,7 @@ export default function Profile() {
     setSaving(true);
     try {
       // Owner: RLS matches owner_id = auth.uid(). Staff admin: filter by store.id (anon key + staff RLS policy).
-      const updates = { store_name: storeName, phone, address, selfie_tryon_tier: selfieTryonTier };
+      const updates = { store_name: storeName, phone, address, selfie_tryon_tier: selfieTryonTier, reminder_days: Number(reminderDays) };
       const query = isOwner
         ? db.from('stores').update(updates).eq('owner_id', user.id)
         : db.from('stores').update(updates).eq('id', store.id);
@@ -216,6 +217,25 @@ export default function Profile() {
                   <option value="vip_and_vvip">VIP &amp; VVIP customers</option>
                   <option value="all">All customers</option>
                 </select>
+              </div>
+
+              <div className={styles.field}>
+                <div className={styles.fieldLabel}>
+                  WhatsApp Reminder Days {canAdmin && <span className={styles.editable}>✎ editable</span>}
+                </div>
+                <input
+                  className="inp"
+                  type="number"
+                  min="0"
+                  max="365"
+                  value={reminderDays}
+                  onChange={e => canAdmin && setReminderDays(e.target.value)}
+                  readOnly={!canAdmin}
+                  placeholder="0"
+                />
+                <p className={styles.fieldHint}>
+                  When a customer browses your jewellery collection via WhatsApp and then goes quiet, KARAT automatically sends them a warm, personalised follow-up after this many days of inactivity — gently inviting them back to explore your catalogue. Set to <strong>0</strong> to disable reminders.
+                </p>
               </div>
 
               {canAdmin && (

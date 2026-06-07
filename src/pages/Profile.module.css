@@ -70,6 +70,13 @@
   display:flex; align-items:center; gap:4px;
   font-size:10px; color:var(--ink-soft); margin-top:4px;
 }
+.fieldHint {
+  font-size:12px; line-height:1.6; color:var(--ink-soft);
+  margin-top:7px; padding:9px 12px;
+  background:rgba(201,168,76,.06);
+  border-left:2px solid rgba(201,168,76,.35);
+  border-radius:0 6px 6px 0;
+}
 
 /* Features */
 .featureList { display:flex; flex-direction:column; gap:1px; }
