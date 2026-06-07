@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { Upload, Sparkles, RefreshCw, PlusCircle, X, AlertCircle } from 'lucide-react';
+import { Upload, Sparkles, RefreshCw, PlusCircle, X, AlertCircle, Camera } from 'lucide-react';
 import { N8N_AI_MODEL, db, CLOUDINARY_CLOUD, CLOUDINARY_PRESET, MAX_IMAGE_BYTES } from '../lib/config';
 import { useAuth } from '../hooks/useAuth';
 import { effectiveLimit, hasFeature } from '../lib/plans';
@@ -47,6 +47,7 @@ async function uploadBlobToCloudinary(blob, filename) {
 export default function AIModelPanel({ category, onAddImage }) {
   const { store, refreshStore } = useAuth();
   const fileRef = useRef(null);
+  const camRef  = useRef(null);
 
   const [srcFile, setSrcFile]     = useState(null);
   const [srcPreview, setSrcPrev]  = useState(null);
@@ -194,19 +195,37 @@ export default function AIModelPanel({ category, onAddImage }) {
 
           {/* Source image upload */}
           {!srcPreview ? (
-            <div
-              className={styles.dropZone}
-              onClick={() => fileRef.current?.click()}
-              onDrop={handleDrop}
-              onDragOver={e => e.preventDefault()}
-            >
-              <Upload size={22} strokeWidth={1.5} className={styles.dropIcon} />
-              <span>Click or drag jewellery photo here</span>
-              <small>JPG, PNG, WebP · Max 5 MB</small>
+            <div className={styles.dropZoneWrap}>
+              <div
+                className={styles.dropZone}
+                onClick={() => fileRef.current?.click()}
+                onDrop={handleDrop}
+                onDragOver={e => e.preventDefault()}
+              >
+                <Upload size={22} strokeWidth={1.5} className={styles.dropIcon} />
+                <span>Click or drag jewellery photo here</span>
+                <small>JPG, PNG, WebP · Max 5 MB</small>
+                <input
+                  ref={fileRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/*"
+                  style={{ display: 'none' }}
+                  onChange={e => handleFile(e.target.files?.[0])}
+                />
+              </div>
+              <button
+                type="button"
+                className={styles.camBtn}
+                onClick={() => camRef.current?.click()}
+                title="Take photo with camera"
+              >
+                <Camera size={15} strokeWidth={1.5} /> Camera
+              </button>
               <input
-                ref={fileRef}
+                ref={camRef}
                 type="file"
-                accept="image/jpeg,image/png,image/webp,image/*"
+                accept="image/*"
+                capture="environment"
                 style={{ display: 'none' }}
                 onChange={e => handleFile(e.target.files?.[0])}
               />

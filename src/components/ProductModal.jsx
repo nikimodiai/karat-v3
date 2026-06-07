@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { X, Upload, Trash2, Tag, Zap, Image as ImageIcon, Layers, Sparkles, Camera, ChevronDown, ChevronUp, Gem } from 'lucide-react';
+import { X, Upload, Trash2, Tag, Zap, Image as ImageIcon, Layers, Sparkles, Camera, ChevronDown, ChevronUp, Gem, Award } from 'lucide-react';
 import {
   CATEGORIES, SUBCATEGORY_MAP, METAL_PURITY_GROUPS, DIAMOND_PURITIES,
   SILVER_CATEGORIES, MAX_IMAGE_BYTES, db,
@@ -19,11 +19,27 @@ import styles from './ProductModal.module.css';
 // AI fields (ai_title, ai_description, etc.) are intentionally NOT
 // referenced or sent — feature removed per Nikhil's spec #1.
 
+const DIAMOND_CUTS   = ['Excellent', 'Very Good', 'Good', 'Fair', 'Poor'];
+const DIAMOND_SHAPES = ['Round Brilliant', 'Princess', 'Oval', 'Cushion', 'Marquise', 'Pear', 'Heart', 'Emerald', 'Radiant', 'Asscher', 'Trillion'];
+const CERT_ISSUERS   = ['GIA', 'IGI', 'HRD', 'SGL', 'Other'];
+
 const EMPTY_FORM = {
   sku: '', name: '', category: '', sub_category: '',
-  gold_carat: '', diamond_purity: '', diamond_color: '', diamond_weight: '', material: '', occasion: '',
+  collection: '',           // e.g. Bridal, Everyday Wear, Antique
+  size: '',                 // Ring size, bangle size, chain length, etc.
+  gold_carat: '',
+  // Stone & Diamond
+  diamond_purity: '', diamond_color: '', diamond_weight: '',
+  diamond_cut: '', diamond_shape: '', diamond_count: '',
+  stone_count: '',
+  material: '', occasion: '',
+  // Certification
+  huid: '',                 // BIS Hallmark Unique ID (6-char)
+  diamond_cert_no: '',      // GIA/IGI certificate number
+  diamond_cert_issuer: '',  // GIA / IGI / HRD / SGL / Other
   color: '',
-  weight: '',
+  weight: '',               // Gross total weight
+  net_weight_grams: '',     // Net metal weight after stone deduction
   // Two parallel price slots. `fixed_price` is what the owner types in
   // Fixed mode; `price` is what gets persisted to products.price and is
   // owned by the panel in Dynamic mode. We keep both in the form so a
@@ -75,22 +91,40 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
   const [customMetalMode,   setCustomMetalMode]   = useState(false);
   const [customDiamondMode, setCustomDiamondMode] = useState(false);
   const [stoneOpen,         setStoneOpen]         = useState(true);
+  const [certOpen,          setCertOpen]          = useState(false);
+
+  // Certificate uploads: { hallmark, diamond } — each holds a File or null
+  const [certFiles,  setCertFiles]  = useState({ hallmark: null, diamond: null });
+  // Preview URLs or existing Cloudinary URLs loaded from DB
+  const [certStates, setCertStates] = useState({ hallmark: '', diamond: '' });
+  const hallmarkRef    = useRef(null);
+  const diamondCertRef = useRef(null);
 
   useEffect(() => {
     if (product) {
       setForm({
         sku:            product.sku            || '',
         name:           product.name           || '',
-        category:       product.category       || '',
-        sub_category:   product.sub_category   || '',
-        gold_carat:     product.gold_carat     || '',
-        diamond_purity:  product.diamond_purity  || '',
-        diamond_color:   product.diamond_color   || '',
-        diamond_weight:  product.diamond_weight  ?? '',
-        material:        product.material        || '',
-        occasion:       product.occasion       || '',
-        color:          product.color          || '',
-        weight:         product.weight         || '',
+        category:            product.category            || '',
+        sub_category:        product.sub_category        || '',
+        collection:          product.collection          || '',
+        size:                product.size                || '',
+        gold_carat:          product.gold_carat          || '',
+        diamond_purity:      product.diamond_purity      || '',
+        diamond_color:       product.diamond_color       || '',
+        diamond_weight:      product.diamond_weight      ?? '',
+        diamond_cut:         product.diamond_cut         || '',
+        diamond_shape:       product.diamond_shape       || '',
+        diamond_count:       product.diamond_count       ?? '',
+        stone_count:         product.stone_count         ?? '',
+        material:            product.material            || '',
+        occasion:            product.occasion            || '',
+        huid:                product.huid                || '',
+        diamond_cert_no:     product.diamond_cert_no     || '',
+        diamond_cert_issuer: product.diamond_cert_issuer || '',
+        color:               product.color               || '',
+        weight:              product.weight              || '',
+        net_weight_grams:    product.net_weight_grams    ?? '',
         // For a saved fixed-price product, seed both slots with the stored value
         // so toggling modes doesn't lose data. Dynamic-priced rows still keep it
         // as a sensible fallback if the owner switches back to Fixed.
@@ -154,10 +188,19 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
               diamond_purity:      row.diamond_purity       ?? '',
               diamond_color:       row.diamond_color        ?? '',
               diamond_weight:      row.diamond_weight       ?? '',
+              size:                row.size                 ?? '',
+              net_weight_grams:    row.net_weight_grams     ?? '',
+              huid:                row.huid                 ?? '',
               stone_value_inr:     row.stone_value_inr      ?? 0,
             }))
           );
         });
+      // Load existing certificate URLs
+      const existingCerts = product.cert_urls || [];
+      const hEntry = existingCerts.find(c => c.type === 'hallmark');
+      const dEntry = existingCerts.find(c => c.type === 'diamond');
+      setCertStates({ hallmark: hEntry?.url || '', diamond: dEntry?.url || '' });
+      setCertFiles({ hallmark: null, diamond: null });
     } else {
       setForm(EMPTY_FORM);
       setSlotFiles([null,null,null,null,null]);
@@ -167,6 +210,8 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
       setVariants([]);
       setCustomCatMode(false); setCustomSubcatMode(false);
       setCustomMetalMode(false); setCustomDiamondMode(false);
+      setCertFiles({ hallmark: null, diamond: null });
+      setCertStates({ hallmark: '', diamond: '' });
     }
     setSkuError('');
   }, [product]);
@@ -239,6 +284,18 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
 
   const previewSrc = (i) => slotBlobUrls[i] || existingUrls[i] || null;
 
+  const handleCertFile = (type, file) => {
+    if (!file) return;
+    if (file.size > MAX_IMAGE_BYTES) { alert('Image too large (max 5 MB)'); return; }
+    if (!file.type.startsWith('image/')) { alert('Please select an image file'); return; }
+    setCertFiles(prev => ({ ...prev, [type]: file }));
+    setCertStates(prev => ({ ...prev, [type]: URL.createObjectURL(file) }));
+  };
+  const removeCert = (type) => {
+    setCertFiles(prev => ({ ...prev, [type]: null }));
+    setCertStates(prev => ({ ...prev, [type]: '' }));
+  };
+
   // Has any image at all?
   const imageCount = useMemo(
     () => slotFiles.filter(Boolean).length + existingUrls.filter(Boolean).length,
@@ -278,6 +335,8 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
         existingUrls,
         variants,
         isEdit,
+        certFiles,
+        certExistingUrls: { ...certStates },
       });
     } catch(err) {
       alert('Save failed: ' + (err.message || 'Unknown'));
@@ -399,6 +458,27 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
             </div>
           </div>
 
+          <div className="fg fg2" style={{ marginTop: 14 }}>
+            <div className="fld">
+              <label className="lbl">Collection</label>
+              <input
+                className="inp"
+                value={form.collection}
+                onChange={e => set('collection', e.target.value)}
+                placeholder="e.g. Bridal, Everyday Wear, Antique, Solitaire…"
+              />
+            </div>
+            <div className="fld">
+              <label className="lbl">Size / Measurement</label>
+              <input
+                className="inp"
+                value={form.size}
+                onChange={e => set('size', e.target.value)}
+                placeholder="e.g. Ring 15, Bangle 2.6″, 18″ Chain, Free Size"
+              />
+            </div>
+          </div>
+
           {/* Color — same swatch picker used in Variants */}
           <div className="fld" style={{ marginTop: 14 }}>
             <label className="lbl">Color</label>
@@ -502,14 +582,55 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
                   </div>
                 </div>
 
-                <div className="fg fg2" style={{ marginTop: 12 }}>
+                <div className="fg fg3" style={{ marginTop: 12 }}>
+                  <div className="fld">
+                    <label className="lbl">Diamond Cut</label>
+                    <select className="inp" value={form.diamond_cut} onChange={e => set('diamond_cut', e.target.value)}>
+                      <option value="">None / N/A</option>
+                      {DIAMOND_CUTS.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  <div className="fld">
+                    <label className="lbl">Diamond Shape</label>
+                    <select className="inp" value={form.diamond_shape} onChange={e => set('diamond_shape', e.target.value)}>
+                      <option value="">None / N/A</option>
+                      {DIAMOND_SHAPES.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+                  <div className="fld">
+                    <label className="lbl">No. of Diamonds</label>
+                    <input
+                      className="inp"
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={form.diamond_count}
+                      onChange={e => set('diamond_count', e.target.value)}
+                      placeholder="e.g. 1, 12, 52"
+                    />
+                  </div>
+                </div>
+
+                <div className="fg fg3" style={{ marginTop: 12 }}>
                   <div className="fld">
                     <label className="lbl">Stone / Material</label>
                     <input
                       className="inp"
                       value={form.material}
                       onChange={e => set('material', e.target.value)}
-                      placeholder="e.g. Kundan, Polki, Ruby, Lab-grown Diamond"
+                      placeholder="e.g. Ruby, Polki, Kundan, Pearl"
+                    />
+                  </div>
+                  <div className="fld">
+                    <label className="lbl">No. of Stones</label>
+                    <input
+                      className="inp"
+                      type="number"
+                      min="0"
+                      step="1"
+                      value={form.stone_count}
+                      onChange={e => set('stone_count', e.target.value)}
+                      placeholder="e.g. 5, 18"
                     />
                   </div>
                   <div className="fld">
@@ -526,15 +647,25 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
             )}
           </div>
 
-          <div className="fg fg3" style={{ marginTop: 14 }}>
+          <div className="fg fg2" style={{ marginTop: 14 }}>
             <div className="fld">
-              <label className="lbl">Total Weight (grams) <span className="req">*</span></label>
+              <label className="lbl">Gross Weight (grams) <span className="req">*</span></label>
               <input
                 className="inp" type="number" step="0.01" min="0"
                 value={form.weight} onChange={e => set('weight', e.target.value)}
                 placeholder="e.g. 5.20"
               />
             </div>
+            <div className="fld">
+              <label className="lbl">Net Metal Weight (grams)</label>
+              <input
+                className="inp" type="number" step="0.01" min="0"
+                value={form.net_weight_grams} onChange={e => set('net_weight_grams', e.target.value)}
+                placeholder="Gold/silver weight after stones"
+              />
+            </div>
+          </div>
+          <div className="fg fg2" style={{ marginTop: 12 }}>
             <div className="fld">
               <label className="lbl">Stock Quantity</label>
               <input
@@ -619,6 +750,88 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
                 placeholder="Craftsmanship notes, certificate numbers, special features…"
               />
             </div>
+          </div>
+
+          {/* ── Certificates & Compliance (collapsible, closed by default) ── */}
+          <div className={styles.stoneSection} style={{ marginTop: 14 }}>
+            <button
+              type="button"
+              className={styles.stoneSectionHeader}
+              onClick={() => setCertOpen(o => !o)}
+            >
+              <span className={styles.stoneSectionTitle}>
+                <Award size={13} strokeWidth={1.8} /> Certificates &amp; Compliance
+                <span className={styles.optionalBadge}>optional</span>
+              </span>
+              {certOpen ? <ChevronUp size={14}/> : <ChevronDown size={14}/>}
+            </button>
+
+            {certOpen && (
+              <div style={{ padding: '0 14px 14px' }}>
+                {/* HUID */}
+                <div className="fg fg2" style={{ marginTop: 12 }}>
+                  <div className="fld">
+                    <label className="lbl">HUID <span style={{ fontWeight: 400, fontSize: 10, color: 'var(--ink-soft)', textTransform: 'none', letterSpacing: 0 }}>(BIS Hallmark Unique ID)</span></label>
+                    <input
+                      className="inp"
+                      value={form.huid}
+                      onChange={e => set('huid', e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6))}
+                      placeholder="e.g. AB1C2D"
+                      maxLength={6}
+                    />
+                    <div style={{ fontSize: 10, color: 'var(--ink-soft)', marginTop: 4 }}>6-character code stamped on the hallmark</div>
+                  </div>
+                  <div className="fld">
+                    <label className="lbl">Hallmark Certificate</label>
+                    {certStates.hallmark ? (
+                      <div className={styles.certSlot}>
+                        <img src={certStates.hallmark} alt="Hallmark cert" className={styles.certThumb} />
+                        <button type="button" className={styles.certRemove} onClick={() => removeCert('hallmark')}>Remove</button>
+                      </div>
+                    ) : (
+                      <div className={styles.certUpload} onClick={() => hallmarkRef.current?.click()}>
+                        <Upload size={13} /> <span>Upload photo / scan</span>
+                      </div>
+                    )}
+                    <input ref={hallmarkRef} type="file" accept="image/jpeg,image/png,image/webp,image/*" style={{ display: 'none' }} onChange={e => handleCertFile('hallmark', e.target.files?.[0])} />
+                  </div>
+                </div>
+
+                {/* Diamond certificate */}
+                <div className="fg fg3" style={{ marginTop: 12 }}>
+                  <div className="fld">
+                    <label className="lbl">Cert. Issuer</label>
+                    <select className="inp" value={form.diamond_cert_issuer} onChange={e => set('diamond_cert_issuer', e.target.value)}>
+                      <option value="">None</option>
+                      {CERT_ISSUERS.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                  </div>
+                  <div className="fld">
+                    <label className="lbl">Certificate Number</label>
+                    <input
+                      className="inp"
+                      value={form.diamond_cert_no}
+                      onChange={e => set('diamond_cert_no', e.target.value)}
+                      placeholder="e.g. 2315678901"
+                    />
+                  </div>
+                  <div className="fld">
+                    <label className="lbl">Diamond Certificate</label>
+                    {certStates.diamond ? (
+                      <div className={styles.certSlot}>
+                        <img src={certStates.diamond} alt="Diamond cert" className={styles.certThumb} />
+                        <button type="button" className={styles.certRemove} onClick={() => removeCert('diamond')}>Remove</button>
+                      </div>
+                    ) : (
+                      <div className={styles.certUpload} onClick={() => diamondCertRef.current?.click()}>
+                        <Upload size={13} /> <span>Upload photo / scan</span>
+                      </div>
+                    )}
+                    <input ref={diamondCertRef} type="file" accept="image/jpeg,image/png,image/webp,image/*" style={{ display: 'none' }} onChange={e => handleCertFile('diamond', e.target.files?.[0])} />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* ③ Images */}

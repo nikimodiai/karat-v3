@@ -49,6 +49,17 @@
   padding: 10px 0 2px;
 }
 
+/* Drop zone wrapper with camera button */
+.dropZoneWrap { display: flex; flex-direction: column; gap: 8px; }
+.camBtn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; padding: 8px 0;
+  border: 1px dashed rgba(201,168,76,.35); border-radius: 10px;
+  background: rgba(201,168,76,.04); color: #8B6914;
+  font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s;
+}
+.camBtn:hover { background: rgba(201,168,76,.1); border-color: var(--gold); }
+
 /* Drop zone */
 .dropZone {
   display: flex;

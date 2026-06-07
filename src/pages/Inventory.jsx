@@ -197,7 +197,7 @@ export default function Inventory() {
   // Direct Supabase UPDATE on edit (one row per product — fixes
   // "multiple records per edit" bug). New products go through INSERT.
   // No n8n round-trip, no AI generation, no soft-insert duplicates.
-  const handleSave = useCallback(async ({ form, slotFiles, existingUrls, variants, isEdit }) => {
+  const handleSave = useCallback(async ({ form, slotFiles, existingUrls, variants, isEdit, certFiles = {}, certExistingUrls = {} }) => {
     // 1) Upload any new images to Cloudinary
     const imageUrls = [...existingUrls];
     for (let i = 0; i < 5; i++) {
@@ -212,6 +212,21 @@ export default function Inventory() {
     }
     const finalImages = imageUrls.filter(Boolean);
 
+    // 1b) Upload any new certificate images to Cloudinary
+    const certUploadedUrls = { ...certExistingUrls };
+    for (const type of ['hallmark', 'diamond']) {
+      if (certFiles[type]) {
+        try {
+          certUploadedUrls[type] = await uploadImageToCloudinary(certFiles[type]);
+        } catch (e) {
+          showToast(`${type === 'hallmark' ? 'Hallmark' : 'Diamond'} certificate upload failed`, '#C0392B');
+        }
+      }
+    }
+    const cert_urls = Object.entries(certUploadedUrls)
+      .filter(([, url]) => !!url)
+      .map(([type, url]) => ({ type, url }));
+
     // 2) Build payload (DB column names only; AI fields excluded)
     const payload = {
       sku:            form.sku,
@@ -220,10 +235,21 @@ export default function Inventory() {
       sub_category:   form.sub_category || null,
       gold_carat:     form.gold_carat,
       color:          form.color || null,
-      diamond_purity:  form.diamond_purity  || null,
-      diamond_color:   form.diamond_color   || null,
-      diamond_weight:  form.diamond_weight  ? Number(form.diamond_weight) : null,
-      material:        form.material        || null,
+      collection:          form.collection          || null,
+      size:                form.size                || null,
+      net_weight_grams:    form.net_weight_grams    ? Number(form.net_weight_grams)  : null,
+      diamond_purity:      form.diamond_purity      || null,
+      diamond_color:       form.diamond_color       || null,
+      diamond_weight:      form.diamond_weight      ? Number(form.diamond_weight)    : null,
+      diamond_cut:         form.diamond_cut         || null,
+      diamond_shape:       form.diamond_shape       || null,
+      diamond_count:       form.diamond_count       ? Number(form.diamond_count)     : null,
+      stone_count:         form.stone_count         ? Number(form.stone_count)       : null,
+      huid:                form.huid                || null,
+      diamond_cert_no:     form.diamond_cert_no     || null,
+      diamond_cert_issuer: form.diamond_cert_issuer || null,
+      cert_urls:           cert_urls,
+      material:            form.material            || null,
       occasion:       form.occasion || null,
       weight:         form.weight,
       price:          form.price,
@@ -333,7 +359,10 @@ export default function Inventory() {
           hallmark_charge:     Number(v.hallmark_charge)      || 45,
           diamond_purity:      v.diamond_purity      || null,
           diamond_color:       v.diamond_color       || null,
-          diamond_weight:      v.diamond_weight      ? Number(v.diamond_weight) : null,
+          diamond_weight:      v.diamond_weight      ? Number(v.diamond_weight)    : null,
+          size:                v.size                || null,
+          net_weight_grams:    v.net_weight_grams    ? Number(v.net_weight_grams)  : null,
+          huid:                v.huid                || null,
           stone_value_inr:     Number(v.stone_value_inr)      || 0,
           dynamic_price:       v.dynamic_price ?? false,
           price:               v.price       ? Number(v.price)       : null,

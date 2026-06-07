@@ -29,6 +29,9 @@ function newVariant(prefill = {}) {
     diamond_purity:     prefill.diamond_purity     ?? '',
     diamond_color:      prefill.diamond_color      ?? '',
     diamond_weight:     prefill.diamond_weight     ?? '',
+    size:               prefill.size               ?? '',
+    net_weight_grams:   prefill.net_weight_grams   ?? '',
+    huid:               prefill.huid               ?? '',
     gross_weight:       prefill.gross_weight       ?? '',
     gold_purity:        prefill.gold_purity        ?? '',
     gold_weight_grams:  prefill.gold_weight_grams  ?? '',
@@ -67,6 +70,8 @@ export default function VariantEditor({ variants, onVariantsChange, productId, p
       diamond_purity:      productForm.diamond_purity      || '',
       diamond_color:       productForm.diamond_color       || '',
       diamond_weight:      productForm.diamond_weight      || '',
+      size:                productForm.size                || '',
+      net_weight_grams:    productForm.net_weight_grams    || '',
       gold_purity:         productForm.gold_purity        || '',
       gold_weight_grams:   productForm.gold_weight_grams  || '',
       silver_purity:       productForm.silver_purity      || '',
@@ -239,12 +244,40 @@ function VariantRow({ variant: v, index, expanded, onToggle, onChange, onRemove 
             <div className="fld">
               <label className="lbl">Diamond Weight (ct)</label>
               <input className="inp"
-                type="number"
-                min="0"
-                step="0.01"
+                type="number" min="0" step="0.01"
                 value={v.diamond_weight || ''}
                 onChange={e => onChange({ diamond_weight: e.target.value })}
                 placeholder="e.g. 0.25"
+              />
+            </div>
+          </div>
+
+          {/* Variant-specific: size, net weight, HUID */}
+          <div className="fg fg3" style={{ marginTop: 12 }}>
+            <div className="fld">
+              <label className="lbl">Size</label>
+              <input className="inp"
+                value={v.size || ''}
+                onChange={e => onChange({ size: e.target.value })}
+                placeholder="e.g. Ring 15, Bangle 2.6″"
+              />
+            </div>
+            <div className="fld">
+              <label className="lbl">Net Metal Weight (g)</label>
+              <input className="inp"
+                type="number" min="0" step="0.01"
+                value={v.net_weight_grams || ''}
+                onChange={e => onChange({ net_weight_grams: e.target.value })}
+                placeholder="After stones"
+              />
+            </div>
+            <div className="fld">
+              <label className="lbl">HUID</label>
+              <input className="inp"
+                value={v.huid || ''}
+                onChange={e => onChange({ huid: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6) })}
+                placeholder="e.g. AB1C2D"
+                maxLength={6}
               />
             </div>
           </div>
