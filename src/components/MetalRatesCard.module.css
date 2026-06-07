@@ -5,6 +5,7 @@
   border-top: 3px solid rgba(201, 168, 76, 0.45);
   box-shadow: var(--shadow-card);
   padding: 14px 16px 12px;
+  overflow: hidden;
 }
 
 /* ── Header ──────────────────────────────────────────────────── */
@@ -60,7 +61,7 @@
   font-size: 12px;
 }
 
-/* ── Rate strip ──────────────────────────────────────────────── */
+/* ── Rate strip (desktop / tablet) ──────────────────────────── */
 .strip {
   display: flex;
   width: 100%;
@@ -71,11 +72,6 @@
 }
 .strip::-webkit-scrollbar { display: none; }
 
-/* ── Metal group (Gold / Silver / Platinum) ──────────────────── */
-/* Each group is flexed proportional to its chip count (set via inline
-   style in MetalRatesCard.jsx) so that the whole row spans the card
-   width and individual chips end up roughly the same size across
-   groups — Gold's 5 chips don't get squashed by Silver's lone chip. */
 .group {
   display: flex;
   flex-direction: column;
@@ -102,7 +98,6 @@
   justify-content: space-around;
 }
 
-/* ── Chip ────────────────────────────────────────────────────── */
 .chip {
   flex: 1 1 0;
   min-width: 0;
@@ -145,7 +140,6 @@
   font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
 }
 
-/* Unit pill — intentionally visible */
 .chipUnit {
   font-size: 11px;
   font-weight: 700;
@@ -155,47 +149,79 @@
   margin-top: 2px;
 }
 
+/* ── Mobile sliding ticker ──────────────────────────────────── */
+.ticker { display: none; }
+
+@keyframes tickerScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
 /* ── Responsive ──────────────────────────────────────────────── */
 @media (max-width: 640px) {
-  /* Stack metal groups vertically, chips wrap inside each group */
-  .strip {
-    flex-direction: column;
-    overflow-x: visible;
-    gap: 10px;
+  /* Hide the desktop grid, show the ticker instead */
+  .strip  { display: none; }
+  .ticker {
+    display: block;
+    overflow: hidden;
+    border-top: 1px solid var(--border-soft);
+    padding-top: 8px;
+    margin: 4px -16px -12px;  /* bleed to card edges */
+    padding-bottom: 12px;
   }
 
-  .group {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 10px;
-  }
-  .group:last-child { border-bottom: none; padding-bottom: 0; }
-
-  .groupLabel {
-    text-align: left;
-    padding: 0 4px 6px;
-  }
-
-  .groupChips {
+  .tickerTrack {
     display: flex;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-    gap: 4px;
+    width: max-content;
+    animation: tickerScroll 20s linear infinite;
+    /* duration overridden inline per item count */
+  }
+  .tickerTrack:hover { animation-play-state: paused; }
+
+  .tickerChip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 18px 6px 14px;
+    flex-shrink: 0;
+    border-right: 1px solid rgba(201,168,76,.15);
+    white-space: nowrap;
   }
 
-  .chip {
-    flex: 0 0 auto;
-    width: calc(50% - 4px);   /* 2-per-row grid */
-    padding: 8px 10px;
-    align-items: flex-start;
-    text-align: left;
-    border-right: none !important;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    background: var(--cream, #F8F5EE);
+  .tickerMetal {
+    font-size: 9px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .08em;
   }
 
-  .chipNum { font-size: 16px; }
-  .chipPurity { font-size: 11px; }
-  .chipUnit { font-size: 10px; }
+  .tickerDot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--ink-soft);
+    flex-shrink: 0;
+  }
+
+  .tickerPurity {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--ink-mid);
+  }
+
+  .tickerRate {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--navy);
+    font-family: 'DM Sans', system-ui, sans-serif;
+    letter-spacing: -.01em;
+  }
+
+  .tickerUnit {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 99px;
+    letter-spacing: .03em;
+  }
 }

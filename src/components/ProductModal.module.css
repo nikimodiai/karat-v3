@@ -409,9 +409,26 @@
 .stoneSection > div:last-child { padding: 0 14px 14px; }
 
 @media (max-width: 640px) {
-  .modal { max-height: 100dvh; border-radius: 0; max-width: 100%; }
-  .header { padding: 18px 18px 0; }
-  .body { padding: 16px 18px; }
-  .footer { padding: 14px 18px; }
+  .modal {
+    max-height: 100dvh;
+    height: 100dvh;
+    border-radius: 0;
+    max-width: 100%;
+    width: 100%;
+  }
+  .header { padding: 16px 16px 0; }
+  .title  { font-size: 18px; }
+  .body   { padding: 14px 16px; }
+  .footer {
+    padding: 12px 16px;
+    /* Safe area for phones with home indicator */
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
   .imgGrid { grid-template-columns: repeat(3, 1fr); }
+
+  /* Pricing mode: stack on mobile */
+  .priceModeRow { grid-template-columns: 1fr; gap: 8px; }
+
+  /* Stone section full-width padding */
+  .stoneSection > div:last-child { padding: 0 10px 10px; }
 }

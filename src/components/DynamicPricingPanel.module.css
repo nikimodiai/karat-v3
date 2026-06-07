@@ -36,6 +36,8 @@
 .row3 { grid-template-columns: 1fr 1fr 1fr; }
 @media (max-width: 600px) {
   .row, .row3 { grid-template-columns: 1fr; }
+  /* Prevent iOS Safari zoom on input focus */
+  .field input, .field select { font-size: 16px; padding: 10px 12px; }
 }
 
 .field { display: flex; flex-direction: column; gap: 4px; }

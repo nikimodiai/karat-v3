@@ -18,7 +18,7 @@ import VoiceStyleSection from './components/VoiceStyleSection';
 function VoiceTab() {
   const { user, store, refreshStore } = useAuth();
   return (
-    <div style={{ flex: 1, overflowY: 'auto', padding: '32px 24px', maxWidth: 760, margin: '0 auto', width: '100%' }}>
+    <div style={{ flex: 1, overflowY: 'auto', padding: 'clamp(16px, 4vw, 32px) clamp(16px, 4vw, 24px)', maxWidth: 760, margin: '0 auto', width: '100%' }}>
       <div style={{ marginBottom: 28 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
           <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--navy)', margin: 0 }}>Teach AI Your Style</h1>

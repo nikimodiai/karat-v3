@@ -17,13 +17,10 @@ function metalType(key) {
   return 'Gold';
 }
 
-// Gold rate_inr is per 10g — show as-is with "10 Gm" label
-// Silver rate_inr is per kg — show as-is with "1 Kg" label
 function unitLabel(key) {
   return /silver/i.test(key) ? '1 Kg' : '10 Gm';
 }
 
-// Sort: gold first (purity desc), platinum, then silver (purity desc)
 function sortRates(rows) {
   const TYPE_ORDER = { Gold: 0, Platinum: 1, Silver: 2 };
   return [...rows].sort((a, b) => {
@@ -31,19 +28,15 @@ function sortRates(rows) {
     if (TYPE_ORDER[tA] !== TYPE_ORDER[tB]) return TYPE_ORDER[tA] - TYPE_ORDER[tB];
     const pA = Number(a.metal_key.match(/(\d+)/)?.[1] || 0);
     const pB = Number(b.metal_key.match(/(\d+)/)?.[1] || 0);
-    return pB - pA; // higher purity first
+    return pB - pA;
   });
 }
 
 function fmtRateDate(dateStr) {
   if (!dateStr) return '';
-  // rate_date is a plain date like '2026-05-27' — parse as local midnight
-  // to avoid the off-by-one UTC shift.
   const d = new Date(dateStr + 'T00:00:00');
   if (isNaN(d.getTime())) return '';
-  return d.toLocaleDateString('en-IN', {
-    day: 'numeric', month: 'long', year: 'numeric',
-  });
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
 }
 
 const TYPE_COLOR = {
@@ -68,16 +61,11 @@ export default function MetalRatesCard() {
         .order('rate_date', { ascending: false })
         .limit(50);
       if (err) {
-        console.error('[MetalRatesCard] query error:', err);
         setError(`Could not load rates — ${err.message}`);
         setLoading(false);
         return;
       }
-      if (!data?.length) {
-        console.warn('[MetalRatesCard] daily_metal_rates returned no rows');
-        setLoading(false);
-        return;
-      }
+      if (!data?.length) { setLoading(false); return; }
       const latestDate = data[0].rate_date;
       const sorted = sortRates(data.filter(r => r.rate_date === latestDate));
       setRates(sorted);
@@ -86,6 +74,16 @@ export default function MetalRatesCard() {
     }
     load();
   }, []);
+
+  // Flat annotated list used by both strip (desktop) and ticker (mobile)
+  const flatItems = rates.map(r => ({
+    ...r,
+    group: metalType(r.metal_key),
+    color: TYPE_COLOR[metalType(r.metal_key)] || TYPE_COLOR.Gold,
+  }));
+
+  // Duration scales with item count so the ticker doesn't feel too fast or too slow
+  const tickerDuration = Math.max(16, flatItems.length * 2.2);
 
   return (
     <div className={styles.card}>
@@ -113,40 +111,66 @@ export default function MetalRatesCard() {
           No rates in <code>daily_metal_rates</code> — check the table has rows and RLS allows authenticated reads.
         </div>
       ) : (
-        <div className={styles.strip}>
-          {['Gold', 'Silver', 'Platinum'].map(group => {
-            const groupRates = rates.filter(r => metalType(r.metal_key) === group);
-            if (!groupRates.length) return null;
-            const color = TYPE_COLOR[group] || TYPE_COLOR.Gold;
-            return (
-              <div key={group} className={styles.group} style={{ flexGrow: groupRates.length }}>
-                <div className={styles.groupLabel} style={{ color: color.text, borderBottomColor: color.unit }}>
-                  {group}
-                </div>
-                <div className={styles.groupChips}>
-                  {groupRates.map((r, i) => (
-                    <div
-                      key={r.metal_key}
-                      className={styles.chip}
-                      style={i < groupRates.length - 1 ? { borderRight: '1px solid var(--border)' } : {}}
-                    >
-                      <span className={styles.chipPurity}>{purityLabel(r.metal_key)}</span>
-                      <div className={styles.chipRate}>
-                        <span className={styles.chipSym}>₹</span>
-                        <span className={styles.chipNum}>
-                          {Math.round(r.rate_inr).toLocaleString('en-IN')}
+        <>
+          {/* ── Desktop / tablet strip ─────────────────────────── */}
+          <div className={styles.strip}>
+            {['Gold', 'Silver', 'Platinum'].map(group => {
+              const groupRates = rates.filter(r => metalType(r.metal_key) === group);
+              if (!groupRates.length) return null;
+              const color = TYPE_COLOR[group] || TYPE_COLOR.Gold;
+              return (
+                <div key={group} className={styles.group} style={{ flexGrow: groupRates.length }}>
+                  <div className={styles.groupLabel} style={{ color: color.text, borderBottomColor: color.unit }}>
+                    {group}
+                  </div>
+                  <div className={styles.groupChips}>
+                    {groupRates.map((r, i) => (
+                      <div
+                        key={r.metal_key}
+                        className={styles.chip}
+                        style={i < groupRates.length - 1 ? { borderRight: '1px solid var(--border)' } : {}}
+                      >
+                        <span className={styles.chipPurity}>{purityLabel(r.metal_key)}</span>
+                        <div className={styles.chipRate}>
+                          <span className={styles.chipSym}>₹</span>
+                          <span className={styles.chipNum}>{Math.round(r.rate_inr).toLocaleString('en-IN')}</span>
+                        </div>
+                        <span className={styles.chipUnit} style={{ background: color.unit, color: color.text }}>
+                          {unitLabel(r.metal_key)}
                         </span>
                       </div>
-                      <span className={styles.chipUnit} style={{ background: color.unit, color: color.text }}>
-                        {unitLabel(r.metal_key)}
-                      </span>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+
+          {/* ── Mobile sliding ticker ──────────────────────────── */}
+          <div className={styles.ticker}>
+            <div
+              className={styles.tickerTrack}
+              style={{ animationDuration: `${tickerDuration}s` }}
+            >
+              {/* Duplicate for seamless loop */}
+              {[...flatItems, ...flatItems].map((item, i) => (
+                <div key={i} className={styles.tickerChip}>
+                  <span className={styles.tickerMetal} style={{ color: item.color.text }}>
+                    {item.group}
+                  </span>
+                  <span className={styles.tickerDot} />
+                  <span className={styles.tickerPurity}>{purityLabel(item.metal_key)}</span>
+                  <span className={styles.tickerRate}>
+                    ₹{Math.round(item.rate_inr).toLocaleString('en-IN')}
+                  </span>
+                  <span className={styles.tickerUnit} style={{ color: item.color.text, background: item.color.unit }}>
+                    {unitLabel(item.metal_key)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
       )}
     </div>
   );
