@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { X, Upload, Trash2, Tag, Zap, Image as ImageIcon, Layers, Sparkles, Camera } from 'lucide-react';
+import { X, Upload, Trash2, Tag, Zap, Image as ImageIcon, Layers, Sparkles, Camera, ChevronDown, ChevronUp, Gem } from 'lucide-react';
 import {
   CATEGORIES, SUBCATEGORY_MAP, METAL_PURITY_GROUPS, DIAMOND_PURITIES,
   SILVER_CATEGORIES, MAX_IMAGE_BYTES, db,
@@ -21,7 +21,7 @@ import styles from './ProductModal.module.css';
 
 const EMPTY_FORM = {
   sku: '', name: '', category: '', sub_category: '',
-  gold_carat: '', diamond_purity: '', diamond_color: '', material: '', occasion: '',
+  gold_carat: '', diamond_purity: '', diamond_color: '', diamond_weight: '', material: '', occasion: '',
   color: '',
   weight: '',
   // Two parallel price slots. `fixed_price` is what the owner types in
@@ -74,6 +74,7 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
   const [customSubcatMode,  setCustomSubcatMode]  = useState(false);
   const [customMetalMode,   setCustomMetalMode]   = useState(false);
   const [customDiamondMode, setCustomDiamondMode] = useState(false);
+  const [stoneOpen,         setStoneOpen]         = useState(true);
 
   useEffect(() => {
     if (product) {
@@ -83,9 +84,10 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
         category:       product.category       || '',
         sub_category:   product.sub_category   || '',
         gold_carat:     product.gold_carat     || '',
-        diamond_purity: product.diamond_purity || '',
-        diamond_color:  product.diamond_color  || '',
-        material:       product.material       || '',
+        diamond_purity:  product.diamond_purity  || '',
+        diamond_color:   product.diamond_color   || '',
+        diamond_weight:  product.diamond_weight  ?? '',
+        material:        product.material        || '',
         occasion:       product.occasion       || '',
         color:          product.color          || '',
         weight:         product.weight         || '',
@@ -151,6 +153,7 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
               diamond_cert_fee:    row.diamond_cert_fee     ?? 0,
               diamond_purity:      row.diamond_purity       ?? '',
               diamond_color:       row.diamond_color        ?? '',
+              diamond_weight:      row.diamond_weight       ?? '',
               stone_value_inr:     row.stone_value_inr      ?? 0,
             }))
           );
@@ -436,61 +439,91 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
             </div>
           </div>
 
-          <div className="fg fg2" style={{ marginTop: 14 }}>
-            <div className="fld">
-              <label className="lbl">Diamond Purity</label>
-              {customDiamondMode ? (
-                <div className={styles.customInputWrap}>
-                  <input className="inp" value={form.diamond_purity} autoFocus
-                    onChange={e => set('diamond_purity', e.target.value)}
-                    placeholder="e.g. GIA Certified, SI3…" />
-                  <button type="button" className={styles.customBack}
-                    onClick={() => { setCustomDiamondMode(false); set('diamond_purity', ''); }}>
-                    ← Choose from list
-                  </button>
-                </div>
-              ) : (
-                <select className="inp" value={form.diamond_purity} onChange={e => {
-                  if (e.target.value === '__custom__') { setCustomDiamondMode(true); set('diamond_purity', ''); }
-                  else set('diamond_purity', e.target.value);
-                }}>
-                  <option value="">None / N/A</option>
-                  {DIAMOND_PURITIES.map(d => <option key={d} value={d}>{d}</option>)}
-                  <option disabled>──────────────</option>
-                  <option value="__custom__">➕ Other / type your own…</option>
-                </select>
-              )}
-            </div>
-            <div className="fld">
-              <label className="lbl">Diamond Color</label>
-              <input
-                className="inp"
-                value={form.diamond_color}
-                onChange={e => set('diamond_color', e.target.value)}
-                placeholder="e.g. D, E, F, G, H…"
-              />
-            </div>
-          </div>
+          {/* ── Stone & Diamond Details (collapsible, open by default) ── */}
+          <div className={styles.stoneSection} style={{ marginTop: 14 }}>
+            <button
+              type="button"
+              className={styles.stoneSectionHeader}
+              onClick={() => setStoneOpen(o => !o)}
+            >
+              <span className={styles.stoneSectionTitle}>
+                <Gem size={13} strokeWidth={1.8} /> Stone &amp; Diamond Details
+              </span>
+              {stoneOpen ? <ChevronUp size={14}/> : <ChevronDown size={14}/>}
+            </button>
 
-          <div className="fg fg2" style={{ marginTop: 14 }}>
-            <div className="fld">
-              <label className="lbl">Stone / Material</label>
-              <input
-                className="inp"
-                value={form.material}
-                onChange={e => set('material', e.target.value)}
-                placeholder="e.g. Kundan, Polki, Ruby, Lab-grown Diamond"
-              />
-            </div>
-            <div className="fld">
-              <label className="lbl">Occasion</label>
-              <input
-                className="inp"
-                value={form.occasion}
-                onChange={e => set('occasion', e.target.value)}
-                placeholder="e.g. Wedding, Festival"
-              />
-            </div>
+            {stoneOpen && (
+              <>
+                <div className="fg fg3" style={{ marginTop: 12 }}>
+                  <div className="fld">
+                    <label className="lbl">Diamond Purity</label>
+                    {customDiamondMode ? (
+                      <div className={styles.customInputWrap}>
+                        <input className="inp" value={form.diamond_purity} autoFocus
+                          onChange={e => set('diamond_purity', e.target.value)}
+                          placeholder="e.g. GIA Certified, SI3…" />
+                        <button type="button" className={styles.customBack}
+                          onClick={() => { setCustomDiamondMode(false); set('diamond_purity', ''); }}>
+                          ← Choose from list
+                        </button>
+                      </div>
+                    ) : (
+                      <select className="inp" value={form.diamond_purity} onChange={e => {
+                        if (e.target.value === '__custom__') { setCustomDiamondMode(true); set('diamond_purity', ''); }
+                        else set('diamond_purity', e.target.value);
+                      }}>
+                        <option value="">None / N/A</option>
+                        {DIAMOND_PURITIES.map(d => <option key={d} value={d}>{d}</option>)}
+                        <option disabled>──────────────</option>
+                        <option value="__custom__">➕ Other / type your own…</option>
+                      </select>
+                    )}
+                  </div>
+                  <div className="fld">
+                    <label className="lbl">Diamond Color</label>
+                    <input
+                      className="inp"
+                      value={form.diamond_color}
+                      onChange={e => set('diamond_color', e.target.value)}
+                      placeholder="e.g. D, E, F, G, H…"
+                    />
+                  </div>
+                  <div className="fld">
+                    <label className="lbl">Diamond Weight (ct)</label>
+                    <input
+                      className="inp"
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      value={form.diamond_weight}
+                      onChange={e => set('diamond_weight', e.target.value)}
+                      placeholder="e.g. 0.25"
+                    />
+                  </div>
+                </div>
+
+                <div className="fg fg2" style={{ marginTop: 12 }}>
+                  <div className="fld">
+                    <label className="lbl">Stone / Material</label>
+                    <input
+                      className="inp"
+                      value={form.material}
+                      onChange={e => set('material', e.target.value)}
+                      placeholder="e.g. Kundan, Polki, Ruby, Lab-grown Diamond"
+                    />
+                  </div>
+                  <div className="fld">
+                    <label className="lbl">Occasion</label>
+                    <input
+                      className="inp"
+                      value={form.occasion}
+                      onChange={e => set('occasion', e.target.value)}
+                      placeholder="e.g. Wedding, Festival"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           <div className="fg fg3" style={{ marginTop: 14 }}>
@@ -571,7 +604,6 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
               <div className={styles.priceSnapshot}>
                 <span>Computed Price</span>
                 <strong>₹{form.price ? Number(form.price).toLocaleString('en-IN') : '—'}</strong>
-                <small>saved to <code>products.price</code>, recomputed each load</small>
               </div>
             </>
           )}

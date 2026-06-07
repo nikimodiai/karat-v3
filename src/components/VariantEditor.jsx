@@ -28,6 +28,7 @@ function newVariant(prefill = {}) {
     customColor:        '',
     diamond_purity:     prefill.diamond_purity     ?? '',
     diamond_color:      prefill.diamond_color      ?? '',
+    diamond_weight:     prefill.diamond_weight     ?? '',
     gross_weight:       prefill.gross_weight       ?? '',
     gold_purity:        prefill.gold_purity        ?? '',
     gold_weight_grams:  prefill.gold_weight_grams  ?? '',
@@ -63,8 +64,9 @@ export default function VariantEditor({ variants, onVariantsChange, productId, p
     // Pre-fill from parent product so owner only changes the differentiator
     const prefill = productForm ? {
       carat:               productForm.gold_carat        || productForm.gold_purity || '',
-      diamond_purity:      productForm.diamond_purity     || '',
-      diamond_color:       productForm.diamond_color      || '',
+      diamond_purity:      productForm.diamond_purity      || '',
+      diamond_color:       productForm.diamond_color       || '',
+      diamond_weight:      productForm.diamond_weight      || '',
       gold_purity:         productForm.gold_purity        || '',
       gold_weight_grams:   productForm.gold_weight_grams  || '',
       silver_purity:       productForm.silver_purity      || '',
@@ -218,7 +220,7 @@ function VariantRow({ variant: v, index, expanded, onToggle, onChange, onRemove 
           </div>
 
           {/* Diamond fields */}
-          <div className="fg fg2" style={{ marginTop: 12 }}>
+          <div className="fg fg3" style={{ marginTop: 12 }}>
             <div className="fld">
               <label className="lbl">Diamond Purity</label>
               <select className="inp" value={v.diamond_purity || ''} onChange={e => onChange({ diamond_purity: e.target.value })}>
@@ -232,6 +234,17 @@ function VariantRow({ variant: v, index, expanded, onToggle, onChange, onRemove 
                 value={v.diamond_color || ''}
                 onChange={e => onChange({ diamond_color: e.target.value })}
                 placeholder="e.g. D, E, F, G, H…"
+              />
+            </div>
+            <div className="fld">
+              <label className="lbl">Diamond Weight (ct)</label>
+              <input className="inp"
+                type="number"
+                min="0"
+                step="0.01"
+                value={v.diamond_weight || ''}
+                onChange={e => onChange({ diamond_weight: e.target.value })}
+                placeholder="e.g. 0.25"
               />
             </div>
           </div>
