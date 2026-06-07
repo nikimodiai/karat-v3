@@ -24,69 +24,76 @@ export const PLAN_LABELS = {
 // image_storage_gb, ai_models_limit}` and overrides these.
 export const PLAN_LIMITS = {
   trial: {
-    conversations:  50,
-    products:       50,
+    conversations:  200,
+    products:       100,
     image_storage:  1,        // GB
-    ai_models:      500,      // model calls / month
+    ai_models:      20,       // AI Models Try-On / month
+    selfie_tryon:   10,       // Selfie Try-On for Customers / month
     monthly_inr:    0,
-    // Trial mirrors Professional capabilities (per Nikhil's spec)
     features: {
       whatsapp:        true,
       inventory:       true,
       voice_search:    true,
-      image_search:    true,
-      customer_tiers:  true,
+      image_search:    false,
+      customer_tiers:  false,
+      teach_ai_style:  false,
       ai_models:       true,
       virtual_tryon:   true,
       analytics:       'PROFESSIONAL',
     },
   },
   starter: {
-    conversations:  500,
+    conversations:  1000,
     products:       500,
     image_storage:  5,
-    ai_models:      1000,
-    monthly_inr:    3500,
+    ai_models:      50,
+    selfie_tryon:   30,
+    monthly_inr:    3999,
     features: {
       whatsapp:        true,
       inventory:       true,
       voice_search:    false,
       image_search:    false,
       customer_tiers:  false,
-      ai_models:       false,
-      virtual_tryon:   false,
+      teach_ai_style:  false,
+      ai_models:       true,
+      virtual_tryon:   true,
       analytics:       'STARTER',
     },
   },
   professional: {
-    conversations:  2000,
-    products:       5000,
+    conversations:  3000,
+    products:       1000,
     image_storage:  25,
-    ai_models:      5000,
-    monthly_inr:    8500,
+    ai_models:      200,
+    selfie_tryon:   100,
+    monthly_inr:    8999,
     features: {
       whatsapp:        true,
       inventory:       true,
       voice_search:    true,
       image_search:    true,
       customer_tiers:  true,
+      teach_ai_style:  true,
       ai_models:       true,
       virtual_tryon:   true,
       analytics:       'PROFESSIONAL',
     },
   },
   enterprise: {
-    conversations:  Infinity,
-    products:       Infinity,
+    conversations:  10000,
+    products:       5000,
     image_storage:  Infinity,
-    ai_models:      Infinity,
-    monthly_inr:    18000,
+    ai_models:      500,
+    selfie_tryon:   300,
+    monthly_inr:    17999,
     features: {
       whatsapp:        true,
       inventory:       true,
       voice_search:    true,
       image_search:    true,
       customer_tiers:  true,
+      teach_ai_style:  true,
       ai_models:       true,
       virtual_tryon:   true,
       analytics:       'ENTERPRISE',
@@ -106,7 +113,7 @@ export function planLimits(store) {
 
 // Returns the *effective* limit for a resource: the store's per-tenant
 // override (if set in the DB) or the plan default.
-// resource ∈ 'conversations' | 'products' | 'image_storage' | 'ai_models'
+// resource ∈ 'conversations' | 'products' | 'image_storage' | 'ai_models' | 'selfie_tryon'
 export function effectiveLimit(store, resource) {
   const plan = planLimits(store);
   const ov = store && {
@@ -114,6 +121,7 @@ export function effectiveLimit(store, resource) {
     products:       store.product_limit,
     image_storage:  store.image_storage_gb,
     ai_models:      store.ai_models_limit,
+    selfie_tryon:   store.virtual_tryon,   // virtual_tryon column = Selfie Try-On limit
   }[resource];
   // Treat 0 as "use plan default"; treat null/undefined the same.
   if (ov === null || ov === undefined || ov === 0) return plan[resource];

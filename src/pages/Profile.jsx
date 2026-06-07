@@ -22,9 +22,15 @@ function FeatureRow({ icon: Icon, label, active, note }) {
         <span>{label}</span>
         {note && <span className={styles.featureNote}>({note})</span>}
       </div>
-      <span className={active ? styles.featureOn : styles.featureOff}>
-        {active ? <><Check size={11} /> Active</> : <><X size={11} /> Upgrade</>}
-      </span>
+      {active
+        ? <span className={styles.featureOn}><Check size={11} /> Active</span>
+        : <a
+            href="mailto:nikimodi81@gmail.com?subject=KARAT Plan Upgrade"
+            className={styles.featureUpgrade}
+          >
+            <Crown size={10} /> Upgrade
+          </a>
+      }
     </div>
   );
 }
@@ -60,10 +66,11 @@ export default function Profile() {
   const { showToast } = useToast();
   const { products } = useStoreData();
 
-  const [storeName, setStoreName] = useState(store?.store_name || '');
-  const [phone, setPhone]         = useState(store?.phone || '');
-  const [address, setAddress]     = useState(store?.address || '');
-  const [saving, setSaving]       = useState(false);
+  const [storeName, setStoreName]           = useState(store?.store_name || '');
+  const [phone, setPhone]                   = useState(store?.phone || '');
+  const [address, setAddress]               = useState(store?.address || '');
+  const [selfieTryonTier, setSelfieTryonTier] = useState(store?.selfie_tryon_tier || 'vvip');
+  const [saving, setSaving]                 = useState(false);
 
   const ownerName    = store?.owner_name || user?.user_metadata?.full_name || user?.email || 'Owner';
   const planName     = planKey(store);
@@ -74,12 +81,14 @@ export default function Profile() {
     : '—';
 
   // Effective limits & usage
-  const convUsed     = store?._conv_used   || 0;
-  const aiUsed       = store?._ai_used     || 0;
-  const convLimit    = effectiveLimit(store, 'conversations');
-  const prodLimit    = effectiveLimit(store, 'products');
-  const aiLimit      = effectiveLimit(store, 'ai_models');
-  const storageLimit = effectiveLimit(store, 'image_storage');
+  const convUsed          = store?._conv_used || 0;
+  const aiUsed            = store?._ai_used   || 0;
+  const vtUsed            = store?._vt_used   || 0;
+  const convLimit         = effectiveLimit(store, 'conversations');
+  const prodLimit         = effectiveLimit(store, 'products');
+  const aiLimit           = effectiveLimit(store, 'ai_models');
+  const selfieTryonLimit  = effectiveLimit(store, 'selfie_tryon');
+  const storageLimit      = effectiveLimit(store, 'image_storage');
 
   const productCount = products.length;
 
@@ -89,7 +98,8 @@ export default function Profile() {
     { icon: Camera,      label: 'Voice Search',              active: hasFeature(store, 'voice_search') },
     { icon: Camera,      label: 'Image Search',              active: hasFeature(store, 'image_search') },
     { icon: Users,       label: 'Customer Tiers (VVIP/VIP)', active: hasFeature(store, 'customer_tiers') },
-    { icon: Cpu,         label: 'Advanced AI Models',        active: hasFeature(store, 'ai_models') },
+    { icon: Cpu,         label: 'Teach AI Your Style',       active: hasFeature(store, 'teach_ai_style') },
+    { icon: Cpu,         label: 'AI Models Try-On',          active: hasFeature(store, 'ai_models') },
     { icon: Shirt,       label: 'Selfie Try-On',             active: hasFeature(store, 'virtual_tryon') },
     { icon: BarChart2,   label: 'Analytics',                 active: !!planSpec.features.analytics, note: planSpec.features.analytics },
   ];
@@ -99,12 +109,13 @@ export default function Profile() {
     setSaving(true);
     try {
       // Owner: RLS matches owner_id = auth.uid(). Staff admin: filter by store.id (anon key + staff RLS policy).
+      const updates = { store_name: storeName, phone, address, selfie_tryon_tier: selfieTryonTier };
       const query = isOwner
-        ? db.from('stores').update({ store_name: storeName, phone, address }).eq('owner_id', user.id)
-        : db.from('stores').update({ store_name: storeName, phone, address }).eq('id', store.id);
+        ? db.from('stores').update(updates).eq('owner_id', user.id)
+        : db.from('stores').update(updates).eq('id', store.id);
       const { error } = await query;
       if (error) throw error;
-      updateStore({ store_name: storeName, phone, address });
+      updateStore(updates);
       showToast('Profile saved!', '#166534');
     } catch(err) {
       showToast('Error: ' + err.message, '#C0392B');
@@ -191,6 +202,22 @@ export default function Profile() {
                 />
               </div>
 
+              <div className={styles.field}>
+                <div className={styles.fieldLabel}>
+                  Selfie Try-On available to {canAdmin && <span className={styles.editable}>✎ editable</span>}
+                </div>
+                <select
+                  className="inp"
+                  value={selfieTryonTier}
+                  onChange={e => canAdmin && setSelfieTryonTier(e.target.value)}
+                  disabled={!canAdmin}
+                >
+                  <option value="vvip">VVIP customers only</option>
+                  <option value="vip_and_vvip">VIP &amp; VVIP customers</option>
+                  <option value="all">All customers</option>
+                </select>
+              </div>
+
               {canAdmin && (
                 <button className="btn-gold" style={{ marginTop: 20, width: '100%', justifyContent: 'center' }} onClick={handleSave} disabled={saving}>
                   {saving ? <><div className="spinner spinner-sm" /> Saving…</> : <><Check size={14} /> Save Changes</>}
@@ -257,10 +284,10 @@ export default function Profile() {
             <div className={styles.card}>
               <div className={styles.cardTitle}><Crown size={14} color="#C9A84C" /> Plan Limits & Usage</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 4 }}>
-                <LimitRow icon={MessageSquare} label="Credits / month" used={convUsed}     limit={convLimit}/>
-                <LimitRow icon={ShoppingBag}   label="Products"              used={productCount} limit={prodLimit}/>
-                <LimitRow icon={Cpu}           label="AI Model Calls"        used={aiUsed}       limit={aiLimit}/>
-
+                <LimitRow icon={MessageSquare} label="Credits / month"    used={convUsed}     limit={convLimit}/>
+                <LimitRow icon={ShoppingBag}   label="Products"           used={productCount} limit={prodLimit}/>
+                <LimitRow icon={Cpu}           label="AI Models Try-On"   used={aiUsed}       limit={aiLimit}/>
+                <LimitRow icon={Shirt}         label="Selfie Try-On"      used={vtUsed}       limit={selfieTryonLimit}/>
               </div>
             </div>
 
@@ -283,13 +310,30 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* ── AI Style Training (owner only — needs Google auth for upload) ── */}
-        {isOwner && (
+        {/* ── AI Style Training (Professional+ only) ── */}
+        {isOwner && hasFeature(store, 'teach_ai_style') && (
           <VoiceStyleSection
             store={store}
             user={user}
             onProfileUpdated={refreshStore}
           />
+        )}
+        {isOwner && !hasFeature(store, 'teach_ai_style') && (
+          <div className={styles.card} style={{ marginTop: 24 }}>
+            <div className={styles.cardTitle}><Lock size={14} color="rgba(13,27,42,.3)" /> Teach AI Your Style</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'flex-start' }}>
+              <p style={{ fontSize: 13, color: 'var(--ink-soft)', margin: 0 }}>
+                Train the AI to match your store's WhatsApp tone and reply style. Available on the Professional plan and above.
+              </p>
+              <a
+                href="mailto:nikimodi81@gmail.com?subject=KARAT Plan Upgrade"
+                className="btn-gold"
+                style={{ textDecoration: 'none', fontSize: 12 }}
+              >
+                <Crown size={12} /> Upgrade to Professional
+              </a>
+            </div>
+          </div>
         )}
 
       </div>

@@ -95,6 +95,13 @@
   font-size:11px; font-weight:600; color:var(--ink-soft);
   background:rgba(11,24,41,.05); padding:3px 9px; border-radius:99px;
 }
+.featureUpgrade {
+  display:flex; align-items:center; gap:4px;
+  font-size:11px; font-weight:600; color:#8B6914;
+  background:rgba(201,168,76,.12); padding:3px 9px; border-radius:99px;
+  text-decoration:none; cursor:pointer; transition:background .12s;
+}
+.featureUpgrade:hover { background:rgba(201,168,76,.22); }
 
 @media (max-width:768px) {
   .header { padding:16px; }
