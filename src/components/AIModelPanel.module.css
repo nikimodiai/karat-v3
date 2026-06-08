@@ -258,8 +258,196 @@
   border-radius: 8px;
 }
 
+/* ── Maximize button (sits top-left of the result image) ── */
+.maximizeBtn {
+  position: absolute;
+  top: 5px;
+  left: 5px;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: rgba(0,0,0,.52);
+  border: none;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .14s, transform .12s;
+  backdrop-filter: blur(4px);
+}
+.maximizeBtn:hover { background: rgba(0,0,0,.75); transform: scale(1.1); }
+
+/* ── Share button ── */
+.shareBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(37,211,102,.10);
+  color: #0d5c2f;
+  border: 1.5px solid rgba(37,211,102,.35);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all .15s;
+}
+.shareBtn:hover {
+  background: rgba(37,211,102,.22);
+  border-color: #25D366;
+}
+
+/* ── Share dropdown wrap + menu ── */
+.shareWrap {
+  position: relative;
+}
+
+.shareMenu {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  background: #fff;
+  border: 1.5px solid rgba(201,168,76,.25);
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(11,24,41,.18);
+  overflow: hidden;
+  z-index: 200;
+  min-width: 170px;
+  animation: menuFadeIn .15s ease;
+}
+
+@keyframes menuFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.shareMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 14px;
+  background: none;
+  border: none;
+  font-size: 13px;
+  font-family: var(--font-body);
+  font-weight: 500;
+  color: var(--navy);
+  cursor: pointer;
+  transition: background .12s;
+  text-align: left;
+}
+.shareMenuItem:hover { background: rgba(201,168,76,.08); }
+.shareMenuItem:not(:last-child) { border-bottom: 1px solid rgba(11,24,41,.06); }
+
+.shareIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ── Copy link button (lightbox) ── */
+.copyBtnLb {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: rgba(11,24,41,.06);
+  color: var(--navy);
+  border: 1.5px solid rgba(11,24,41,.15);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all .15s;
+}
+.copyBtnLb:hover { background: rgba(11,24,41,.12); }
+
+/* ── Lightbox overlay ── */
+.lightboxOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(0,0,0,.82);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  animation: lbFadeIn .18s ease;
+}
+
+@keyframes lbFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.lightboxContent {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: min(92vw, 560px);
+  max-height: 92vh;
+  animation: lbSlideIn .2s ease;
+}
+
+@keyframes lbSlideIn {
+  from { transform: scale(.92); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.lightboxClose {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.15);
+  border: 1.5px solid rgba(255,255,255,.25);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .14s;
+  backdrop-filter: blur(4px);
+  z-index: 1;
+}
+.lightboxClose:hover { background: rgba(192,57,43,.75); }
+
+.lightboxImg {
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 12px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.5);
+}
+
+.lightboxActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 @media (max-width: 640px) {
   .previewRow { gap: 8px; }
   .actions { flex-direction: column; align-items: stretch; }
-  .generateBtn, .addBtn { justify-content: center; }
+  .generateBtn, .addBtn, .shareBtn { justify-content: center; width: 100%; }
+  .shareMenu { left: 0; right: 0; min-width: unset; }
+  .lightboxContent { max-width: 98vw; }
 }

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { Upload, Sparkles, RefreshCw, PlusCircle, X, AlertCircle, Camera } from 'lucide-react';
+import { Upload, Sparkles, RefreshCw, PlusCircle, X, AlertCircle, Camera, Maximize2, Share2, Copy, Check } from 'lucide-react';
 import { N8N_AI_MODEL, db, CLOUDINARY_CLOUD, CLOUDINARY_PRESET, MAX_IMAGE_BYTES } from '../lib/config';
 import { useAuth } from '../hooks/useAuth';
 import { effectiveLimit, hasFeature } from '../lib/plans';
@@ -49,12 +49,15 @@ export default function AIModelPanel({ category, onAddImage }) {
   const fileRef = useRef(null);
   const camRef  = useRef(null);
 
-  const [srcFile, setSrcFile]     = useState(null);
-  const [srcPreview, setSrcPrev]  = useState(null);
+  const [srcFile, setSrcFile]       = useState(null);
+  const [srcPreview, setSrcPrev]    = useState(null);
   const [generating, setGenerating] = useState(false);
   const [resultUrl, setResultUrl]   = useState(null);
   const [error, setError]           = useState(null);
   const [added, setAdded]           = useState(false);
+  const [lightbox, setLightbox]     = useState(false);
+  const [copied, setCopied]         = useState(false);
+  const [shareOpen, setShareOpen]   = useState(false);
 
   const aiUsed  = store?._ai_used || 0;
   const aiLimit = effectiveLimit(store, 'ai_models');
@@ -162,7 +165,53 @@ export default function AIModelPanel({ category, onAddImage }) {
     setResultUrl(null);
     setError(null);
     setAdded(false);
+    setLightbox(false);
+    setShareOpen(false);
+    setCopied(false);
     if (fileRef.current) fileRef.current.value = '';
+  };
+
+  const handleCopyLink = async () => {
+    if (!resultUrl) return;
+    try {
+      await navigator.clipboard.writeText(resultUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* fallback: open in new tab */
+      window.open(resultUrl, '_blank');
+    }
+  };
+
+  const handleShare = (platform) => {
+    if (!resultUrl) return;
+    const text = encodeURIComponent('Check out this jewellery look! 💎');
+    const url  = encodeURIComponent(resultUrl);
+    const shareUrls = {
+      whatsapp:  `https://wa.me/?text=${text}%20${url}`,
+      instagram: `https://www.instagram.com/`,          // Instagram doesn't support deep-link sharing from web
+      gmail:     `https://mail.google.com/mail/?view=cm&su=${encodeURIComponent('Jewellery Look')}&body=${text}%20${url}`,
+      twitter:   `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
+    };
+    // For Instagram: try Web Share API first (mobile), fallback open app
+    if (platform === 'instagram' && navigator.share) {
+      navigator.share({ title: 'Jewellery Look', text: 'Check out this jewellery look! 💎', url: resultUrl }).catch(() => {});
+      return;
+    }
+    if (shareUrls[platform]) window.open(shareUrls[platform], '_blank');
+    setShareOpen(false);
+  };
+
+  // Native share (mobile)
+  const handleNativeShare = async () => {
+    if (!resultUrl) return;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: 'AI Jewellery Model', text: 'Check out this jewellery look! 💎', url: resultUrl });
+        return;
+      } catch { /* user cancelled */ }
+    }
+    setShareOpen(v => !v);
   };
 
   const limitHit = !canUse && hasFeature(store, 'ai_models');
@@ -263,6 +312,13 @@ export default function AIModelPanel({ category, onAddImage }) {
                   ) : resultUrl ? (
                     <>
                       <img src={resultUrl} alt="AI model" className={styles.previewImg} />
+                      <button
+                        className={styles.maximizeBtn}
+                        onClick={() => setLightbox(true)}
+                        title="View full size"
+                      >
+                        <Maximize2 size={12} />
+                      </button>
                     </>
                   ) : (
                     <div className={styles.resultPlaceholder}>
@@ -301,15 +357,76 @@ export default function AIModelPanel({ category, onAddImage }) {
 
               {resultUrl && !added && (
                 <button className={styles.addBtn} onClick={handleAddToProduct}>
-                  <PlusCircle size={13} /> Add to Product Images
+                  <PlusCircle size={13} /> Add to Images
                 </button>
               )}
               {resultUrl && added && (
-                <span className={styles.addedBadge}>Added to images</span>
+                <span className={styles.addedBadge}>✓ Added to images</span>
+              )}
+
+              {/* Share button */}
+              {resultUrl && (
+                <div className={styles.shareWrap}>
+                  <button className={styles.shareBtn} onClick={handleNativeShare} title="Share">
+                    <Share2 size={13} /> Share
+                  </button>
+                  {shareOpen && (
+                    <div className={styles.shareMenu}>
+                      <button className={styles.shareMenuItem} onClick={() => handleShare('whatsapp')}>
+                        <span className={styles.shareIcon} style={{ background: '#25D366' }}>W</span>
+                        WhatsApp
+                      </button>
+                      <button className={styles.shareMenuItem} onClick={() => handleShare('gmail')}>
+                        <span className={styles.shareIcon} style={{ background: '#EA4335' }}>G</span>
+                        Gmail
+                      </button>
+                      <button className={styles.shareMenuItem} onClick={() => handleShare('instagram')}>
+                        <span className={styles.shareIcon} style={{ background: 'linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)' }}>I</span>
+                        Instagram
+                      </button>
+                      <button className={styles.shareMenuItem} onClick={() => handleShare('twitter')}>
+                        <span className={styles.shareIcon} style={{ background: '#000' }}>𝕏</span>
+                        Twitter / X
+                      </button>
+                      <button className={styles.shareMenuItem} onClick={handleCopyLink}>
+                        {copied
+                          ? <><Check size={12} color="#166534" /> Copied!</>
+                          : <><Copy size={12} /> Copy Link</>
+                        }
+                      </button>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           )}
         </>
+      )}
+
+      {/* Lightbox */}
+      {lightbox && resultUrl && (
+        <div className={styles.lightboxOverlay} onClick={() => setLightbox(false)}>
+          <div className={styles.lightboxContent} onClick={e => e.stopPropagation()}>
+            <button className={styles.lightboxClose} onClick={() => setLightbox(false)}>
+              <X size={18} />
+            </button>
+            <img src={resultUrl} alt="AI model full size" className={styles.lightboxImg} />
+            <div className={styles.lightboxActions}>
+              {!added && (
+                <button className={styles.addBtn} onClick={() => { handleAddToProduct(); setLightbox(false); }}>
+                  <PlusCircle size={13} /> Add to Images
+                </button>
+              )}
+              {added && <span className={styles.addedBadge}>✓ Added to images</span>}
+              <button className={styles.shareBtn} onClick={handleNativeShare}>
+                <Share2 size={13} /> Share
+              </button>
+              <button className={styles.copyBtnLb} onClick={handleCopyLink}>
+                {copied ? <><Check size={13} /> Copied!</> : <><Copy size={13} /> Copy Link</>}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
