@@ -398,11 +398,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   max-width: min(92vw, 560px);
   width: min(92vw, 560px);
   max-height: 92vh;
-  overflow: visible;
+  overflow: hidden;
   animation: lbSlideIn .2s ease;
 }
 
@@ -433,12 +433,11 @@
 
 .lightboxImg {
   width: 100%;
-  max-height: calc(92vh - 80px);
+  flex: 1 1 auto;
+  min-height: 0;
   object-fit: contain;
   border-radius: 12px;
   box-shadow: 0 24px 64px rgba(0,0,0,.5);
-  flex-shrink: 1;
-  min-height: 0;
 }
 
 .lightboxActions {
@@ -447,8 +446,9 @@
   gap: 10px;
   flex-wrap: wrap;
   justify-content: center;
-  flex-shrink: 0;
-  padding: 4px 0 8px;
+  flex: 0 0 auto;
+  padding: 6px 0 4px;
+  width: 100%;
 }
 
 @media (max-width: 640px) {
