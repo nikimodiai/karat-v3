@@ -355,15 +355,27 @@
   flex-shrink: 0;
 }
 
+/* ── Lightbox button overrides — gold on dark overlay ── */
+.lightboxActions .addBtn,
+.lightboxActions .shareBtn {
+  background: rgba(201,168,76,.25);
+  border-color: var(--gold);
+  color: #f5d878;
+}
+.lightboxActions .addBtn:hover,
+.lightboxActions .shareBtn:hover {
+  background: rgba(201,168,76,.45);
+}
+
 /* ── Copy link button (lightbox) ── */
 .copyBtnLb {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 8px 14px;
-  background: rgba(11,24,41,.06);
-  color: var(--navy);
-  border: 1.5px solid rgba(11,24,41,.15);
+  background: rgba(201,168,76,.18);
+  border: 1.5px solid var(--gold);
+  color: #f5d878;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 600;
@@ -371,7 +383,7 @@
   cursor: pointer;
   transition: all .15s;
 }
-.copyBtnLb:hover { background: rgba(11,24,41,.12); }
+.copyBtnLb:hover { background: rgba(201,168,76,.35); border-color: var(--gold); }
 
 /* ── Lightbox overlay ── */
 .lightboxOverlay {
