@@ -232,18 +232,14 @@ export default function AIModelPanel({ category, onAddImage }) {
         <div className={styles.upgradeNote}>
           AI model generation is available on Pro and higher plans. Upgrade to generate campaign-quality model photos.
         </div>
-      ) : limitHit ? (
-        <div className={styles.upgradeNote}>
-          Monthly AI model limit reached ({aiLimit}/{aiLimit}). Upgrade your plan for more.
-        </div>
       ) : (
         <>
           <p className={styles.hint}>
             Upload a jewellery photo — AI will place it on a professional model. Add the result to your product images.
           </p>
 
-          {/* Source image upload */}
-          {!srcPreview ? (
+          {/* Source image upload — hidden when limit hit and no result yet */}
+          {!srcPreview && !limitHit && (
             <div className={styles.dropZoneWrap}>
               <div
                 className={styles.dropZone}
@@ -279,7 +275,16 @@ export default function AIModelPanel({ category, onAddImage }) {
                 onChange={e => handleFile(e.target.files?.[0])}
               />
             </div>
-          ) : (
+          )}
+
+          {/* Limit reached — only show when there's no active result to display */}
+          {limitHit && !resultUrl && (
+            <div className={styles.upgradeNote}>
+              Monthly AI model limit reached ({aiUsed}/{aiLimit}). Upgrade your plan for more.
+            </div>
+          )}
+
+          {srcPreview && (
             <div className={styles.previewRow}>
               {/* Source */}
               <div className={styles.previewCard}>
@@ -344,7 +349,7 @@ export default function AIModelPanel({ category, onAddImage }) {
               <button
                 className={styles.generateBtn}
                 onClick={generate}
-                disabled={generating}
+                disabled={generating || limitHit}
               >
                 {generating ? (
                   <><div className="spinner spinner-sm" /> Generating…</>
