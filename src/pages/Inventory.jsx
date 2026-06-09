@@ -1,4 +1,5 @@
 import React, { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { compressImage } from '../lib/imageUtils';
 import {
   Search, SlidersHorizontal, Plus, Package, TrendingUp, TrendingDown,
   X, Grid, List, ArrowUpDown, Tag, Gem, Sparkles,
@@ -191,8 +192,9 @@ function sortProducts(arr, sort) {
 
 // ── Cloudinary upload helpers ───────────────────────────────────────
 async function uploadImageToCloudinary(file) {
+  const compressed = await compressImage(file);
   const fd = new FormData();
-  fd.append('file', file);
+  fd.append('file', compressed, 'image.jpg');
   fd.append('upload_preset', CLOUDINARY_PRESET);
   const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
     method: 'POST', body: fd,

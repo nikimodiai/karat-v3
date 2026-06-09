@@ -3,6 +3,7 @@ import { Upload, Sparkles, RefreshCw, PlusCircle, X, AlertCircle, Camera, Maximi
 import { N8N_AI_MODEL, db, CLOUDINARY_CLOUD, CLOUDINARY_PRESET, MAX_IMAGE_BYTES } from '../lib/config';
 import { useAuth } from '../hooks/useAuth';
 import { effectiveLimit, hasFeature } from '../lib/plans';
+import { compressImage } from '../lib/imageUtils';
 import styles from './AIModelPanel.module.css';
 
 // Map jewelry category → jewelry type label sent to the n8n workflow
@@ -31,8 +32,9 @@ function jewelryTypeForCategory(category) {
 
 // Upload generated image blob to Cloudinary and return the secure_url
 async function uploadBlobToCloudinary(blob, filename) {
+  const compressed = await compressImage(blob);
   const fd = new FormData();
-  fd.append('file', blob, filename);
+  fd.append('file', compressed, filename);
   fd.append('upload_preset', CLOUDINARY_PRESET);
   fd.append('folder', 'karat-ai-models');
   const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {

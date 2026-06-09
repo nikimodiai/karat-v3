@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { X, Upload, Trash2, Tag, Zap, Image as ImageIcon, Layers, Sparkles, Camera, ChevronDown, ChevronUp, Gem, Award } from 'lucide-react';
+import { X, Upload, Trash2, Tag, Zap, Image as ImageIcon, Layers, Sparkles, Camera, ChevronDown, ChevronUp, Gem, Award, Maximize2, Share2, Copy, Check } from 'lucide-react';
 import {
   CATEGORIES, SUBCATEGORY_MAP, METAL_PURITY_GROUPS, DIAMOND_PURITIES,
   SILVER_CATEGORIES, MAX_IMAGE_BYTES, db,
@@ -92,6 +92,9 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
   const [customDiamondMode, setCustomDiamondMode] = useState(false);
   const [stoneOpen,         setStoneOpen]         = useState(true);
   const [certOpen,          setCertOpen]          = useState(false);
+  const [lightboxUrl,       setLightboxUrl]       = useState(null);
+  const [lbCopied,          setLbCopied]          = useState(false);
+  const [lbShareOpen,       setLbShareOpen]       = useState(false);
 
   // Certificate uploads: { hallmark, diamond } — each holds a File or null
   const [certFiles,  setCertFiles]  = useState({ hallmark: null, diamond: null });
@@ -343,6 +346,41 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleLbShare = (platform) => {
+    if (!lightboxUrl) return;
+    const text = encodeURIComponent('Check out this jewellery! 💎');
+    const url  = encodeURIComponent(lightboxUrl);
+    const map = {
+      whatsapp:  `https://wa.me/?text=${text}%20${url}`,
+      gmail:     `https://mail.google.com/mail/?view=cm&su=${encodeURIComponent('Jewellery Photo')}&body=${text}%20${url}`,
+      instagram: null,
+      twitter:   `https://twitter.com/intent/tweet?text=${text}&url=${url}`,
+    };
+    if (platform === 'instagram' && navigator.share) {
+      navigator.share({ title: 'Jewellery Photo', text: 'Check out this jewellery! 💎', url: lightboxUrl }).catch(() => {});
+      return;
+    }
+    if (map[platform]) window.open(map[platform], '_blank');
+    setLbShareOpen(false);
+  };
+
+  const handleLbNativeShare = async () => {
+    if (!lightboxUrl) return;
+    if (navigator.share) {
+      try { await navigator.share({ title: 'Jewellery Photo', text: 'Check out this jewellery! 💎', url: lightboxUrl }); return; }
+      catch { /* cancelled */ }
+    }
+    setLbShareOpen(v => !v);
+  };
+
+  const handleLbCopy = async () => {
+    if (!lightboxUrl) return;
+    try { await navigator.clipboard.writeText(lightboxUrl); }
+    catch { window.open(lightboxUrl, '_blank'); return; }
+    setLbCopied(true);
+    setTimeout(() => setLbCopied(false), 2000);
   };
 
   return (
@@ -846,6 +884,9 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
                   {src ? (
                     <>
                       <img src={src} alt="" className={styles.imgPreview} />
+                      <button className={styles.imgMaximize} onClick={() => { setLightboxUrl(src); setLbShareOpen(false); setLbCopied(false); }} title="View full size">
+                        <Maximize2 size={11} />
+                      </button>
                       <button className={styles.imgRemove} onClick={() => removeSlot(i)} title="Remove">
                         <Trash2 size={12} />
                       </button>
@@ -932,6 +973,40 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
           </button>
         </div>
       </div>
+
+      {/* Image lightbox */}
+      {lightboxUrl && (
+        <div className={styles.imgLightboxOverlay} onClick={() => setLightboxUrl(null)}>
+          <div className={styles.imgLightboxContent} onClick={e => e.stopPropagation()}>
+            <button className={styles.imgLightboxClose} onClick={() => setLightboxUrl(null)}><X size={18} /></button>
+            <img src={lightboxUrl} alt="product" className={styles.imgLightboxImg} />
+            <div className={styles.imgLightboxActions}>
+              <button className={styles.imgLbShareBtn} onClick={handleLbNativeShare}>
+                <Share2 size={13} /> Share
+              </button>
+              {lbShareOpen && (
+                <div className={styles.imgLbShareMenu}>
+                  <button className={styles.imgLbShareItem} onClick={() => handleLbShare('whatsapp')}>
+                    <span className={styles.imgLbShareIcon} style={{ background: '#25D366' }}>W</span> WhatsApp
+                  </button>
+                  <button className={styles.imgLbShareItem} onClick={() => handleLbShare('gmail')}>
+                    <span className={styles.imgLbShareIcon} style={{ background: '#EA4335' }}>G</span> Gmail
+                  </button>
+                  <button className={styles.imgLbShareItem} onClick={() => handleLbShare('instagram')}>
+                    <span className={styles.imgLbShareIcon} style={{ background: 'linear-gradient(135deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)' }}>I</span> Instagram
+                  </button>
+                  <button className={styles.imgLbShareItem} onClick={() => handleLbShare('twitter')}>
+                    <span className={styles.imgLbShareIcon} style={{ background: '#000' }}>𝕏</span> Twitter / X
+                  </button>
+                </div>
+              )}
+              <button className={styles.imgLbCopyBtn} onClick={handleLbCopy}>
+                {lbCopied ? <><Check size={13} /> Copied!</> : <><Copy size={13} /> Copy Link</>}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
