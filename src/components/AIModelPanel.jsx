@@ -3,7 +3,7 @@ import { Upload, Sparkles, RefreshCw, PlusCircle, X, AlertCircle, Camera, Maximi
 import { N8N_AI_MODEL, db, CLOUDINARY_CLOUD, CLOUDINARY_PRESET, MAX_IMAGE_BYTES } from '../lib/config';
 import { useAuth } from '../hooks/useAuth';
 import { effectiveLimit, hasFeature } from '../lib/plans';
-import { compressImage } from '../lib/imageUtils';
+import { compressImage, shareImageFile } from '../lib/imageUtils';
 import styles from './AIModelPanel.module.css';
 
 // Map jewelry category → jewelry type label sent to the n8n workflow
@@ -204,16 +204,11 @@ export default function AIModelPanel({ category, onAddImage }) {
     setShareOpen(false);
   };
 
-  // Native share (mobile)
+  // Native share (mobile) — shares image file so WhatsApp shows the photo directly
   const handleNativeShare = async () => {
     if (!resultUrl) return;
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: 'AI Jewellery Model', text: 'Check out this jewellery look! 💎', url: resultUrl });
-        return;
-      } catch { /* user cancelled */ }
-    }
-    setShareOpen(v => !v);
+    const shared = await shareImageFile(resultUrl, { title: 'AI Jewellery Model', text: 'Check out this jewellery look! 💎' });
+    if (!shared) setShareOpen(v => !v);
   };
 
   const limitHit = !canUse && hasFeature(store, 'ai_models');

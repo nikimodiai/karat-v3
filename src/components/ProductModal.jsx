@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { X, Upload, Trash2, Tag, Zap, Image as ImageIcon, Layers, Sparkles, Camera, ChevronDown, ChevronUp, Gem, Award, Maximize2, Share2, Copy, Check } from 'lucide-react';
+import { shareImageFile } from '../lib/imageUtils';
 import {
   CATEGORIES, SUBCATEGORY_MAP, METAL_PURITY_GROUPS, DIAMOND_PURITIES,
   SILVER_CATEGORIES, MAX_IMAGE_BYTES, db,
@@ -368,11 +369,8 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
 
   const handleLbNativeShare = async () => {
     if (!lightboxUrl) return;
-    if (navigator.share) {
-      try { await navigator.share({ title: 'Jewellery Photo', text: 'Check out this jewellery! 💎', url: lightboxUrl }); return; }
-      catch { /* cancelled */ }
-    }
-    setLbShareOpen(v => !v);
+    const shared = await shareImageFile(lightboxUrl, { title: 'Jewellery Photo', text: 'Check out this jewellery! 💎' });
+    if (!shared) setLbShareOpen(v => !v);
   };
 
   const handleLbCopy = async () => {
