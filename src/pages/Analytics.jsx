@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import {
   MessageSquare, Package, Cpu, Shirt, ArrowRight,
   Gem, Users, Activity, BarChart as BarChartIcon, Layers,
-  Info, Zap, ShieldCheck,
+  Info, Zap, ShieldCheck, FileText,
 } from 'lucide-react';
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, RadialBarChart, RadialBar,
@@ -16,6 +16,7 @@ import {
 } from '../lib/plans';
 import { UpgradeBanner } from '../components/UpgradeNotice';
 import CustomerInsights from '../components/CustomerInsights';
+import ConversationSummary from '../components/ConversationSummary';
 import styles from './Analytics.module.css';
 
 const GOLD_PALETTE = ['#C9A84C','#E8CC7A','#8B6914','#d4a843','#f0e0a0','#a07830','#b5912a'];
@@ -417,6 +418,10 @@ export default function Analytics() {
             <CustomerInsights />
           </>
         )}
+
+        {/* ── Conversation Summaries ────────────────────────────── */}
+        <SectionTitle icon={FileText}>Conversation Summaries</SectionTitle>
+        <ConversationSummary />
 
         {/* ── Footer note ───────────────────────────────────────── */}
         <div className={styles.footerNote}>

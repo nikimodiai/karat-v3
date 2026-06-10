@@ -1,0 +1,144 @@
+{
+  "name": "Karat — Conversation Summary",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "conversation-summary",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "node-webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "body.customers",
+        "options": {}
+      },
+      "id": "node-split",
+      "name": "Split Customers",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Build the prompt for this customer\nconst c = $input.item.json;\n\nconst threadLines = (c.thread || []).map(t => {\n  const parts = [];\n  if (t.customer) parts.push(`Customer: ${t.customer}`);\n  if (t.ai)       parts.push(`Karat AI: ${t.ai}`);\n  if (t.feature)  parts.push(`[Feature used: ${t.feature}]`);\n  return parts.join('\\n');\n}).join('\\n---\\n');\n\nreturn {\n  json: {\n    phone: c.phone,\n    name: c.name,\n    msgCount: c.msgCount,\n    firstAt: c.firstAt,\n    lastAt: c.lastAt,\n    prompt: `You are a business intelligence assistant for a premium Indian jewellery store using the Karat WhatsApp AI platform.\n\nWrite a warm, rich summary (4-6 sentences) of this customer's WhatsApp shopping journey so the jewellery store owner feels proud of their investment in Karat.\n\nGuidelines:\n- Highlight what jewellery categories/pieces the customer explored (rings, mangalsutra, necklaces, etc.)\n- Mention any special features they used: voice search, image search, AI model try-on, virtual try-on\n- Capture their engagement level and enthusiasm\n- If they asked for specific occasions (wedding, anniversary, gifting), highlight it\n- Frame it so the owner thinks: \"Customers are really using and loving this!\"\n- Write in 3rd person, warm and professional tone\n- Do NOT fabricate details not present in the conversation\n\nCustomer: ${c.name} (${c.phone})\nTotal messages: ${c.msgCount}\nPeriod: ${c.firstAt} to ${c.lastAt}\n\nConversation:\n${threadLines}\n\nRespond with ONLY the summary paragraph.`\n  }\n};"
+      },
+      "id": "node-build-prompt",
+      "name": "Build Prompt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "model": "claude-opus-4-8",
+        "messages": {
+          "values": [
+            {
+              "role": "user",
+              "content": "={{ $json.prompt }}"
+            }
+          ]
+        },
+        "options": {
+          "max_tokens": 500,
+          "temperature": 0.7
+        }
+      },
+      "id": "node-claude",
+      "name": "Claude — Summarise",
+      "type": "n8n-nodes-base.anthropic",
+      "typeVersion": 1,
+      "position": [900, 300],
+      "credentials": {
+        "anthropicApi": {
+          "id": "anthropic-credentials",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract summary text and pair back with customer identity\nconst customer = $('Build Prompt').item.json;\nconst content = $input.item.json.content;\n\n// Claude returns content as an array of blocks or a plain string\nlet summary = '';\nif (Array.isArray(content)) {\n  summary = content.map(b => b.text || b).join(' ');\n} else if (typeof content === 'string') {\n  summary = content;\n}\n\nreturn {\n  json: {\n    phone: customer.phone,\n    name: customer.name,\n    summary: summary.trim()\n  }\n};"
+      },
+      "id": "node-extract",
+      "name": "Extract Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 300]
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "destinationFieldName": "summaries",
+        "options": {}
+      },
+      "id": "node-aggregate",
+      "name": "Aggregate",
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [1340, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { summaries: $json.summaries } }}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "node-respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1560, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [{ "node": "Split Customers", "type": "main", "index": 0 }]
+      ]
+    },
+    "Split Customers": {
+      "main": [
+        [{ "node": "Build Prompt", "type": "main", "index": 0 }]
+      ]
+    },
+    "Build Prompt": {
+      "main": [
+        [{ "node": "Claude — Summarise", "type": "main", "index": 0 }]
+      ]
+    },
+    "Claude — Summarise": {
+      "main": [
+        [{ "node": "Extract Summary", "type": "main", "index": 0 }]
+      ]
+    },
+    "Extract Summary": {
+      "main": [
+        [{ "node": "Aggregate", "type": "main", "index": 0 }]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [{ "node": "Respond to Webhook", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": ["karat", "analytics"],
+  "meta": {
+    "instanceId": "karat-v3"
+  }
+}

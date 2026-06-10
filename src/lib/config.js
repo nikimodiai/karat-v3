@@ -27,6 +27,8 @@ export const N8N_AI_MODEL       = N8N_BASE + '/karat-ai-model';
 // Image-search vectorization: receives { product_id, primary_image_url },
 // generates an embedding for the main image, writes it back to the product row.
 export const N8N_ADD_PRODUCT_VECTOR = N8N_BASE + '/add_product_vector';
+// Conversation summary: receives { owner_id, days, customers[] }, returns { summaries[] }
+export const N8N_CONVERSATION_SUMMARY = N8N_BASE + '/conversation-summary';
 
 export const db = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
