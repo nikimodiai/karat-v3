@@ -240,11 +240,30 @@
   color: var(--ink-soft);
 }
 
-/* ── Delete button ────────────────────────────────────────────────── */
-.deleteBtn {
+/* ── Card action buttons (edit + delete) ──────────────────────────── */
+.cardActions {
   position: absolute;
   top: 10px;
   right: 10px;
+  display: flex;
+  gap: 6px;
+}
+
+.editBtn {
+  background: rgba(255,255,255,.9);
+  border: 1.5px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 6px;
+  cursor: pointer;
+  color: #64748B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.editBtn:hover { background: #EFF6FF; color: #1D4ED8; border-color: #BFDBFE; }
+
+.deleteBtn {
   background: rgba(255,255,255,.9);
   border: 1.5px solid #E2E8F0;
   border-radius: 8px;
@@ -258,6 +277,85 @@
 }
 .deleteBtn:hover:not(:disabled) { background: #FEE2E2; color: #DC2626; border-color: #FECACA; }
 .deleteBtn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── Inline edit card ─────────────────────────────────────────────── */
+.cardEditing {
+  border-color: #C9A84C !important;
+  box-shadow: 0 0 0 3px rgba(201,168,76,.12);
+}
+
+.editHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px 10px;
+  border-bottom: 1px solid #F1F5F9;
+}
+.editLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #C9A84C;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+.cancelBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748B;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background .15s;
+}
+.cancelBtn:hover { background: #F1F5F9; }
+
+.editDropZone {
+  margin: 12px 16px 0;
+  border: 2px dashed #CBD5E1;
+  border-radius: 8px;
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color .15s, background .15s;
+  background: #F8FAFC;
+  overflow: hidden;
+}
+.editDropZone:hover { border-color: #C9A84C; background: #FFFDF5; }
+
+.editFields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px 16px 18px;
+}
+
+.editActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cancelBtnAlt {
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748B;
+  background: none;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 9px 16px;
+  cursor: pointer;
+  transition: background .15s;
+}
+.cancelBtnAlt:hover { background: #F1F5F9; }
 
 /* ── Spinner ──────────────────────────────────────────────────────── */
 .spin {

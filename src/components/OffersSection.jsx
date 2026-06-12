@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback, useEffect } from 'react';
-import { Upload, Loader, CheckCircle, XCircle, Trash2, Tag, CalendarDays, Plus, Video, Image as ImageIcon } from 'lucide-react';
+import { Loader, CheckCircle, XCircle, Trash2, Tag, CalendarDays, Plus, Video, Image as ImageIcon, Pencil, X } from 'lucide-react';
 import { db, CLOUDINARY_CLOUD, CLOUDINARY_PRESET } from '../lib/config';
 import { compressImage } from '../lib/imageUtils';
 import { useToast } from '../hooks/useToast';
@@ -19,9 +19,99 @@ function isExpired(validTo) {
 }
 
 // ── Offer card ────────────────────────────────────────────────────────────────
-function OfferCard({ offer, onDelete }) {
-  const [deleting, setDeleting] = useState(false);
+function OfferCard({ offer, onDelete, onUpdate }) {
+  const { showToast } = useToast();
+  const [deleting, setDeleting]   = useState(false);
+  const [editing, setEditing]     = useState(false);
+  const [saving, setSaving]       = useState(false);
+  // edit form state
+  const [title, setTitle]         = useState(offer.title);
+  const [desc, setDesc]           = useState(offer.description || '');
+  const [validTo, setValidTo]     = useState(offer.valid_to || '');
+  const [mediaFile, setMedia]     = useState(null);
+  const [preview, setPreview]     = useState(null);
+  const [mediaType, setMType]     = useState(null);
+  const [dragOver, setDrag]       = useState(false);
+  const fileRef                   = useRef();
   const expired = isExpired(offer.valid_to);
+
+  function openEdit() {
+    setTitle(offer.title);
+    setDesc(offer.description || '');
+    setValidTo(offer.valid_to || '');
+    setMedia(null); setPreview(null); setMType(null);
+    setEditing(true);
+  }
+
+  function cancelEdit() {
+    setEditing(false);
+    setMedia(null); setPreview(null); setMType(null);
+    if (fileRef.current) fileRef.current.value = '';
+  }
+
+  function resetMedia() {
+    setMedia(null); setPreview(null); setMType(null);
+    if (fileRef.current) fileRef.current.value = '';
+  }
+
+  const handleFile = useCallback((file) => {
+    if (!file) return;
+    const isVideo = file.type.startsWith('video/');
+    const isImage = file.type.startsWith('image/');
+    if (!isVideo && !isImage) { showToast('Only image or video files are allowed.', 'error'); return; }
+    if (isVideo && file.size > MAX_VIDEO_BYTES) { showToast('Video must be under 50 MB.', 'error'); return; }
+    if (isImage && file.size > MAX_IMAGE_BYTES) { showToast('Image must be under 5 MB.', 'error'); return; }
+    setMedia(file);
+    setMType(isVideo ? 'video' : 'image');
+    setPreview(URL.createObjectURL(file));
+  }, [showToast]);
+
+  function onDrop(e) {
+    e.preventDefault(); setDrag(false);
+    handleFile(e.dataTransfer.files[0]);
+  }
+
+  async function handleSave(e) {
+    e.preventDefault();
+    if (!title.trim()) { showToast('Please enter an offer title.', 'error'); return; }
+    setSaving(true);
+    try {
+      let mediaUrl  = offer.media_url;
+      let mediaTypeVal = offer.media_type;
+      if (mediaFile) {
+        const resourceType = mediaType === 'video' ? 'video' : 'image';
+        let uploadable = mediaFile;
+        if (mediaType === 'image') uploadable = await compressImage(mediaFile);
+        const fd = new FormData();
+        fd.append('file', uploadable, mediaFile.name);
+        fd.append('upload_preset', CLOUDINARY_PRESET);
+        fd.append('folder', 'offers');
+        const res = await fetch(
+          `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/${resourceType}/upload`,
+          { method: 'POST', body: fd }
+        );
+        if (!res.ok) throw new Error('Upload failed');
+        mediaUrl = (await res.json()).secure_url;
+        mediaTypeVal = mediaType;
+      }
+      const updates = {
+        title:       title.trim(),
+        description: desc.trim() || null,
+        valid_to:    validTo || null,
+        media_url:   mediaUrl,
+        media_type:  mediaTypeVal,
+      };
+      const { data, error } = await db.from('offers').update(updates).eq('id', offer.id).select().single();
+      if (error) throw error;
+      showToast('Offer updated!', 'success');
+      onUpdate(data);
+      setEditing(false);
+    } catch {
+      showToast('Failed to update offer. Please try again.', 'error');
+    } finally {
+      setSaving(false);
+    }
+  }
 
   async function handleDelete() {
     if (!window.confirm('Delete this offer?')) return;
@@ -33,6 +123,76 @@ function OfferCard({ offer, onDelete }) {
     } catch {
       setDeleting(false);
     }
+  }
+
+  const today = new Date().toISOString().split('T')[0];
+  // current media to show in edit zone (new preview OR existing)
+  const editPreview  = preview || offer.media_url;
+  const editMType    = preview ? mediaType : offer.media_type;
+
+  if (editing) {
+    return (
+      <form className={`${styles.card} ${styles.cardEditing}`} onSubmit={handleSave}>
+        <div className={styles.editHeader}>
+          <span className={styles.editLabel}><Pencil size={13} /> Edit Offer</span>
+          <button type="button" className={styles.cancelBtn} onClick={cancelEdit}><X size={14} /> Cancel</button>
+        </div>
+
+        {/* Media zone */}
+        <div
+          className={`${styles.editDropZone} ${dragOver ? styles.dropZoneActive : ''}`}
+          onDragOver={e => { e.preventDefault(); setDrag(true); }}
+          onDragLeave={() => setDrag(false)}
+          onDrop={onDrop}
+          onClick={() => !editPreview && fileRef.current?.click()}
+          style={{ cursor: editPreview ? 'default' : 'pointer' }}
+        >
+          {editPreview ? (
+            <div className={styles.previewWrap}>
+              {editMType === 'video'
+                ? <video src={editPreview} className={styles.previewVideo} controls />
+                : <img src={editPreview} alt="preview" className={styles.previewImg} />}
+              <button type="button" className={styles.removeMedia}
+                onClick={e => { e.stopPropagation(); preview ? resetMedia() : fileRef.current?.click(); }}>
+                {preview ? <XCircle size={20} /> : <Pencil size={16} />}
+              </button>
+            </div>
+          ) : (
+            <div className={styles.dropHint}>
+              <div className={styles.dropIcons}><ImageIcon size={20} /><Video size={20} /></div>
+              <span className={styles.dropText}>Replace media (optional)</span>
+              <span className={styles.dropSub}>Drag & drop or click to browse</span>
+            </div>
+          )}
+          <input ref={fileRef} type="file" accept="image/*,video/*" style={{ display: 'none' }}
+            onChange={e => handleFile(e.target.files[0])} />
+        </div>
+
+        <div className={styles.editFields}>
+          <div className={styles.field}>
+            <label className={styles.label}><Tag size={13} /> Offer title <span className={styles.req}>*</span></label>
+            <input className={styles.input} type="text" value={title}
+              onChange={e => setTitle(e.target.value)} maxLength={120} required />
+          </div>
+          <div className={styles.field}>
+            <label className={styles.label}>Details (optional)</label>
+            <textarea className={styles.textarea} value={desc}
+              onChange={e => setDesc(e.target.value)} rows={3} maxLength={600} />
+          </div>
+          <div className={styles.field}>
+            <label className={styles.label}><CalendarDays size={13} /> Valid till (optional)</label>
+            <input className={styles.input} type="date" value={validTo} min={today}
+              onChange={e => setValidTo(e.target.value)} />
+          </div>
+          <div className={styles.editActions}>
+            <button className={styles.submitBtn} type="submit" disabled={saving}>
+              {saving ? <><Loader size={14} className={styles.spin} /> Saving…</> : <><CheckCircle size={14} /> Save Changes</>}
+            </button>
+            <button type="button" className={styles.cancelBtnAlt} onClick={cancelEdit}>Cancel</button>
+          </div>
+        </div>
+      </form>
+    );
   }
 
   return (
@@ -60,9 +220,14 @@ function OfferCard({ offer, onDelete }) {
           )}
         </div>
       </div>
-      <button className={styles.deleteBtn} onClick={handleDelete} disabled={deleting} title="Delete offer">
-        {deleting ? <Loader size={14} className={styles.spin} /> : <Trash2 size={14} />}
-      </button>
+      <div className={styles.cardActions}>
+        <button className={styles.editBtn} onClick={openEdit} title="Edit offer">
+          <Pencil size={14} />
+        </button>
+        <button className={styles.deleteBtn} onClick={handleDelete} disabled={deleting} title="Delete offer">
+          {deleting ? <Loader size={14} className={styles.spin} /> : <Trash2 size={14} />}
+        </button>
+      </div>
     </div>
   );
 }
@@ -282,6 +447,10 @@ export default function OffersSection({ store, user }) {
     setOffers(prev => prev.filter(o => o.id !== id));
   }
 
+  function handleUpdated(updated) {
+    setOffers(prev => prev.map(o => o.id === updated.id ? updated : o));
+  }
+
   return (
     <div className={styles.root}>
       <AddOfferForm ownerId={ownerId} onAdded={handleAdded} />
@@ -293,7 +462,7 @@ export default function OffersSection({ store, user }) {
           <div className={styles.emptyState}>No offers yet. Add your first offer above.</div>
         )}
         {offers.map(o => (
-          <OfferCard key={o.id} offer={o} onDelete={handleDeleted} />
+          <OfferCard key={o.id} offer={o} onDelete={handleDeleted} onUpdate={handleUpdated} />
         ))}
       </div>
     </div>
