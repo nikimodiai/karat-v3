@@ -14,6 +14,22 @@ import FAQ from './pages/FAQ';
 import Topbar from './components/Topbar';
 import Footer from './components/Footer';
 import VoiceStyleSection from './components/VoiceStyleSection';
+import OffersSection from './components/OffersSection';
+
+function OffersTab() {
+  const { user, store } = useAuth();
+  return (
+    <div style={{ flex: 1, overflowY: 'auto', padding: 'clamp(16px, 4vw, 32px) clamp(16px, 4vw, 24px)', maxWidth: 760, margin: '0 auto', width: '100%' }}>
+      <div style={{ marginBottom: 28 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--navy)', margin: '0 0 6px' }}>Offers</h1>
+        <p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>
+          Post seasonal deals and promotions — upload an image or video, add details, and set a validity date.
+        </p>
+      </div>
+      <OffersSection store={store} user={user} />
+    </div>
+  );
+}
 
 function VoiceTab() {
   const { user, store, refreshStore } = useAuth();
@@ -93,6 +109,7 @@ function Shell({ activeTab, setActiveTab }) {
         {activeTab === 'customers'  && <Customers />}
         {activeTab === 'analytics'  && <Analytics />}
         {activeTab === 'team'       && <TeamPage />}
+        {activeTab === 'offers'     && <OffersTab />}
         {activeTab === 'voice'      && <VoiceTab />}
         {activeTab === 'faq'        && <FAQ />}
         {activeTab === 'profile'    && <Profile />}

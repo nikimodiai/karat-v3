@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import {
   MessageSquare, Package, Cpu, Shirt, ArrowRight,
   Gem, Users, Activity, BarChart as BarChartIcon, Layers,
-  Info, Zap, ShieldCheck, FileText,
+  Info, Zap, ShieldCheck,
 } from 'lucide-react';
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, RadialBarChart, RadialBar,
@@ -420,7 +420,6 @@ export default function Analytics() {
         )}
 
         {/* ── Conversation Summaries ────────────────────────────── */}
-        <SectionTitle icon={FileText}>Conversation Summaries</SectionTitle>
         <ConversationSummary />
 
         {/* ── Footer note ───────────────────────────────────────── */}

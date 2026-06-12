@@ -1,0 +1,266 @@
+/* ── Root ─────────────────────────────────────────────────────────── */
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* ── Add-offer form ───────────────────────────────────────────────── */
+.form {
+  background: #fff;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 1px 4px rgba(11,24,41,.07);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.formTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 0 0 4px;
+}
+
+/* ── Drop zone ────────────────────────────────────────────────────── */
+.dropZone {
+  border: 2px dashed #CBD5E1;
+  border-radius: 10px;
+  padding: 28px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+  background: #F8FAFC;
+  min-height: 120px;
+}
+.dropZone:hover { border-color: #C9A84C; background: #FFFDF5; }
+.dropZoneActive { border-color: #C9A84C !important; background: #FFFDF5 !important; }
+.dropZoneHasFile { border-style: solid; border-color: #C9A84C; cursor: default; }
+
+.dropHint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+.dropIcons {
+  display: flex;
+  gap: 10px;
+  color: #94A3B8;
+  margin-bottom: 2px;
+}
+.dropText { font-size: 13px; font-weight: 600; color: var(--navy); }
+.dropSub  { font-size: 11px; color: var(--ink-soft); }
+
+.previewWrap {
+  position: relative;
+  width: 100%;
+  max-height: 280px;
+  display: flex;
+  justify-content: center;
+}
+.previewImg, .previewVideo {
+  max-width: 100%;
+  max-height: 280px;
+  border-radius: 8px;
+  object-fit: contain;
+}
+.removeMedia {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(0,0,0,.55);
+  border: none;
+  border-radius: 99px;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  transition: background .15s;
+}
+.removeMedia:hover { background: #DC2626; }
+
+/* ── Fields ───────────────────────────────────────────────────────── */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.req { color: #EF4444; }
+
+.input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--navy);
+  outline: none;
+  transition: border-color .15s;
+  background: #fff;
+  box-sizing: border-box;
+}
+.input:focus { border-color: #C9A84C; }
+
+.textarea {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid #E2E8F0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--navy);
+  outline: none;
+  transition: border-color .15s;
+  background: #fff;
+  resize: vertical;
+  font-family: inherit;
+  box-sizing: border-box;
+}
+.textarea:focus { border-color: #C9A84C; }
+
+/* ── Submit ───────────────────────────────────────────────────────── */
+.submitBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 22px;
+  background: linear-gradient(135deg, #C9A84C, #e8b84b);
+  color: #0B1829;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity .15s, transform .1s;
+  align-self: flex-start;
+}
+.submitBtn:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); }
+.submitBtn:disabled { opacity: .6; cursor: not-allowed; }
+
+/* ── Offers list ──────────────────────────────────────────────────── */
+.listSection { display: flex; flex-direction: column; gap: 14px; }
+
+.listTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 0;
+}
+
+.emptyState {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  padding: 20px 0;
+}
+
+/* ── Offer card ───────────────────────────────────────────────────── */
+.card {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(11,24,41,.07);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  border: 1.5px solid transparent;
+  transition: border-color .15s;
+}
+.card:hover { border-color: #E2E8F0; }
+.cardExpired { opacity: .65; }
+
+.cardMedia { max-height: 300px; overflow: hidden; background: #F1F5F9; }
+.cardImg  { width: 100%; max-height: 300px; object-fit: cover; display: block; }
+.cardVideo { width: 100%; max-height: 300px; display: block; }
+
+.cardBody { padding: 14px 16px 16px; }
+
+.cardTop {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.cardTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 0;
+  flex: 1;
+}
+.expiredPill {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: #FEE2E2;
+  color: #B91C1C;
+  white-space: nowrap;
+}
+
+.cardDesc {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin: 0 0 10px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.cardMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.cardDate {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+/* ── Delete button ────────────────────────────────────────────────── */
+.deleteBtn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(255,255,255,.9);
+  border: 1.5px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 6px;
+  cursor: pointer;
+  color: #64748B;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.deleteBtn:hover:not(:disabled) { background: #FEE2E2; color: #DC2626; border-color: #FECACA; }
+.deleteBtn:disabled { opacity: .5; cursor: not-allowed; }
+
+/* ── Spinner ──────────────────────────────────────────────────────── */
+.spin {
+  animation: spin .8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
