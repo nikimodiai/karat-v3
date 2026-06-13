@@ -247,11 +247,11 @@ export default function WhatsAppConnect({ store, onConnected }) {
           </div>
           <div className={styles.detailRow}>
             <span className={styles.detailLabel}>Phone Number ID</span>
-            <span className={styles.detailVal mono}>{store.whatsapp_phone_number_id}</span>
+            <span className={`${styles.detailVal} ${styles.mono}`}>{store.whatsapp_phone_number_id}</span>
           </div>
           <div className={styles.detailRow}>
             <span className={styles.detailLabel}>WABA ID</span>
-            <span className={styles.detailVal mono}>{store.waba_id}</span>
+            <span className={`${styles.detailVal} ${styles.mono}`}>{store.waba_id}</span>
           </div>
         </div>
       )}
