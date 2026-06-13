@@ -12,6 +12,7 @@ import {
   planKey, PLAN_LABELS, hasFeature, effectiveLimit, fmtLimit, PLAN_LIMITS,
 } from '../lib/plans';
 import VoiceStyleSection from '../components/VoiceStyleSection';
+import WhatsAppConnect from '../components/WhatsAppConnect';
 import styles from './Profile.module.css';
 
 function FeatureRow({ icon: Icon, label, active, note }) {
@@ -329,6 +330,13 @@ export default function Profile() {
             </div>
           </div>
         </div>
+
+        {/* ── WhatsApp Business Connect ── */}
+        {isOwner && (
+          <div style={{ marginTop: 24 }}>
+            <WhatsAppConnect store={store} onConnected={refreshStore} />
+          </div>
+        )}
 
         {/* ── AI Style Training (Professional+ only) ── */}
         {isOwner && hasFeature(store, 'teach_ai_style') && (

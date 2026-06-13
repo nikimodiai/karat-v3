@@ -18,6 +18,8 @@ export const SUPABASE_KEY =
 export const CLOUDINARY_CLOUD = env.VITE_CLOUDINARY_CLOUD || 'jewelleryinventory';
 export const CLOUDINARY_PRESET = env.VITE_CLOUDINARY_PRESET || 'jewelleryupload';
 
+export const FB_APP_ID = env.VITE_FB_APP_ID || '';
+
 export const N8N_BASE = env.VITE_N8N_BASE || 'https://n8n.srv1639765.hstgr.cloud/webhook';
 export const N8N_SIGNUP_URL    = N8N_BASE + '/store-approval-request';
 export const N8N_IMPORT_ANALYZE = N8N_BASE + '/swarnix-import/analyze';
