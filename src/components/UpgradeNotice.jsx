@@ -4,7 +4,7 @@ import styles from './UpgradeNotice.module.css';
 
 // Inline banner version (in flow, dismissible)
 export function UpgradeBanner({ title, message, ctaLabel = 'Upgrade Plan', onCta, onDismiss }) {
-  const cta = onCta || (() => window.location.href = 'mailto:nikimodi81@gmail.com?subject=KARAT Plan Upgrade');
+  const cta = onCta || (() => window.location.href = 'mailto:nikimodi81@gmail.com?subject=SWARNIX Plan Upgrade');
   return (
     <div className={styles.banner}>
       <div className={styles.bannerIcon}><Crown size={16} /></div>
@@ -26,7 +26,7 @@ export function UpgradeBanner({ title, message, ctaLabel = 'Upgrade Plan', onCta
 
 // Modal/overlay version (blocking, used when user tries to use a locked feature)
 export function UpgradeDialog({ feature, currentPlan, recommendedPlan, message, onClose }) {
-  const subject = encodeURIComponent(`KARAT Plan Upgrade — ${recommendedPlan || feature}`);
+  const subject = encodeURIComponent(`SWARNIX Plan Upgrade — ${recommendedPlan || feature}`);
   return (
     <div className="overlay-backdrop" onClick={e => e.target === e.currentTarget && onClose?.()}>
       <div className={styles.dialog} style={{ animation: 'slideUp .2s ease' }}>
@@ -63,7 +63,7 @@ export function LockedCard({ icon: Icon, title, message, currentPlan, ctaLabel =
       <p className={styles.lockedMsg}>{message}</p>
       <p className={styles.lockedMeta}>Current plan: <strong>{currentPlan}</strong></p>
       <a
-        href="mailto:nikimodi81@gmail.com?subject=KARAT Plan Upgrade"
+        href="mailto:nikimodi81@gmail.com?subject=SWARNIX Plan Upgrade"
         className="btn-gold"
         style={{ textDecoration: 'none', marginTop: 16 }}
       >

@@ -237,7 +237,7 @@ export default function UserManagement() {
       <div className={styles.header}>
         <div>
           <h2 className={styles.title}>Team Members</h2>
-          <p className={styles.subtitle}>Staff and relatives who can log in to Karat</p>
+          <p className={styles.subtitle}>Staff and relatives who can log in to Swarnix</p>
         </div>
         <div className={styles.headerActions}>
           <button className={styles.btnRefresh} onClick={loadUsers} title="Refresh">

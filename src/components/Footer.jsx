@@ -12,7 +12,7 @@ export default function Footer() {
             <polygon points="12,2 22,7 22,17 12,22 2,17 2,7" fill="none" stroke="#C9A84C" strokeWidth="1.5"/>
             <circle cx="12" cy="12" r="3" fill="#C9A84C"/>
           </svg>
-          <span className={styles.brandText}>KARAT</span>
+          <span className={styles.brandText}>SWARNIX</span>
           <span className={styles.sep}>·</span>
           <span className={styles.copy}>© {year} Jewellery Inventory Intelligence</span>
         </div>

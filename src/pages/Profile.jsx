@@ -25,7 +25,7 @@ function FeatureRow({ icon: Icon, label, active, note }) {
       {active
         ? <span className={styles.featureOn}><Check size={11} /> Active</span>
         : <a
-            href="mailto:nikimodi81@gmail.com?subject=KARAT Plan Upgrade"
+            href="mailto:nikimodi81@gmail.com?subject=SWARNIX Plan Upgrade"
             className={styles.featureUpgrade}
           >
             <Crown size={10} /> Upgrade
@@ -234,7 +234,7 @@ export default function Profile() {
                   placeholder="0"
                 />
                 <p className={styles.fieldHint}>
-                  When a customer browses your jewellery collection via WhatsApp and then goes quiet, KARAT automatically sends them a warm, personalised follow-up after this many days of inactivity — gently inviting them back to explore your catalogue. Set to <strong>0</strong> to disable reminders.
+                  When a customer browses your jewellery collection via WhatsApp and then goes quiet, SWARNIX automatically sends them a warm, personalised follow-up after this many days of inactivity — gently inviting them back to explore your catalogue. Set to <strong>0</strong> to disable reminders.
                 </p>
               </div>
 
@@ -319,7 +319,7 @@ export default function Profile() {
               </div>
               {isOwner && (planName === 'trial' || planName === 'starter') && (
                 <a
-                  href="mailto:nikimodi81@gmail.com?subject=KARAT Plan Upgrade"
+                  href="mailto:nikimodi81@gmail.com?subject=SWARNIX Plan Upgrade"
                   className="btn-gold"
                   style={{ marginTop: 16, width: '100%', justifyContent: 'center', fontSize: 12, textDecoration: 'none' }}
                 >
@@ -346,7 +346,7 @@ export default function Profile() {
                 Train the AI to match your store's WhatsApp tone and reply style. Available on the Professional plan and above.
               </p>
               <a
-                href="mailto:nikimodi81@gmail.com?subject=KARAT Plan Upgrade"
+                href="mailto:nikimodi81@gmail.com?subject=SWARNIX Plan Upgrade"
                 className="btn-gold"
                 style={{ textDecoration: 'none', fontSize: 12 }}
               >

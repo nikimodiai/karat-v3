@@ -191,7 +191,7 @@ select.inp { cursor: pointer; }
 .sec-label:first-child { margin-top: 0; }
 
 /* ─── Stat cards (shared) ─── */
-.karat-stat-card {
+.swarnix-stat-card {
   background: #fff; border-radius: var(--r);
   border: 1px solid var(--border-card);
   box-shadow: var(--shadow-card);
@@ -199,4 +199,4 @@ select.inp { cursor: pointer; }
   display: flex; align-items: center; gap: 14px;
   transition: box-shadow .2s, transform .2s;
 }
-.karat-stat-card:hover { box-shadow: var(--shadow-float); transform: translateY(-1px); }
+.swarnix-stat-card:hover { box-shadow: var(--shadow-float); transform: translateY(-1px); }

@@ -6,7 +6,7 @@ import { db, N8N_SIGNUP_URL, INACTIVITY_MS } from '../lib/config';
 // 'store_user' – username + password (store_users table RPC), role-limited
 
 const AuthContext = createContext(null);
-const STORE_USER_KEY = 'karat_store_user_session';
+const STORE_USER_KEY = 'swarnix_store_user_session';
 
 const getInitialAuthState = () => {
   try {
@@ -15,7 +15,7 @@ const getInitialAuthState = () => {
     if (suStr) {
       const su = JSON.parse(suStr);
       if (su?.id && su?.owner_id) {
-        const cachedStoreStr = localStorage.getItem('karat_cached_store');
+        const cachedStoreStr = localStorage.getItem('swarnix_cached_store');
         if (cachedStoreStr) {
           return {
             initialUser: null,
@@ -27,7 +27,7 @@ const getInitialAuthState = () => {
       }
     }
 
-    const storedStr = localStorage.getItem('karat-auth-v3');
+    const storedStr = localStorage.getItem('swarnix-auth-v3');
     if (storedStr) {
       const parsed = JSON.parse(storedStr);
       const user = parsed?.user || parsed?.currentSession?.user;
@@ -42,7 +42,7 @@ const getInitialAuthState = () => {
           } catch {}
         }
 
-        const cachedStoreStr = localStorage.getItem('karat_cached_store');
+        const cachedStoreStr = localStorage.getItem('swarnix_cached_store');
         const initialStore = cachedStoreStr ? JSON.parse(cachedStoreStr) : null;
         return {
           initialUser: user,
@@ -59,7 +59,7 @@ const getInitialAuthState = () => {
   } catch (e) {
     // Corrupt localStorage — clear it and start fresh
     try {
-      localStorage.removeItem('karat_cached_store');
+      localStorage.removeItem('swarnix_cached_store');
       localStorage.removeItem(STORE_USER_KEY);
     } catch (_) {}
   }
@@ -88,7 +88,7 @@ export function AuthProvider({ children }) {
     try { await db.auth.signOut(); } catch(e) {}
     const keys = Object.keys(localStorage);
     keys.forEach(k => {
-      if (k.startsWith('sb-') || k.includes('supabase') || k.startsWith('karat_cached_') || k === STORE_USER_KEY) {
+      if (k.startsWith('sb-') || k.includes('supabase') || k.startsWith('swarnix_cached_') || k === STORE_USER_KEY) {
         localStorage.removeItem(k);
       }
     });
@@ -115,7 +115,7 @@ export function AuthProvider({ children }) {
     if (!storeData) {
       setAuthStatus('pending');
       // Fire signup notification once
-      const signupKey = 'karat_signup_fired_' + u.id;
+      const signupKey = 'swarnix_signup_fired_' + u.id;
       if (!sessionStorage.getItem(signupKey)) {
         sessionStorage.setItem(signupKey, '1');
         try {
@@ -137,7 +137,7 @@ export function AuthProvider({ children }) {
 
     setStore(storeData);
     try {
-      localStorage.setItem('karat_cached_store', JSON.stringify(storeData));
+      localStorage.setItem('swarnix_cached_store', JSON.stringify(storeData));
     } catch (e) {}
     setAuthStatus('app');
   }, []);
@@ -247,7 +247,7 @@ export function AuthProvider({ children }) {
 
     try {
       localStorage.setItem(STORE_USER_KEY, JSON.stringify(suRow));
-      localStorage.setItem('karat_cached_store', JSON.stringify(storeData));
+      localStorage.setItem('swarnix_cached_store', JSON.stringify(storeData));
     } catch(e) {}
 
     setStoreUser(suRow);
@@ -262,7 +262,7 @@ export function AuthProvider({ children }) {
       const storeData = await loadStoreById(storeUser.store_id);
       if (storeData) {
         setStore(storeData);
-        try { localStorage.setItem('karat_cached_store', JSON.stringify(storeData)); } catch(e) {}
+        try { localStorage.setItem('swarnix_cached_store', JSON.stringify(storeData)); } catch(e) {}
       }
       return;
     }
@@ -274,7 +274,7 @@ export function AuthProvider({ children }) {
       const next = prev ? { ...prev, ...patch } : prev;
       if (next) {
         try {
-          localStorage.setItem('karat_cached_store', JSON.stringify(next));
+          localStorage.setItem('swarnix_cached_store', JSON.stringify(next));
         } catch (e) {}
       }
       return next;

@@ -1,5 +1,5 @@
 {
-  "name": "Karat – Dynamic Price Update",
+  "name": "Swarnix – Dynamic Price Update",
   "nodes": [
     {
       "parameters": {
@@ -95,7 +95,7 @@
   },
   "settings": { "executionOrder": "v1" },
   "staticData": null,
-  "tags": [{ "name": "karat" }, { "name": "pricing" }],
+  "tags": [{ "name": "swarnix" }, { "name": "pricing" }],
   "meta": {
     "templateCredsSetupCompleted": true,
     "description": "Runs at 12:40 PM and 6:40 PM IST daily. For every product with dynamic_price=true, fetches the owner's current metal rate from metal_rates, calculates the new price (metal cost + making + stones + hallmark, no GST), and updates products.price. If the exact purity rate is missing, it derives from the 999-base rate."

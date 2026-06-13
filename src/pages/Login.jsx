@@ -72,7 +72,7 @@ export default function Login() {
               <line x1="4" y1="20" x2="14" y2="23" stroke="#C9A84C" strokeWidth="1.2"/>
             </svg>
           </div>
-          <div className={styles.brandName}>KARAT</div>
+          <div className={styles.brandName}>SWARNIX</div>
           <div className={styles.brandTagline}>Jewellery Inventory Intelligence</div>
         </div>
 

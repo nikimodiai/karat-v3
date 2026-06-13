@@ -55,7 +55,7 @@ export default function Topbar({ activeTab, onTabChange, productCount }) {
             <polygon points="16,8 24,13 24,19 16,24 8,19 8,13" fill="none" stroke="rgba(201,168,76,0.35)" strokeWidth="1"/>
             <circle cx="16" cy="16" r="3.5" fill="#C9A84C"/>
           </svg>
-          <span className={styles.brandName}>KARAT</span>
+          <span className={styles.brandName}>SWARNIX</span>
         </div>
 
         {/* Nav tabs – desktop */}

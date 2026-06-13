@@ -16,7 +16,7 @@ const StoreDataContext = createContext(null);
 // Optimistic local caching helpers to render data instantly on page refresh
 const getCachedProducts = () => {
   try {
-    const cached = localStorage.getItem('karat_cached_products');
+    const cached = localStorage.getItem('swarnix_cached_products');
     return cached ? JSON.parse(cached) : [];
   } catch (e) {
     return [];
@@ -25,7 +25,7 @@ const getCachedProducts = () => {
 
 const getCachedCustomers = () => {
   try {
-    const cached = localStorage.getItem('karat_cached_customers');
+    const cached = localStorage.getItem('swarnix_cached_customers');
     return cached ? JSON.parse(cached) : [];
   } catch (e) {
     return [];
@@ -34,7 +34,7 @@ const getCachedCustomers = () => {
 
 const getCachedMonthlyUsage = () => {
   try {
-    const cached = localStorage.getItem('karat_cached_monthly_usage');
+    const cached = localStorage.getItem('swarnix_cached_monthly_usage');
     return cached ? JSON.parse(cached) : null;
   } catch (e) {
     return null;
@@ -49,7 +49,7 @@ export function StoreDataProvider({ children }) {
   const [monthlyUsage, setMonthlyUsage] = useState(getCachedMonthlyUsage);
   const [loading,   setLoading]   = useState(() => {
     try {
-      return !localStorage.getItem('karat_cached_products');
+      return !localStorage.getItem('swarnix_cached_products');
     } catch (e) {
       return true;
     }
@@ -102,12 +102,12 @@ export function StoreDataProvider({ children }) {
       setMonthlyUsage(usage);
 
       try {
-        localStorage.setItem('karat_cached_products', JSON.stringify(prods));
-        localStorage.setItem('karat_cached_customers', JSON.stringify(custs));
+        localStorage.setItem('swarnix_cached_products', JSON.stringify(prods));
+        localStorage.setItem('swarnix_cached_customers', JSON.stringify(custs));
         if (usage) {
-          localStorage.setItem('karat_cached_monthly_usage', JSON.stringify(usage));
+          localStorage.setItem('swarnix_cached_monthly_usage', JSON.stringify(usage));
         } else {
-          localStorage.removeItem('karat_cached_monthly_usage');
+          localStorage.removeItem('swarnix_cached_monthly_usage');
         }
       } catch (e) {}
 
@@ -147,7 +147,7 @@ export function StoreDataProvider({ children }) {
       if (typeof window !== 'undefined') {
         window._products = next;
         try {
-          localStorage.setItem('karat_cached_products', JSON.stringify(next));
+          localStorage.setItem('swarnix_cached_products', JSON.stringify(next));
         } catch (e) {}
       }
       return next;
@@ -160,7 +160,7 @@ export function StoreDataProvider({ children }) {
       if (typeof window !== 'undefined') {
         window._customers = next;
         try {
-          localStorage.setItem('karat_cached_customers', JSON.stringify(next));
+          localStorage.setItem('swarnix_cached_customers', JSON.stringify(next));
         } catch (e) {}
       }
       return next;

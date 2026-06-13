@@ -1,5 +1,5 @@
-{
-  "name": "Karat — Conversation Summary",
+﻿{
+  "name": "Swarnix — Conversation Summary",
   "nodes": [
     {
       "parameters": {
@@ -27,7 +27,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Build the prompt for this customer\nconst c = $input.item.json;\n\nconst threadLines = (c.thread || []).map(t => {\n  const parts = [];\n  if (t.customer) parts.push(`Customer: ${t.customer}`);\n  if (t.ai)       parts.push(`Karat AI: ${t.ai}`);\n  if (t.feature)  parts.push(`[Feature used: ${t.feature}]`);\n  return parts.join('\\n');\n}).join('\\n---\\n');\n\nreturn {\n  json: {\n    phone: c.phone,\n    name: c.name,\n    msgCount: c.msgCount,\n    firstAt: c.firstAt,\n    lastAt: c.lastAt,\n    prompt: `You are a business intelligence assistant for a premium Indian jewellery store using the Karat WhatsApp AI platform.\n\nWrite a warm, rich summary (4-6 sentences) of this customer's WhatsApp shopping journey so the jewellery store owner feels proud of their investment in Karat.\n\nGuidelines:\n- Highlight what jewellery categories/pieces the customer explored (rings, mangalsutra, necklaces, etc.)\n- Mention any special features they used: voice search, image search, AI model try-on, virtual try-on\n- Capture their engagement level and enthusiasm\n- If they asked for specific occasions (wedding, anniversary, gifting), highlight it\n- Frame it so the owner thinks: \"Customers are really using and loving this!\"\n- Write in 3rd person, warm and professional tone\n- Do NOT fabricate details not present in the conversation\n\nCustomer: ${c.name} (${c.phone})\nTotal messages: ${c.msgCount}\nPeriod: ${c.firstAt} to ${c.lastAt}\n\nConversation:\n${threadLines}\n\nRespond with ONLY the summary paragraph.`\n  }\n};"
+        "jsCode": "// Build the prompt for this customer\nconst c = $input.item.json;\n\nconst threadLines = (c.thread || []).map(t => {\n  const parts = [];\n  if (t.customer) parts.push(`Customer: ${t.customer}`);\n  if (t.ai)       parts.push(`Swarnix AI: ${t.ai}`);\n  if (t.feature)  parts.push(`[Feature used: ${t.feature}]`);\n  return parts.join('\\n');\n}).join('\\n---\\n');\n\nreturn {\n  json: {\n    phone: c.phone,\n    name: c.name,\n    msgCount: c.msgCount,\n    firstAt: c.firstAt,\n    lastAt: c.lastAt,\n    prompt: `You are a business intelligence assistant for a premium Indian jewellery store using the Swarnix WhatsApp AI platform.\n\nWrite a warm, rich summary (4-6 sentences) of this customer's WhatsApp shopping journey so the jewellery store owner feels proud of their investment in Swarnix.\n\nGuidelines:\n- Highlight what jewellery categories/pieces the customer explored (rings, mangalsutra, necklaces, etc.)\n- Mention any special features they used: voice search, image search, AI model try-on, virtual try-on\n- Capture their engagement level and enthusiasm\n- If they asked for specific occasions (wedding, anniversary, gifting), highlight it\n- Frame it so the owner thinks: \"Customers are really using and loving this!\"\n- Write in 3rd person, warm and professional tone\n- Do NOT fabricate details not present in the conversation\n\nCustomer: ${c.name} (${c.phone})\nTotal messages: ${c.msgCount}\nPeriod: ${c.firstAt} to ${c.lastAt}\n\nConversation:\n${threadLines}\n\nRespond with ONLY the summary paragraph.`\n  }\n};"
       },
       "id": "node-build-prompt",
       "name": "Build Prompt",
@@ -137,8 +137,8 @@
     "executionOrder": "v1"
   },
   "staticData": null,
-  "tags": ["karat", "analytics"],
+  "tags": ["swarnix", "analytics"],
   "meta": {
-    "instanceId": "karat-v3"
+    "instanceId": "swarnix-v3"
   }
 }

@@ -36,7 +36,7 @@ async function uploadBlobToCloudinary(blob, filename) {
   const fd = new FormData();
   fd.append('file', compressed, filename);
   fd.append('upload_preset', CLOUDINARY_PRESET);
-  fd.append('folder', 'karat-ai-models');
+  fd.append('folder', 'swarnix-ai-models');
   const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
     method: 'POST',
     body: fd,

@@ -76,7 +76,7 @@ function AppShell() {
           </svg>
           <div className="spinner" />
           <div style={{ fontSize: 12, color: 'rgba(201,168,76,.55)', letterSpacing: '.1em', fontFamily: 'DM Sans,sans-serif' }}>
-            LOADING KARAT
+            LOADING SWARNIX
           </div>
         </div>
       </div>

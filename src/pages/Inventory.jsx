@@ -583,7 +583,7 @@ export default function Inventory() {
       if (error) throw error;
 
       const rows = (data || []).map(mapProductToExportRow);
-      const filename = `karat_products_${new Date().toISOString().slice(0, 10)}`;
+      const filename = `swarnix_products_${new Date().toISOString().slice(0, 10)}`;
 
       if (format === 'csv') {
         downloadCSV(rows, filename);

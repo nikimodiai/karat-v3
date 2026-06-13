@@ -66,7 +66,7 @@ function UpgradeWall({ planLabel }) {
       </p>
       <p className={styles.upgradeCurrent}>You're currently on the <strong>{planLabel}</strong> plan.</p>
       <a
-        href="mailto:nikimodi81@gmail.com?subject=KARAT Plan Upgrade — Conversation Summaries"
+        href="mailto:nikimodi81@gmail.com?subject=SWARNIX Plan Upgrade — Conversation Summaries"
         className={styles.upgradeCta}
       >
         <Crown size={13} /> Upgrade to Professional <ArrowRight size={13} />
