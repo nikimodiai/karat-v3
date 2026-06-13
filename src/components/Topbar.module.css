@@ -8,7 +8,7 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 1px 0 rgba(201,168,76,.18), 0 4px 20px rgba(11,24,41,.25);
+  box-shadow: 0 1px 0 rgba(183,110,121,.22), 0 4px 20px rgba(26,13,15,.35);
   flex-shrink: 0;
 }
 
@@ -21,12 +21,19 @@
   flex-shrink: 0;
   margin-right: 8px;
 }
+.brandLogo {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+  border-radius: 6px;
+}
 .brandName {
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 20px;
   font-weight: 700;
-  color: #E8CC7A;
-  letter-spacing: .12em;
+  color: #D4A0A8;
+  letter-spacing: .18em;
+  text-transform: uppercase;
 }
 
 /* Nav */
@@ -48,7 +55,7 @@
   border-radius: 7px;
   border: none;
   background: transparent;
-  color: rgba(248,245,236,.55);
+  color: rgba(240,220,222,.60);
   cursor: pointer;
   font-family: var(--font-body);
   font-size: 13px;
@@ -57,10 +64,10 @@
   transition: all .18s;
   position: relative;
 }
-.navBtn:hover { background: rgba(201,168,76,.12); color: #E8CC7A; }
+.navBtn:hover { background: rgba(183,110,121,.14); color: #D4A0A8; }
 .navBtnActive {
-  background: rgba(201,168,76,.15);
-  color: #E8CC7A;
+  background: rgba(183,110,121,.18);
+  color: #D4A0A8;
   font-weight: 600;
 }
 .navBtnActive::after {
@@ -76,7 +83,7 @@
 }
 .badge {
   background: var(--gold);
-  color: var(--navy);
+  color: #fff;
   font-size: 10px;
   font-weight: 700;
   padding: 1px 6px;
@@ -111,24 +118,24 @@
   align-items: center;
   gap: 7px;
   background: rgba(255,255,255,.08);
-  border: 1px solid rgba(201,168,76,.2);
+  border: 1px solid rgba(183,110,121,.25);
   border-radius: 99px;
   padding: 5px 12px 5px 5px;
   cursor: pointer;
   transition: all .18s;
 }
-.pill:hover { background: rgba(255,255,255,.13); border-color: rgba(201,168,76,.35); }
+.pill:hover { background: rgba(255,255,255,.13); border-color: rgba(183,110,121,.45); }
 .avatar {
   width: 26px; height: 26px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #C9A84C, #8B6914);
-  color: var(--navy);
+  background: linear-gradient(135deg, #D4A0A8, #8B3A47);
+  color: #fff;
   font-size: 11px;
   font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.pillName { font-size: 13px; font-weight: 500; color: rgba(248,245,236,.9); }
+.pillName { font-size: 13px; font-weight: 500; color: rgba(240,220,222,.95); }
 
 /* Dropdown */
 .dropdown {
@@ -154,8 +161,8 @@
 .ddAvatar {
   width: 38px; height: 38px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #C9A84C, #8B6914);
-  color: var(--navy);
+  background: linear-gradient(135deg, #D4A0A8, #8B3A47);
+  color: #fff;
   font-size: 14px;
   font-weight: 700;
   display: flex; align-items: center; justify-content: center;
@@ -200,7 +207,7 @@
   display: none;
   background: none;
   border: none;
-  color: rgba(248,245,236,.8);
+  color: rgba(240,220,222,.85);
   cursor: pointer;
   padding: 4px;
 }
@@ -212,7 +219,7 @@
   background: var(--navy);
   z-index: 99;
   padding: 8px 8px max(8px, env(safe-area-inset-bottom));
-  box-shadow: 0 8px 24px rgba(11,24,41,.35);
+  box-shadow: 0 8px 24px rgba(26,13,15,.45);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
@@ -221,27 +228,27 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 12px 16px;
+  padding: 14px 18px;
   background: none;
   border: none;
-  color: rgba(248,245,236,.7);
+  color: rgba(240,220,222,.75);
   cursor: pointer;
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 15px;
   border-radius: 8px;
   transition: all .15s;
 }
 .mobileNavItem:hover, .mobileNavActive {
-  background: rgba(201,168,76,.12);
-  color: #E8CC7A;
+  background: rgba(183,110,121,.15);
+  color: #D4A0A8;
 }
-.mobileDivider { height: 1px; background: rgba(201,168,76,.12); margin: 6px 0; }
+.mobileDivider { height: 1px; background: rgba(183,110,121,.14); margin: 6px 0; }
 .mobileNavDanger { color: #f87171; }
 
 /* "New" feature highlight */
 .newPill {
-  background: linear-gradient(135deg, #C9A84C, #e8b84b);
-  color: #0B1829;
+  background: linear-gradient(135deg, #D4A0A8, #B76E79);
+  color: #fff;
   font-size: 9px;
   font-weight: 800;
   padding: 1px 5px;
@@ -253,15 +260,15 @@
 }
 
 .navBtnNew {
-  color: #E8CC7A !important;
+  color: #D4A0A8 !important;
 }
 .navBtnNew svg {
-  filter: drop-shadow(0 0 4px rgba(201,168,76,.6));
+  filter: drop-shadow(0 0 4px rgba(183,110,121,.6));
 }
 
 @keyframes newPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,76,.45); }
-  50%       { box-shadow: 0 0 0 4px rgba(201,168,76,0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(183,110,121,.45); }
+  50%       { box-shadow: 0 0 0 4px rgba(183,110,121,0); }
 }
 
 @media (max-width: 1100px) {

@@ -66,16 +66,12 @@ function AppShell() {
     return (
       <div style={{
         minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'radial-gradient(ellipse 100% 70% at 50% 30%, #17305A 0%, #0B1829 45%, #060C14 100%)'
+        background: 'radial-gradient(ellipse 100% 70% at 50% 30%, #2d0f14 0%, #1A0D0F 45%, #0d0608 100%)'
       }}>
         <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
-          <svg viewBox="0 0 60 60" fill="none" width="56" height="56" style={{ filter: 'drop-shadow(0 0 16px rgba(201,168,76,.4))' }}>
-            <polygon points="30,4 56,20 56,40 30,56 4,40 4,20" fill="none" stroke="#C9A84C" strokeWidth="1.5"/>
-            <polygon points="30,14 46,23 46,37 30,46 14,37 14,23" fill="none" stroke="rgba(201,168,76,0.35)" strokeWidth="1"/>
-            <circle cx="30" cy="30" r="6" fill="#C9A84C"/>
-          </svg>
+          <img src="/swarnix-logo.png" alt="Swarnix" style={{ width: 72, height: 72, objectFit: 'contain', borderRadius: '50%', filter: 'drop-shadow(0 0 16px rgba(183,110,121,.45))' }} />
           <div className="spinner" />
-          <div style={{ fontSize: 12, color: 'rgba(201,168,76,.55)', letterSpacing: '.1em', fontFamily: 'DM Sans,sans-serif' }}>
+          <div style={{ fontSize: 12, color: 'rgba(183,110,121,.65)', letterSpacing: '.1em', fontFamily: 'DM Sans,sans-serif' }}>
             LOADING SWARNIX
           </div>
         </div>

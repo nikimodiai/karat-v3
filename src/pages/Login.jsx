@@ -60,20 +60,10 @@ export default function Login() {
         {/* Logo */}
         <div className={styles.logoWrap}>
           <div className={styles.logoMark}>
-            <svg viewBox="0 0 60 60" fill="none" width="52" height="52">
-              <polygon points="30,4 56,20 56,40 30,56 4,40 4,20" fill="none" stroke="#C9A84C" strokeWidth="1.5"/>
-              <polygon points="30,14 46,23 46,37 30,46 14,37 14,23" fill="none" stroke="rgba(201,168,76,0.38)" strokeWidth="1"/>
-              <circle cx="30" cy="30" r="6" fill="#C9A84C"/>
-              <line x1="30" y1="4" x2="30" y2="14" stroke="#C9A84C" strokeWidth="1.2"/>
-              <line x1="56" y1="20" x2="46" y2="23" stroke="#C9A84C" strokeWidth="1.2"/>
-              <line x1="56" y1="40" x2="46" y2="37" stroke="#C9A84C" strokeWidth="1.2"/>
-              <line x1="30" y1="56" x2="30" y2="46" stroke="#C9A84C" strokeWidth="1.2"/>
-              <line x1="4" y1="40" x2="14" y2="37" stroke="#C9A84C" strokeWidth="1.2"/>
-              <line x1="4" y1="20" x2="14" y2="23" stroke="#C9A84C" strokeWidth="1.2"/>
-            </svg>
+            <img src="/swarnix-logo.png" alt="Swarnix" className={styles.logoImg} />
           </div>
           <div className={styles.brandName}>SWARNIX</div>
-          <div className={styles.brandTagline}>Jewellery Inventory Intelligence</div>
+          <div className={styles.brandTagline}>Smart Inventory · WhatsApp AI Agent</div>
         </div>
 
         {/* Hero */}

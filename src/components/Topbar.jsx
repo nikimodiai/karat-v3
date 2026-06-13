@@ -11,10 +11,9 @@ const NAV_ITEMS = [
   { id: 'customers',  label: 'Customers',          icon: Users },
   { id: 'analytics',  label: 'Analytics',          icon: BarChart2 },
   { id: 'team',       label: 'Team',               icon: UserCog },
-  { id: 'offers',     label: 'Offers',               icon: Tag },
+  { id: 'offers',     label: 'Offers',             icon: Tag },
   { id: 'voice',      label: 'Teach AI Your Style', icon: Sparkles, isNew: true },
-  { id: 'faq',        label: 'FAQ',                 icon: HelpCircle },
-  { id: 'profile',    label: 'My Profile',          icon: User },
+  { id: 'faq',        label: 'FAQ',                icon: HelpCircle },
 ];
 
 const PLAN_COLORS = {
@@ -50,11 +49,7 @@ export default function Topbar({ activeTab, onTabChange, productCount }) {
       <header className={styles.topbar}>
         {/* Brand */}
         <div className={styles.brand}>
-          <svg viewBox="0 0 32 32" fill="none" width="28" height="28">
-            <polygon points="16,2 30,10 30,22 16,30 2,22 2,10" fill="none" stroke="#C9A84C" strokeWidth="1.5"/>
-            <polygon points="16,8 24,13 24,19 16,24 8,19 8,13" fill="none" stroke="rgba(201,168,76,0.35)" strokeWidth="1"/>
-            <circle cx="16" cy="16" r="3.5" fill="#C9A84C"/>
-          </svg>
+          <img src="/swarnix-logo.png" alt="Swarnix" className={styles.brandLogo} />
           <span className={styles.brandName}>SWARNIX</span>
         </div>
 
@@ -139,6 +134,13 @@ export default function Topbar({ activeTab, onTabChange, productCount }) {
               {isNew && <span className={styles.newPill}>New</span>}
             </button>
           ))}
+          <div className={styles.mobileDivider} />
+          <button
+            className={`${styles.mobileNavItem} ${activeTab === 'profile' ? styles.mobileNavActive : ''}`}
+            onClick={() => { onTabChange('profile'); setMobileOpen(false); }}
+          >
+            <User size={16} strokeWidth={2} /> My Profile
+          </button>
           <div className={styles.mobileDivider} />
           <button className={`${styles.mobileNavItem} ${styles.mobileNavDanger}`} onClick={logout}>
             <LogOut size={16} /> Sign Out
