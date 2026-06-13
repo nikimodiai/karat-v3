@@ -66,12 +66,12 @@ function AppShell() {
     return (
       <div style={{
         minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'radial-gradient(ellipse 100% 70% at 50% 30%, #2d0f14 0%, #1A0D0F 45%, #0d0608 100%)'
+        background: '#0A0A0A'
       }}>
         <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
-          <img src="/swarnix-logo.png" alt="Swarnix" style={{ width: 72, height: 72, objectFit: 'contain', borderRadius: '50%', filter: 'drop-shadow(0 0 16px rgba(183,110,121,.45))' }} />
+          <img src="/swarnix-logo.png" alt="Swarnix" style={{ width: 90, height: 90, objectFit: 'contain', filter: 'drop-shadow(0 0 20px rgba(200,149,108,.5))' }} />
           <div className="spinner" />
-          <div style={{ fontSize: 12, color: 'rgba(183,110,121,.65)', letterSpacing: '.1em', fontFamily: 'DM Sans,sans-serif' }}>
+          <div style={{ fontSize: 12, color: 'rgba(200,149,108,.65)', letterSpacing: '.12em', fontFamily: 'DM Sans,sans-serif' }}>
             LOADING SWARNIX
           </div>
         </div>

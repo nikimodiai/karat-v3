@@ -1,6 +1,6 @@
 .topbar {
   height: 60px;
-  background: var(--navy);
+  background: #0D0D0D;
   display: flex;
   align-items: center;
   padding: 0 20px;
@@ -8,7 +8,7 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 1px 0 rgba(183,110,121,.22), 0 4px 20px rgba(26,13,15,.35);
+  box-shadow: 0 1px 0 rgba(200,149,108,.18), 0 4px 24px rgba(0,0,0,.5);
   flex-shrink: 0;
 }
 
@@ -16,24 +16,28 @@
 .brand {
   display: flex;
   align-items: center;
-  gap: 9px;
-  text-decoration: none;
+  gap: 10px;
   flex-shrink: 0;
   margin-right: 8px;
 }
 .brandLogo {
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   object-fit: contain;
-  border-radius: 6px;
+  /* No border-radius — show logo as-is */
+  border-radius: 0;
+  filter: drop-shadow(0 0 6px rgba(200,149,108,.3));
 }
 .brandName {
   font-family: var(--font-display);
   font-size: 20px;
   font-weight: 700;
-  color: #D4A0A8;
-  letter-spacing: .18em;
+  letter-spacing: .2em;
   text-transform: uppercase;
+  background: linear-gradient(180deg, #DEB896 0%, #C8956C 60%, #8B5E3C 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 /* Nav */
@@ -55,7 +59,7 @@
   border-radius: 7px;
   border: none;
   background: transparent;
-  color: rgba(240,220,222,.60);
+  color: rgba(237,224,208,.55);
   cursor: pointer;
   font-family: var(--font-body);
   font-size: 13px;
@@ -64,10 +68,10 @@
   transition: all .18s;
   position: relative;
 }
-.navBtn:hover { background: rgba(183,110,121,.14); color: #D4A0A8; }
+.navBtn:hover { background: rgba(200,149,108,.12); color: #DEB896; }
 .navBtnActive {
-  background: rgba(183,110,121,.18);
-  color: #D4A0A8;
+  background: rgba(200,149,108,.16);
+  color: #DEB896;
   font-weight: 600;
 }
 .navBtnActive::after {
@@ -78,12 +82,12 @@
   transform: translateX(-50%);
   width: 20px;
   height: 2px;
-  background: var(--gold);
+  background: #C8956C;
   border-radius: 99px;
 }
 .badge {
-  background: var(--gold);
-  color: #fff;
+  background: #C8956C;
+  color: #0D0D0D;
   font-size: 10px;
   font-weight: 700;
   padding: 1px 6px;
@@ -117,25 +121,25 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  background: rgba(255,255,255,.08);
-  border: 1px solid rgba(183,110,121,.25);
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(200,149,108,.22);
   border-radius: 99px;
   padding: 5px 12px 5px 5px;
   cursor: pointer;
   transition: all .18s;
 }
-.pill:hover { background: rgba(255,255,255,.13); border-color: rgba(183,110,121,.45); }
+.pill:hover { background: rgba(255,255,255,.12); border-color: rgba(200,149,108,.4); }
 .avatar {
   width: 26px; height: 26px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #D4A0A8, #8B3A47);
+  background: linear-gradient(135deg, #DEB896, #8B5E3C);
   color: #fff;
   font-size: 11px;
   font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.pillName { font-size: 13px; font-weight: 500; color: rgba(240,220,222,.95); }
+.pillName { font-size: 13px; font-weight: 500; color: rgba(237,224,208,.9); }
 
 /* Dropdown */
 .dropdown {
@@ -161,7 +165,7 @@
 .ddAvatar {
   width: 38px; height: 38px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #D4A0A8, #8B3A47);
+  background: linear-gradient(135deg, #DEB896, #8B5E3C);
   color: #fff;
   font-size: 14px;
   font-weight: 700;
@@ -207,7 +211,7 @@
   display: none;
   background: none;
   border: none;
-  color: rgba(240,220,222,.85);
+  color: rgba(237,224,208,.8);
   cursor: pointer;
   padding: 4px;
 }
@@ -216,22 +220,22 @@
   position: fixed;
   top: 60px; left: 0; right: 0;
   bottom: 0;
-  background: var(--navy);
+  background: #0D0D0D;
   z-index: 99;
   padding: 8px 8px max(8px, env(safe-area-inset-bottom));
-  box-shadow: 0 8px 24px rgba(26,13,15,.45);
+  box-shadow: 0 8px 24px rgba(0,0,0,.6);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 }
 .mobileNavItem {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
-  padding: 14px 18px;
+  padding: 15px 18px;
   background: none;
   border: none;
-  color: rgba(240,220,222,.75);
+  color: rgba(237,224,208,.70);
   cursor: pointer;
   font-family: var(--font-body);
   font-size: 15px;
@@ -239,16 +243,16 @@
   transition: all .15s;
 }
 .mobileNavItem:hover, .mobileNavActive {
-  background: rgba(183,110,121,.15);
-  color: #D4A0A8;
+  background: rgba(200,149,108,.12);
+  color: #DEB896;
 }
-.mobileDivider { height: 1px; background: rgba(183,110,121,.14); margin: 6px 0; }
+.mobileDivider { height: 1px; background: rgba(200,149,108,.12); margin: 6px 0; }
 .mobileNavDanger { color: #f87171; }
 
-/* "New" feature highlight */
+/* "New" pill */
 .newPill {
-  background: linear-gradient(135deg, #D4A0A8, #B76E79);
-  color: #fff;
+  background: linear-gradient(135deg, #DEB896, #C8956C);
+  color: #0D0D0D;
   font-size: 9px;
   font-weight: 800;
   padding: 1px 5px;
@@ -258,24 +262,19 @@
   line-height: 1.6;
   animation: newPulse 2.4s ease-in-out infinite;
 }
-
-.navBtnNew {
-  color: #D4A0A8 !important;
-}
-.navBtnNew svg {
-  filter: drop-shadow(0 0 4px rgba(183,110,121,.6));
-}
+.navBtnNew { color: #DEB896 !important; }
+.navBtnNew svg { filter: drop-shadow(0 0 4px rgba(200,149,108,.55)); }
 
 @keyframes newPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(183,110,121,.45); }
-  50%       { box-shadow: 0 0 0 4px rgba(183,110,121,0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(200,149,108,.4); }
+  50%       { box-shadow: 0 0 0 4px rgba(200,149,108,0); }
 }
 
 @media (max-width: 1100px) {
   .nav { display: none; }
   .planBadge { display: none; }
   .mobileMenu { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; }
-  .mobileMenu:hover { background: rgba(255,255,255,.1); }
+  .mobileMenu:hover { background: rgba(255,255,255,.08); }
   .mobileDrawer { display: flex; flex-direction: column; }
 }
 
@@ -285,5 +284,5 @@
 }
 
 @media (max-width: 380px) {
-  .brandName { font-size: 15px; letter-spacing: .08em; }
+  .brandName { font-size: 16px; letter-spacing: .12em; }
 }
