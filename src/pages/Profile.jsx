@@ -11,7 +11,6 @@ import { usePermissions } from '../hooks/usePermissions';
 import {
   planKey, PLAN_LABELS, hasFeature, effectiveLimit, fmtLimit, PLAN_LIMITS,
 } from '../lib/plans';
-import VoiceStyleSection from '../components/VoiceStyleSection';
 import WhatsAppConnect from '../components/WhatsAppConnect';
 import styles from './Profile.module.css';
 
@@ -100,7 +99,6 @@ export default function Profile() {
     { icon: Camera,      label: 'Voice Search',              active: hasFeature(store, 'voice_search') },
     { icon: Camera,      label: 'Image Search',              active: hasFeature(store, 'image_search') },
     { icon: Users,       label: 'Customer Tiers (VVIP/VIP)', active: hasFeature(store, 'customer_tiers') },
-    { icon: Cpu,         label: 'Teach AI Your Style',       active: hasFeature(store, 'teach_ai_style') },
     { icon: Cpu,         label: 'AI Models Try-On',          active: hasFeature(store, 'ai_models') },
     { icon: Shirt,       label: 'Selfie Try-On',             active: hasFeature(store, 'virtual_tryon') },
     { icon: BarChart2,   label: 'Analytics',                 active: !!planSpec.features.analytics, note: planSpec.features.analytics },
@@ -246,6 +244,11 @@ export default function Profile() {
               )}
             </div>
 
+            {/* WhatsApp Business Connect */}
+            {isOwner && (
+              <WhatsAppConnect store={store} onConnected={refreshStore} />
+            )}
+
             {/* Credit usage guide — left column */}
             <div className={styles.card}>
               <div className={styles.cardTitle}><Zap size={14} color="#C9A84C" /> Credit Usage Guide</div>
@@ -330,39 +333,6 @@ export default function Profile() {
             </div>
           </div>
         </div>
-
-        {/* ── WhatsApp Business Connect ── */}
-        {isOwner && (
-          <div style={{ marginTop: 24 }}>
-            <WhatsAppConnect store={store} onConnected={refreshStore} />
-          </div>
-        )}
-
-        {/* ── AI Style Training (Professional+ only) ── */}
-        {isOwner && hasFeature(store, 'teach_ai_style') && (
-          <VoiceStyleSection
-            store={store}
-            user={user}
-            onProfileUpdated={refreshStore}
-          />
-        )}
-        {isOwner && !hasFeature(store, 'teach_ai_style') && (
-          <div className={styles.card} style={{ marginTop: 24 }}>
-            <div className={styles.cardTitle}><Lock size={14} color="rgba(13,27,42,.3)" /> Teach AI Your Style</div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'flex-start' }}>
-              <p style={{ fontSize: 13, color: 'var(--ink-soft)', margin: 0 }}>
-                Train the AI to match your store's WhatsApp tone and reply style. Available on the Professional plan and above.
-              </p>
-              <a
-                href="mailto:nikimodi81@gmail.com?subject=SWARNIX Plan Upgrade"
-                className="btn-gold"
-                style={{ textDecoration: 'none', fontSize: 12 }}
-              >
-                <Crown size={12} /> Upgrade to Professional
-              </a>
-            </div>
-          </div>
-        )}
 
       </div>
     </div>
