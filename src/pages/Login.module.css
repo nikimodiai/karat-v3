@@ -86,46 +86,36 @@
   margin-bottom: 20px;
 }
 
+/* The logoMark is a clipping window — shows only the crown+S, hides the text rows */
 .logoMark {
-  width: 130px;
-  height: 130px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 10px;
+  width: 160px;
+  height: 160px;
+  overflow: hidden;
+  border-radius: 0;
+  margin-bottom: 12px;
   animation: pulseLogo 3.5s ease-in-out infinite;
 }
 .logoImg {
-  width: 130px;
-  height: 130px;
-  object-fit: contain;
-  /* NO border-radius — show the full square logo as-is */
-  border-radius: 0;
-  filter: drop-shadow(0 0 18px rgba(200,149,108,.35));
+  width: 160px;
+  /* Taller than the container — the bottom text rows get clipped off */
+  height: 230px;
+  object-fit: cover;
+  object-position: center top;
+  display: block;
 }
 @keyframes pulseLogo {
-  0%,100% { filter: drop-shadow(0 0 10px rgba(200,149,108,.2)); }
-  50%      { filter: drop-shadow(0 0 24px rgba(200,149,108,.45)); }
+  0%,100% { filter: drop-shadow(0 0 10px rgba(200,149,108,.22)); }
+  50%      { filter: drop-shadow(0 0 26px rgba(200,149,108,.5)); }
 }
 
-.brandName {
-  font-family: var(--font-display);
-  font-size: 36px;
-  font-weight: 700;
-  letter-spacing: .3em;
-  text-transform: uppercase;
-  /* Metallic gradient text matching logo lettering */
-  background: linear-gradient(180deg, #DEB896 0%, #C8956C 45%, #8B5E3C 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 4px;
-}
+/* Tagline — large, bright, very readable */
 .brandTagline {
-  font-size: 10px;
-  color: rgba(200,149,108,.55);
-  letter-spacing: .22em;
+  font-size: 13px;
+  font-weight: 600;
+  color: #C8956C;
+  letter-spacing: .18em;
   text-transform: uppercase;
+  text-align: center;
 }
 
 /* Hero */
@@ -278,8 +268,7 @@
 
 @media (max-width: 500px) {
   .box { padding: 28px 20px 24px; }
-  .logoMark { width: 110px; height: 110px; }
-  .logoImg { width: 110px; height: 110px; }
-  .brandName { font-size: 28px; letter-spacing: .22em; }
+  .logoMark { width: 140px; height: 140px; }
+  .logoImg { width: 140px; height: 200px; }
   .heroTitle { font-size: 19px; }
 }

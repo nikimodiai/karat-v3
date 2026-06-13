@@ -62,8 +62,7 @@ export default function Login() {
           <div className={styles.logoMark}>
             <img src="/swarnix-logo.png" alt="Swarnix" className={styles.logoImg} />
           </div>
-          <div className={styles.brandName}>SWARNIX</div>
-          <div className={styles.brandTagline}>Smart Inventory · WhatsApp AI Agent</div>
+          <div className={styles.brandTagline}>Smart Inventory &nbsp;·&nbsp; WhatsApp AI Agent</div>
         </div>
 
         {/* Hero */}
