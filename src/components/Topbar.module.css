@@ -35,10 +35,10 @@
   align-items: center;
   gap: 2px;
   flex: 1;
-  overflow-x: auto;
-  scrollbar-width: none;
+  overflow: visible;
+  flex-wrap: nowrap;
+  min-width: 0;
 }
-.nav::-webkit-scrollbar { display: none; }
 
 .navBtn {
   display: flex;
@@ -264,16 +264,17 @@
   50%       { box-shadow: 0 0 0 4px rgba(201,168,76,0); }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1100px) {
   .nav { display: none; }
   .planBadge { display: none; }
   .mobileMenu { display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 8px; }
   .mobileMenu:hover { background: rgba(255,255,255,.1); }
   .mobileDrawer { display: flex; flex-direction: column; }
+}
+
+@media (max-width: 600px) {
   .pillName { display: none; }
-  /* Tighten topbar for mobile */
   .topbar { padding: 0 14px; gap: 6px; }
-  /* Plan badge in mobile drawer footer */
 }
 
 @media (max-width: 380px) {
