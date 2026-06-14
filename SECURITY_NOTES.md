@@ -6,6 +6,42 @@ for the owner to do.
 
 ---
 
+## OPEN — anon role can read `stores.wa_access_token`
+
+**Severity:** High (confidentiality — per-tenant WhatsApp Business token)
+**Status:** Mitigated for the public storefront; root cause still open.
+
+**The issue.** Staff sessions authenticate via a custom RPC
+(`authenticate_store_user`) and then run all queries as the Supabase
+**anon** role with an app-supplied `owner_id` filter. To make that work,
+`staff_read_stores` (in `supabase/2026_05_30_store_users.sql`) grants anon
+`SELECT` on `public.stores` with `USING (true)` — i.e. every column of
+every row, including `wa_access_token`, `waba_id`, and
+`whatsapp_phone_number_id`. The admin app legitimately reads those columns
+(`src/hooks/useAuth.jsx` `STORE_SELECT`, `src/components/WhatsAppConnect.jsx`),
+so the broad policy cannot simply be dropped or column-revoked without
+breaking staff WhatsApp connect/load. Anyone holding the public anon key
+can therefore `select wa_access_token from stores`.
+
+**Mitigation in place (2026-06-14).** The public customer storefront never
+touches the base table. It reads through a restricted view
+`public.public_stores` (safe columns only) created in the storefront
+project (`../stores-site/supabase/2026_06_14_store_slug.sql`), which is
+where the storefront code now lives. This removes the storefront as an
+exposure path and documents intent, but does **not** revoke anon's direct
+access to the base table.
+
+**Proper fix (not yet done).** Either:
+1. Move `wa_access_token` (+ `waba_id`) into a separate `store_secrets`
+   table with **no** anon policy, read only via the service role / n8n; or
+2. Replace anon-role staff sessions with real scoped Supabase sessions (or
+   `SECURITY DEFINER` RPCs) so the `USING (true)` policies can be removed.
+
+Until then: treat the anon key as able to read all WhatsApp tokens, and
+rotate any token you believe leaked.
+
+---
+
 ## CRITICAL — Hardcoded Supabase service-role key in n8n workflows
 
 **Severity:** Critical
