@@ -1,0 +1,480 @@
+/* ── Page shell ─────────────────────────────────────────── */
+.page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  background: var(--cream);
+}
+
+/* ── Header ─────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 28px 16px;
+  border-bottom: 1px solid rgba(201, 168, 76, 0.12);
+  background: linear-gradient(90deg, #fff 0%, #fdfaf5 100%);
+  flex-wrap: wrap;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.headerIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(200, 149, 108, 0.15), rgba(200, 149, 108, 0.06));
+  border: 1px solid rgba(200, 149, 108, 0.22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--navy);
+  margin: 0;
+}
+
+.sub {
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-top: 3px;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Refresh button */
+.refreshBtn {
+  width: 36px;
+  height: 36px;
+  border: 1.5px solid var(--border-card);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--ink-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.18s;
+  flex-shrink: 0;
+}
+.refreshBtn:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+.refreshBtn:disabled { opacity: 0.5; cursor: default; }
+
+.spinning {
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Bulk action buttons */
+.bulkWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btnBulkApprove {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: 9px;
+  border: none;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 10px rgba(21, 128, 61, 0.28);
+}
+.btnBulkApprove:hover { transform: translateY(-1px); box-shadow: 0 4px 18px rgba(21,128,61,.38); }
+.btnBulkApprove:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btnBulkReject {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border-radius: 9px;
+  border: 1.5px solid rgba(190, 18, 60, 0.25);
+  background: #fff;
+  color: var(--danger);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btnBulkReject:hover { background: rgba(190,18,60,.05); border-color: var(--danger); }
+.btnBulkReject:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Bulk confirm banner ─────────────────────────────────── */
+.bulkConfirm {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 28px;
+  background: rgba(217, 119, 6, 0.07);
+  border-bottom: 1px solid rgba(217, 119, 6, 0.18);
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.bulkIcon {
+  color: var(--warn);
+  flex-shrink: 0;
+}
+
+.bulkConfirm span {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  min-width: 180px;
+}
+
+.bulkBtns {
+  display: flex;
+  gap: 8px;
+}
+
+.bulkCancel {
+  padding: 7px 16px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border-card);
+  background: #fff;
+  color: var(--ink-mid);
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.bulkCancel:hover { border-color: var(--ink-mid); }
+.bulkCancel:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.bulkApproveBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.bulkApproveBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.bulkRejectBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: 8px;
+  border: none;
+  background: var(--danger);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.bulkRejectBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Content area ────────────────────────────────────────── */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 28px 40px;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Info pill */
+.infoPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11.5px;
+  color: var(--ink-soft);
+  background: rgba(200, 149, 108, 0.08);
+  border: 1px solid rgba(200, 149, 108, 0.18);
+  border-radius: 99px;
+  padding: 5px 14px;
+  margin-bottom: 18px;
+}
+
+/* ── Review list ─────────────────────────────────────────── */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 820px;
+}
+
+/* ── Review card ─────────────────────────────────────────── */
+.card {
+  background: #fff;
+  border-radius: 14px;
+  border: 1px solid rgba(200, 149, 108, 0.16);
+  box-shadow: 0 2px 14px rgba(28, 20, 12, 0.06), 0 1px 3px rgba(28, 20, 12, 0.04);
+  overflow: hidden;
+  transition: box-shadow 0.2s, transform 0.2s, opacity 0.25s;
+}
+.card:hover {
+  box-shadow: 0 6px 28px rgba(28, 20, 12, 0.1), 0 2px 8px rgba(28, 20, 12, 0.06);
+  transform: translateY(-1px);
+}
+.cardProcessing {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 18px 20px 14px;
+  gap: 14px;
+  border-bottom: 1px solid rgba(200, 149, 108, 0.09);
+}
+
+.cardLeft {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Avatar */
+.avatarImg {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(200, 149, 108, 0.22);
+  flex-shrink: 0;
+}
+
+.avatarInitials {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(200,149,108,.18), rgba(200,149,108,.08));
+  border: 1.5px solid rgba(200, 149, 108, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--gold-dk);
+  flex-shrink: 0;
+}
+
+.custName {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy);
+  line-height: 1.3;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+/* Stars */
+.stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+.starFilled {
+  color: #C9A84C;
+  fill: #C9A84C;
+}
+.starEmpty {
+  color: rgba(200, 149, 108, 0.28);
+  fill: none;
+}
+
+.metaDot { color: var(--ink-faint); font-size: 14px; }
+
+.metaDate {
+  font-size: 11px;
+  color: var(--ink-soft);
+}
+
+/* ── Card action buttons ─────────────────────────────────── */
+.cardActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.btnApprove {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(135deg, #16a34a, #15803d);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(21, 128, 61, 0.25);
+  white-space: nowrap;
+}
+.btnApprove:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(21,128,61,.36); }
+.btnApprove:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btnReject {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: 1.5px solid rgba(190, 18, 60, 0.22);
+  background: #fff;
+  color: var(--danger);
+  font-size: 12.5px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btnReject:hover { background: rgba(190,18,60,.05); border-color: var(--danger); }
+.btnReject:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Pending badge for read-only view */
+.pendingBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 99px;
+  background: var(--warn-bg);
+  color: var(--warn);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  flex-shrink: 0;
+}
+
+/* ── Review body ─────────────────────────────────────────── */
+.body {
+  font-size: 13.5px;
+  line-height: 1.7;
+  color: var(--ink-mid);
+  padding: 16px 20px 18px;
+  font-style: italic;
+  margin: 0;
+}
+
+/* ── Loading / Empty states ──────────────────────────────── */
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  gap: 18px;
+}
+
+.loadingText {
+  font-size: 13px;
+  color: var(--ink-soft);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+  gap: 12px;
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.emptyIcon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(21,128,61,.1), rgba(21,128,61,.05));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--success);
+  margin-bottom: 8px;
+}
+
+.emptyTitle {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.emptyText {
+  font-size: 13px;
+  color: var(--ink-soft);
+  line-height: 1.7;
+}
+
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 720px) {
+  .header { padding: 14px 16px; }
+  .content { padding: 16px 16px 32px; }
+  .cardHeader { flex-direction: column; gap: 12px; }
+  .cardActions { width: 100%; justify-content: flex-end; }
+  .title { font-size: 19px; }
+}
+
+@media (max-width: 480px) {
+  .header { flex-direction: column; align-items: flex-start; }
+  .headerRight { width: 100%; }
+  .bulkWrap { width: 100%; }
+  .btnBulkApprove, .btnBulkReject { flex: 1; justify-content: center; }
+  .bulkConfirm { padding: 12px 16px; }
+  .body { padding: 14px 16px; }
+  .cardHeader { padding: 14px 16px 12px; }
+}

@@ -205,6 +205,8 @@
 .ddItem:hover { background: var(--cream); }
 .ddItemDanger { color: var(--danger); }
 .ddItemDanger:hover { background: var(--danger-bg); }
+.ddItemReviews { color: var(--gold-dk); }
+.ddItemReviews:hover { background: rgba(200,149,108,.08); }
 
 /* Mobile */
 .mobileMenu {

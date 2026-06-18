@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LayoutGrid, Users, BarChart2, User, LogOut, ChevronDown, Gem, Menu, X, Home, Shield, UserCog, Sparkles, HelpCircle, Tag } from 'lucide-react';
+import { LayoutGrid, Users, BarChart2, User, LogOut, ChevronDown, Gem, Menu, X, Home, Shield, UserCog, Sparkles, HelpCircle, Tag, MessageSquare } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import styles from './Topbar.module.css';
 
@@ -105,6 +105,9 @@ export default function Topbar({ activeTab, onTabChange, productCount }) {
                 <button className={styles.ddItem} onClick={() => { setDropOpen(false); onTabChange('profile'); }}>
                   <User size={14} /> My Profile & Plan
                 </button>
+                <button className={`${styles.ddItem} ${styles.ddItemReviews}`} onClick={() => { setDropOpen(false); onTabChange('reviews'); }}>
+                  <MessageSquare size={14} /> Review Moderation
+                </button>
                 <div className={styles.ddDivider} />
                 <button className={`${styles.ddItem} ${styles.ddItemDanger}`} onClick={logout}>
                   <LogOut size={14} /> Sign Out
@@ -140,6 +143,12 @@ export default function Topbar({ activeTab, onTabChange, productCount }) {
             onClick={() => { onTabChange('profile'); setMobileOpen(false); }}
           >
             <User size={16} strokeWidth={2} /> My Profile
+          </button>
+          <button
+            className={`${styles.mobileNavItem} ${activeTab === 'reviews' ? styles.mobileNavActive : ''}`}
+            onClick={() => { onTabChange('reviews'); setMobileOpen(false); }}
+          >
+            <MessageSquare size={16} strokeWidth={2} /> Review Moderation
           </button>
           <div className={styles.mobileDivider} />
           <button className={`${styles.mobileNavItem} ${styles.mobileNavDanger}`} onClick={logout}>
