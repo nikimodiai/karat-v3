@@ -27,17 +27,10 @@
     },
     {
       "parameters": {
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googlePalmApi",
         "method": "POST",
-        "url": "=https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2-preview:embedContent?key={{ $env.GOOGLE_API_KEY }}",
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "Content-Type",
-              "value": "application/json"
-            }
-          ]
-        },
+        "url": "=https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-2-preview:embedContent",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ model: 'models/gemini-embedding-2-preview', content: { parts: [ { text: $json.question } ] }, outputDimensionality: 768 }) }}",
@@ -47,7 +40,13 @@
       "typeVersion": 4.2,
       "position": [-1952, 400],
       "id": "8f1a1a10-0001-4000-8000-000000000003",
-      "name": "Embed Question"
+      "name": "Embed Question",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "REPLACE_WITH_YOUR_CREDENTIAL_ID",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
     },
     {
       "parameters": {
