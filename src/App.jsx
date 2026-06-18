@@ -16,6 +16,7 @@ import Topbar from './components/Topbar';
 import Footer from './components/Footer';
 import VoiceStyleSection from './components/VoiceStyleSection';
 import OffersSection from './components/OffersSection';
+import AskSwarnix from './components/AskSwarnix';
 
 function OffersTab() {
   const { user, store } = useAuth();
@@ -113,6 +114,7 @@ function Shell({ activeTab, setActiveTab }) {
         {activeTab === 'profile'    && <Profile />}
       </div>
       <Footer />
+      <AskSwarnix />
     </div>
   );
 }

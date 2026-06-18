@@ -31,6 +31,8 @@ export const N8N_AI_MODEL       = N8N_BASE + '/swarnix-ai-model';
 export const N8N_ADD_PRODUCT_VECTOR = N8N_BASE + '/add_product_vector';
 // Conversation summary: receives { owner_id, days, customers[] }, returns { summaries[] }
 export const N8N_CONVERSATION_SUMMARY = N8N_BASE + '/conversation-summary';
+// "Ask Swarnix" SOP help chatbot: receives { owner_id, asked_by, question }, returns { answer, matchedSlugs[] }
+export const N8N_SOP_CHAT = N8N_BASE + '/swarnix-sop-chat';
 
 export const db = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
