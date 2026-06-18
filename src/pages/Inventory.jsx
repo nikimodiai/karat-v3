@@ -459,7 +459,25 @@ export default function Inventory() {
 
       for (let i = 0; i < variants.length; i++) {
         const v = variants[i];
+
+        // Upload any new variant image files to Cloudinary
+        const varImageUrls = [...(v.existingImageUrls || [null,null,null,null,null])];
+        const varFiles = v.images || [null,null,null,null,null];
+        for (let s = 0; s < 5; s++) {
+          if (varFiles[s]) {
+            try {
+              varImageUrls[s] = await uploadImageToCloudinary(varFiles[s]);
+            } catch (e) {
+              varImageUrls[s] = null;
+              showToast(`Variant ${i+1} image ${s+1} upload failed`, '#C0392B');
+            }
+          }
+        }
+        const finalVarImages = varImageUrls.filter(Boolean);
+
         const varPayload = {
+          images:              finalVarImages,
+          primary_image_url:   finalVarImages[0] || null,
           product_id:          savedProductId,
           owner_id:            store.owner_id,
           carat:               v.carat || '',

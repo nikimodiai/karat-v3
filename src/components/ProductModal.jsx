@@ -196,6 +196,12 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
               net_weight_grams:    row.net_weight_grams     ?? '',
               huid:                row.huid                 ?? '',
               stone_value_inr:     row.stone_value_inr      ?? 0,
+              images:              [null, null, null, null, null],
+              existingImageUrls:   (() => {
+                const ex = [null, null, null, null, null];
+                (row.images || []).forEach((u, i) => { if (i < 5) ex[i] = u; });
+                return ex;
+              })(),
             }))
           );
         });

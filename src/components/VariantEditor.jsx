@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from 'react';
-import { Plus, Trash2, Zap, Tag, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useCallback, useRef, useState } from 'react';
+import { Plus, Trash2, Zap, Tag, ChevronDown, ChevronUp, Upload, Camera, Image as ImageIcon } from 'lucide-react';
 import { METAL_PURITY_GROUPS, DIAMOND_PURITIES } from '../lib/config';
 import { DEFAULT_HALLMARK_FEE } from '../lib/pricing';
 import DynamicPricingPanel from './DynamicPricingPanel';
@@ -48,6 +48,8 @@ function newVariant(prefill = {}) {
     price:              prefill.price               ?? '',
     is_in_stock:        true,
     sort_order:         0,
+    images:              prefill.images              ?? [null, null, null, null, null],
+    existingImageUrls:   prefill.existingImageUrls   ?? [null, null, null, null, null],
   };
 }
 
@@ -126,8 +128,50 @@ export default function VariantEditor({ variants, onVariantsChange, productId, p
   );
 }
 
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+
 // ── Single variant row ───────────────────────────────────────────────
 function VariantRow({ variant: v, index, expanded, onToggle, onChange, onRemove }) {
+  const fileRefs = useRef([]);
+  const camRefs = useRef([]);
+  const [blobUrls, setBlobUrls] = useState([null, null, null, null, null]);
+
+  const handleImageFile = (i, file) => {
+    if (!file) return;
+    if (file.size > MAX_IMAGE_BYTES) {
+      alert(`Image too large (${(file.size/1024/1024).toFixed(1)} MB). Max 5 MB per image.`);
+      return;
+    }
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file.');
+      return;
+    }
+    const url = URL.createObjectURL(file);
+    setBlobUrls(prev => {
+      const n = [...prev];
+      if (n[i]) URL.revokeObjectURL(n[i]);
+      n[i] = url;
+      return n;
+    });
+    const newImages = [...(v.images || [null,null,null,null,null])]; newImages[i] = file;
+    const newExisting = [...(v.existingImageUrls || [null,null,null,null,null])]; newExisting[i] = null;
+    onChange({ images: newImages, existingImageUrls: newExisting });
+  };
+
+  const removeImageSlot = (i) => {
+    setBlobUrls(prev => {
+      const n = [...prev];
+      if (n[i]) URL.revokeObjectURL(n[i]);
+      n[i] = null;
+      return n;
+    });
+    const newImages = [...(v.images || [null,null,null,null,null])]; newImages[i] = null;
+    const newExisting = [...(v.existingImageUrls || [null,null,null,null,null])]; newExisting[i] = null;
+    onChange({ images: newImages, existingImageUrls: newExisting });
+  };
+
+  const imagePreview = (i) => blobUrls[i] || (v.existingImageUrls || [])[i] || null;
+
   const colorMeta = VARIANT_COLORS.find(c => c.value === v.color);
   const isCustomColor = v.color === '__custom__' || (v.color && !VARIANT_COLORS.find(c => c.value === v.color));
   const displayColor = isCustomColor ? (v.customColor || 'Custom') : (v.color || '—');
@@ -209,6 +253,60 @@ function VariantRow({ variant: v, index, expanded, onToggle, onChange, onRemove 
                 autoFocus
               />
             )}
+          </div>
+
+          {/* Variant images — up to 5, falls back to the product's images if empty */}
+          <div className="fld" style={{ marginTop: 12 }}>
+            <label className="lbl">
+              <ImageIcon size={11} style={{ verticalAlign: 'middle', marginRight: 4 }}/>
+              Variant Images (up to 5)
+            </label>
+            <div className={modalStyles.imgGrid}>
+              {[0,1,2,3,4].map(i => {
+                const src = imagePreview(i);
+                return (
+                  <div key={i} className={modalStyles.imgSlot}>
+                    {src ? (
+                      <>
+                        <img src={src} alt="" className={modalStyles.imgPreview} />
+                        <button type="button" className={modalStyles.imgRemove} onClick={() => removeImageSlot(i)} title="Remove">
+                          <Trash2 size={12} />
+                        </button>
+                        {i === 0 && <span className={modalStyles.imgPrimary}>Primary</span>}
+                      </>
+                    ) : (
+                      <div className={modalStyles.imgAddWrap}>
+                        <button type="button" className={modalStyles.imgAdd} onClick={() => fileRefs.current[i]?.click()}>
+                          <Upload size={15} strokeWidth={1.5} />
+                          <span>{i === 0 ? 'Primary image' : 'Add photo'}</span>
+                        </button>
+                        <button type="button" className={modalStyles.imgCam} onClick={() => camRefs.current[i]?.click()} title="Take photo">
+                          <Camera size={13} strokeWidth={1.5} />
+                        </button>
+                      </div>
+                    )}
+                    <input
+                      ref={el => fileRefs.current[i] = el}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/*"
+                      style={{ display: 'none' }}
+                      onChange={e => handleImageFile(i, e.target.files?.[0])}
+                    />
+                    <input
+                      ref={el => camRefs.current[i] = el}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      style={{ display: 'none' }}
+                      onChange={e => handleImageFile(i, e.target.files?.[0])}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+            <p className={modalStyles.imgNote}>
+              Optional — if left empty, the storefront uses the product's main images for this variant.
+            </p>
           </div>
 
           {/* Carat — always visible (shown in summary bar) */}

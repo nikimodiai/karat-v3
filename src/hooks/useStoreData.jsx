@@ -41,12 +41,22 @@ const getCachedMonthlyUsage = () => {
   }
 };
 
+const getCachedReviews = () => {
+  try {
+    const cached = localStorage.getItem('swarnix_cached_reviews');
+    return cached ? JSON.parse(cached) : [];
+  } catch (e) {
+    return [];
+  }
+};
+
 export function StoreDataProvider({ children }) {
   const { user, store, storeUser, authStatus, isAuthReady } = useAuth();
 
   const [products,  setProducts]  = useState(getCachedProducts);
   const [customers, setCustomers] = useState(getCachedCustomers);
   const [monthlyUsage, setMonthlyUsage] = useState(getCachedMonthlyUsage);
+  const [reviews, setReviews] = useState(getCachedReviews);
   const [loading,   setLoading]   = useState(() => {
     try {
       return !localStorage.getItem('swarnix_cached_products');
@@ -91,19 +101,28 @@ export function StoreDataProvider({ children }) {
         .limit(1)
         .maybeSingle();
 
-      const [pRes, cRes, uRes] = await Promise.allSettled([productsP, customersP, usageP]);
+      const reviewsP = db
+        .from('reviews')
+        .select('*')
+        .eq('owner_id', ownerId)
+        .order('created_at', { ascending: false });
+
+      const [pRes, cRes, uRes, rRes] = await Promise.allSettled([productsP, customersP, usageP, reviewsP]);
 
       const prods = pRes.status === 'fulfilled' && pRes.value.data ? pRes.value.data : [];
       const custs = cRes.status === 'fulfilled' && cRes.value.data ? cRes.value.data : [];
       const usage = uRes.status === 'fulfilled' && uRes.value.data ? uRes.value.data : null;
+      const revs  = rRes.status === 'fulfilled' && rRes.value.data ? rRes.value.data : [];
 
       setProducts(prods);
       setCustomers(custs);
       setMonthlyUsage(usage);
+      setReviews(revs);
 
       try {
         localStorage.setItem('swarnix_cached_products', JSON.stringify(prods));
         localStorage.setItem('swarnix_cached_customers', JSON.stringify(custs));
+        localStorage.setItem('swarnix_cached_reviews', JSON.stringify(revs));
         if (usage) {
           localStorage.setItem('swarnix_cached_monthly_usage', JSON.stringify(usage));
         } else {
@@ -130,7 +149,7 @@ export function StoreDataProvider({ children }) {
     const sessionId = storeUser ? storeUser.id : user?.id;
     if (authStatus !== 'app' || !sessionId || !isAuthReady) {
       if (authStatus !== 'app' || !sessionId) {
-        setProducts([]); setCustomers([]); setMonthlyUsage(null);
+        setProducts([]); setCustomers([]); setMonthlyUsage(null); setReviews([]);
         loadedForUid.current = null;
       }
       return;
@@ -167,12 +186,23 @@ export function StoreDataProvider({ children }) {
     });
   }, []);
 
+  const setReviewsAndSync = useCallback((updater) => {
+    setReviews(prev => {
+      const next = typeof updater === 'function' ? updater(prev) : updater;
+      try {
+        localStorage.setItem('swarnix_cached_reviews', JSON.stringify(next));
+      } catch (e) {}
+      return next;
+    });
+  }, []);
+
   const ctx = {
-    products, customers, monthlyUsage,
+    products, customers, monthlyUsage, reviews,
     loading, error,
     reload: loadAll,
     setProducts: setProductsAndSync,
     setCustomers: setCustomersAndSync,
+    setReviews: setReviewsAndSync,
   };
 
   return <StoreDataContext.Provider value={ctx}>{children}</StoreDataContext.Provider>;
