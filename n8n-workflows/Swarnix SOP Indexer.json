@@ -59,7 +59,8 @@
     },
     {
       "parameters": {
-        "jsCode": "// httpRequest with return=representation responds with an array containing\n// the upserted row for THIS item (n8n runs this HTTP node once per item and\n// pairs each output with its corresponding input automatically).\nconst resp = $input.first().json;\nconst row = Array.isArray(resp) ? resp[0] : resp;\n\nif (!row || !row.id) {\n  throw new Error('Upsert SOP document returned no id: ' + JSON.stringify(resp));\n}\n\nreturn [{\n  json: {\n    documentId: row.id,\n    slug: row.slug,\n    title: row.title,\n    content: `${row.title}\\n\\n${row.body}`\n  }\n}];"
+        "mode": "runOnceForEachItem",
+        "jsCode": "// mode: runOnceForEachItem — this node runs once PER SOP (12 times total).\n// $input.item is THIS run's single item (not $input.first()/$input.all(),\n// which belong to the \"run once for all items\" mode and would silently\n// collapse all 12 SOPs down to just item 0).\n//\n// httpRequest with return=representation responds with an array containing\n// the upserted row for this item.\nconst resp = $input.item.json;\nconst row = Array.isArray(resp) ? resp[0] : resp;\n\nif (!row || !row.id) {\n  throw new Error('Upsert SOP document returned no id: ' + JSON.stringify(resp));\n}\n\nreturn {\n  json: {\n    documentId: row.id,\n    slug: row.slug,\n    title: row.title,\n    content: `${row.title}\\n\\n${row.body}`\n  }\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -92,7 +93,8 @@
     },
     {
       "parameters": {
-        "jsCode": "const resp = $input.first().json;\nconst values = resp.embedding && resp.embedding.values;\nif (!Array.isArray(values) || values.length === 0) {\n  throw new Error('Gemini embedding response missing embedding.values for SOP: ' + $('Prepare for Embedding').first().json.slug);\n}\n\nconst doc = $('Prepare for Embedding').first().json;\nreturn [{\n  json: {\n    documentId: doc.documentId,\n    slug: doc.slug,\n    content: doc.content,\n    embedding: values\n  }\n}];"
+        "mode": "runOnceForEachItem",
+        "jsCode": "// mode: runOnceForEachItem — runs once PER SOP. $input.item is this run's\n// single item, and $('Prepare for Embedding').item reads the matching\n// paired item from that earlier node (NOT .first(), which would always be\n// item 0 of the whole batch regardless of which item this run is on).\nconst resp = $input.item.json;\nconst values = resp.embedding && resp.embedding.values;\nif (!Array.isArray(values) || values.length === 0) {\n  throw new Error('Gemini embedding response missing embedding.values: ' + JSON.stringify(resp));\n}\n\nconst doc = $('Prepare for Embedding').item.json;\nreturn {\n  json: {\n    documentId: doc.documentId,\n    slug: doc.slug,\n    content: doc.content,\n    embedding: values\n  }\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
