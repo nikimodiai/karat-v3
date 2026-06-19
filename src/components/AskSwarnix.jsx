@@ -75,7 +75,6 @@ export default function AskSwarnix() {
               <div className={styles.headerIcon}><Sparkles size={14} /></div>
               <div>
                 <div className={styles.headerTitle}>Ask Swarnix</div>
-                <div className={styles.headerSub}>App help, in your language</div>
               </div>
             </div>
             <button className={styles.closeBtn} onClick={() => setOpen(false)} aria-label="Close">
