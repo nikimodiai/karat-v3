@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Lock, Check, X, Crown, Store, Phone, Mail, MapPin, Wifi, Diamond,
-  ShoppingBag, Users, Cpu, Shirt, BarChart2, Camera, MessageSquare, HardDrive, Zap,
+  ShoppingBag, Users, Cpu, Shirt, BarChart2, Camera, MessageSquare, HardDrive, Zap, Upload, Image as ImageIcon,
 } from 'lucide-react';
-import { db } from '../lib/config';
+import { db, CLOUDINARY_CLOUD, CLOUDINARY_PRESET } from '../lib/config';
+import { compressImage } from '../lib/imageUtils';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { useStoreData } from '../hooks/useStoreData';
@@ -13,6 +14,19 @@ import {
 } from '../lib/plans';
 import WhatsAppConnect from '../components/WhatsAppConnect';
 import styles from './Profile.module.css';
+
+async function uploadBrandImage(file) {
+  const compressed = await compressImage(file);
+  const fd = new FormData();
+  fd.append('file', compressed, 'image.jpg');
+  fd.append('upload_preset', CLOUDINARY_PRESET);
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, {
+    method: 'POST', body: fd,
+  });
+  if (!res.ok) throw new Error('Image upload failed');
+  const json = await res.json();
+  return json.secure_url || null;
+}
 
 function FeatureRow({ icon: Icon, label, active, note }) {
   return (
@@ -72,6 +86,10 @@ export default function Profile() {
   const [selfieTryonTier, setSelfieTryonTier] = useState(store?.selfie_tryon_tier || 'vvip');
   const [reminderDays, setReminderDays]       = useState(store?.reminder_days ?? 0);
   const [saving, setSaving]                   = useState(false);
+  const [logoUploading, setLogoUploading]     = useState(false);
+  const [nameStyleUploading, setNameStyleUploading] = useState(false);
+  const logoInputRef     = useRef(null);
+  const nameStyleInputRef = useRef(null);
 
   const ownerName    = store?.owner_name || user?.user_metadata?.full_name || user?.email || 'Owner';
   const planName     = planKey(store);
@@ -124,6 +142,26 @@ export default function Profile() {
     }
   };
 
+  const handleBrandImageUpload = async (field, file, setUploading) => {
+    if (!file || !canAdmin) return;
+    setUploading(true);
+    try {
+      const url = await uploadBrandImage(file);
+      const updates = { [field]: url };
+      const query = isOwner
+        ? db.from('stores').update(updates).eq('owner_id', user.id)
+        : db.from('stores').update(updates).eq('id', store.id);
+      const { error } = await query;
+      if (error) throw error;
+      updateStore(updates);
+      showToast('Branding updated!', '#166534');
+    } catch(err) {
+      showToast('Error: ' + err.message, '#C0392B');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.header}>
@@ -155,6 +193,68 @@ export default function Profile() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
             <div className={styles.card}>
               <div className={styles.cardTitle}><Store size={16} color="#C9A84C" /> Store Details</div>
+
+              <div className={styles.field}>
+                <div className={styles.fieldLabel}>
+                  Store Branding {canAdmin && <span className={styles.editable}>✎ editable</span>}
+                </div>
+                <div style={{ display: 'flex', gap: 16, marginTop: 4 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                    <div
+                      onClick={() => canAdmin && logoInputRef.current?.click()}
+                      style={{
+                        width: 56, height: 56, borderRadius: 8, border: '1px dashed rgba(13,27,42,.25)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        cursor: canAdmin ? 'pointer' : 'default', overflow: 'hidden', background: '#fafafa',
+                      }}
+                      title={canAdmin ? 'Upload logo' : ''}
+                    >
+                      {logoUploading
+                        ? <div className="spinner spinner-sm" />
+                        : store?.logo_url
+                          ? <img src={store.logo_url} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                          : <ImageIcon size={20} color="rgba(13,27,42,.3)" />}
+                    </div>
+                    <span style={{ fontSize: 10, color: 'rgba(13,27,42,.5)' }}>Logo</span>
+                    <input
+                      ref={logoInputRef}
+                      type="file"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      onChange={e => handleBrandImageUpload('logo_url', e.target.files?.[0], setLogoUploading)}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                    <div
+                      onClick={() => canAdmin && nameStyleInputRef.current?.click()}
+                      style={{
+                        width: 56, height: 56, borderRadius: 8, border: '1px dashed rgba(13,27,42,.25)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        cursor: canAdmin ? 'pointer' : 'default', overflow: 'hidden', background: '#fafafa',
+                      }}
+                      title={canAdmin ? 'Upload styled name image' : ''}
+                    >
+                      {nameStyleUploading
+                        ? <div className="spinner spinner-sm" />
+                        : store?.name_style_url
+                          ? <img src={store.name_style_url} alt="Name style" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                          : <Upload size={20} color="rgba(13,27,42,.3)" />}
+                    </div>
+                    <span style={{ fontSize: 10, color: 'rgba(13,27,42,.5)' }}>Name Style</span>
+                    <input
+                      ref={nameStyleInputRef}
+                      type="file"
+                      accept="image/*"
+                      style={{ display: 'none' }}
+                      onChange={e => handleBrandImageUpload('name_style_url', e.target.files?.[0], setNameStyleUploading)}
+                    />
+                  </div>
+                </div>
+                <p className={styles.fieldHint}>
+                  Shown top-left in your app. If not uploaded, SWARNIX branding is shown by default.
+                </p>
+              </div>
 
               <div className={styles.field}>
                 <div className={styles.fieldLabel}>Owner Name</div>
