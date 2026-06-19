@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
-import { Package, MessageSquare, Users, BarChart2, Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff } from 'lucide-react';
 import styles from './Login.module.css';
 
 const GoogleIcon = () => (
@@ -12,13 +12,6 @@ const GoogleIcon = () => (
     <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
   </svg>
 );
-
-const FEATURES = [
-  { icon: Package,       label: 'Smart Inventory' },
-  { icon: MessageSquare, label: 'WhatsApp AI Bot' },
-  { icon: Users,         label: 'Customer CRM'   },
-  { icon: BarChart2,     label: 'Analytics'       },
-];
 
 export default function Login() {
   const { loginWithGoogle, loginWithCredentials } = useAuth();
@@ -62,22 +55,12 @@ export default function Login() {
           <div className={styles.logoMark}>
             <img src="/swarnix-logo.png" alt="Swarnix" className={styles.logoImg} />
           </div>
-          <div className={styles.brandTagline}>Smart Inventory &nbsp;·&nbsp; WhatsApp AI Agent</div>
+          <div className={styles.brandName}>Swarnix</div>
         </div>
 
         {/* Hero */}
         <div className={styles.heroSection}>
           <h1 className={styles.heroTitle}>Your Jewellery Store,<br/><em>Beautifully Organised</em></h1>
-        </div>
-
-        {/* Feature icons */}
-        <div className={styles.features}>
-          {FEATURES.map(({ icon: Icon, label }) => (
-            <div key={label} className={styles.featureItem}>
-              <div className={styles.featureIcon}><Icon size={16} strokeWidth={1.5}/></div>
-              <div className={styles.featureLabel}>{label}</div>
-            </div>
-          ))}
         </div>
 
         {/* Tab toggle */}
