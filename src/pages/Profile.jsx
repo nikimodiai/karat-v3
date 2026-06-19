@@ -162,6 +162,23 @@ export default function Profile() {
     }
   };
 
+  const handleBrandImageRemove = async (field, e) => {
+    e.stopPropagation();
+    if (!canAdmin) return;
+    try {
+      const updates = { [field]: null };
+      const query = isOwner
+        ? db.from('stores').update(updates).eq('owner_id', user.id)
+        : db.from('stores').update(updates).eq('id', store.id);
+      const { error } = await query;
+      if (error) throw error;
+      updateStore(updates);
+      showToast('Image removed', '#166534');
+    } catch(err) {
+      showToast('Error: ' + err.message, '#C0392B');
+    }
+  };
+
   return (
     <div className={styles.page}>
       <div className={styles.header}>
@@ -200,20 +217,36 @@ export default function Profile() {
                 </div>
                 <div style={{ display: 'flex', gap: 16, marginTop: 4 }}>
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                    <div
-                      onClick={() => canAdmin && logoInputRef.current?.click()}
-                      style={{
-                        width: 56, height: 56, borderRadius: 8, border: '1px dashed rgba(13,27,42,.25)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        cursor: canAdmin ? 'pointer' : 'default', overflow: 'hidden', background: '#fafafa',
-                      }}
-                      title={canAdmin ? 'Upload logo' : ''}
-                    >
-                      {logoUploading
-                        ? <div className="spinner spinner-sm" />
-                        : store?.logo_url
-                          ? <img src={store.logo_url} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                          : <ImageIcon size={20} color="rgba(13,27,42,.3)" />}
+                    <div style={{ position: 'relative' }}>
+                      <div
+                        onClick={() => canAdmin && logoInputRef.current?.click()}
+                        style={{
+                          width: 56, height: 56, borderRadius: 8, border: '1px dashed rgba(13,27,42,.25)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          cursor: canAdmin ? 'pointer' : 'default', overflow: 'hidden', background: '#fafafa',
+                        }}
+                        title={canAdmin ? 'Upload logo' : ''}
+                      >
+                        {logoUploading
+                          ? <div className="spinner spinner-sm" />
+                          : store?.logo_url
+                            ? <img src={store.logo_url} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                            : <ImageIcon size={20} color="rgba(13,27,42,.3)" />}
+                      </div>
+                      {canAdmin && store?.logo_url && !logoUploading && (
+                        <button
+                          type="button"
+                          onClick={e => handleBrandImageRemove('logo_url', e)}
+                          title="Remove logo"
+                          style={{
+                            position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%',
+                            background: '#C0392B', color: '#fff', border: 'none', cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+                          }}
+                        >
+                          <X size={11} />
+                        </button>
+                      )}
                     </div>
                     <span style={{ fontSize: 10, color: 'rgba(13,27,42,.5)' }}>Logo</span>
                     <input
@@ -226,20 +259,36 @@ export default function Profile() {
                   </div>
 
                   <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                    <div
-                      onClick={() => canAdmin && nameStyleInputRef.current?.click()}
-                      style={{
-                        width: 56, height: 56, borderRadius: 8, border: '1px dashed rgba(13,27,42,.25)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        cursor: canAdmin ? 'pointer' : 'default', overflow: 'hidden', background: '#fafafa',
-                      }}
-                      title={canAdmin ? 'Upload styled name image' : ''}
-                    >
-                      {nameStyleUploading
-                        ? <div className="spinner spinner-sm" />
-                        : store?.name_style_url
-                          ? <img src={store.name_style_url} alt="Name style" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                          : <Upload size={20} color="rgba(13,27,42,.3)" />}
+                    <div style={{ position: 'relative' }}>
+                      <div
+                        onClick={() => canAdmin && nameStyleInputRef.current?.click()}
+                        style={{
+                          width: 56, height: 56, borderRadius: 8, border: '1px dashed rgba(13,27,42,.25)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          cursor: canAdmin ? 'pointer' : 'default', overflow: 'hidden', background: '#fafafa',
+                        }}
+                        title={canAdmin ? 'Upload styled name image' : ''}
+                      >
+                        {nameStyleUploading
+                          ? <div className="spinner spinner-sm" />
+                          : store?.name_style_url
+                            ? <img src={store.name_style_url} alt="Name style" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                            : <Upload size={20} color="rgba(13,27,42,.3)" />}
+                      </div>
+                      {canAdmin && store?.name_style_url && !nameStyleUploading && (
+                        <button
+                          type="button"
+                          onClick={e => handleBrandImageRemove('name_style_url', e)}
+                          title="Remove name style image"
+                          style={{
+                            position: 'absolute', top: -6, right: -6, width: 18, height: 18, borderRadius: '50%',
+                            background: '#C0392B', color: '#fff', border: 'none', cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+                          }}
+                        >
+                          <X size={11} />
+                        </button>
+                      )}
                     </div>
                     <span style={{ fontSize: 10, color: 'rgba(13,27,42,.5)' }}>Name Style</span>
                     <input
@@ -252,7 +301,7 @@ export default function Profile() {
                   </div>
                 </div>
                 <p className={styles.fieldHint}>
-                  Shown top-left in your app. If not uploaded, SWARNIX branding is shown by default.
+                  Shown top-left in your app and on your customer-facing website. If not uploaded, SWARNIX branding is shown by default.
                 </p>
               </div>
 
