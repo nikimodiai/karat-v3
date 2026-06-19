@@ -388,7 +388,7 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
   };
 
   return (
-    <div className="overlay-backdrop" onClick={e => e.target === e.currentTarget && onClose()}>
+    <div className="overlay-backdrop">
       <div className={styles.modal} style={{ animation: 'slideUp .2s ease' }}>
         <div className={styles.header}>
           <h2 className={styles.title}>{isEdit ? 'Edit Product' : 'Add New Product'}</h2>
