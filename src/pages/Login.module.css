@@ -109,18 +109,10 @@
 }
 
 /* Brand wordmark below the crown mark */
-.brandName {
-  font-family: var(--font-display);
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  text-align: center;
-  background: linear-gradient(135deg, #EDD8C0 0%, #C8956C 50%, #8B5E3C 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: #C8956C;
+.brandWordmark {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
 }
 
 /* Hero */

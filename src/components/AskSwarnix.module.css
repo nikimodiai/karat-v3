@@ -5,7 +5,7 @@
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #DEB896 0%, #C8956C 50%, #8B5E3C 100%);
+  background: linear-gradient(135deg, #C8956C 0%, #8B5E3C 50%, #5E3D26 100%);
   color: #fff;
   border: 1.5px solid rgba(200,149,108,.4);
   box-shadow: 0 8px 24px rgba(139,94,60,.35);
@@ -48,7 +48,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px 14px 12px;
-  background: linear-gradient(135deg, #DEB896 0%, #C8956C 50%, #8B5E3C 100%);
+  background: linear-gradient(135deg, #C8956C 0%, #8B5E3C 50%, #5E3D26 100%);
   flex-shrink: 0;
 }
 
@@ -124,7 +124,7 @@
 .msgUser {
   align-self: flex-end;
   max-width: 86%;
-  background: linear-gradient(135deg, #C8956C 0%, #8B5E3C 100%);
+  background: linear-gradient(135deg, #8B5E3C 0%, #5E3D26 100%);
   color: #fff;
   padding: 9px 12px;
   border-radius: 12px 12px 4px 12px;
@@ -192,7 +192,7 @@
   width: 34px;
   height: 34px;
   border-radius: 9px;
-  background: linear-gradient(135deg, #C8956C 0%, #8B5E3C 100%);
+  background: linear-gradient(135deg, #8B5E3C 0%, #5E3D26 100%);
   color: #fff;
   border: none;
   display: flex;
@@ -202,7 +202,7 @@
   flex-shrink: 0;
   transition: background .15s, opacity .15s;
 }
-.sendBtn:hover:not(:disabled) { background: linear-gradient(135deg, #DEB896 0%, #C8956C 100%); }
+.sendBtn:hover:not(:disabled) { background: linear-gradient(135deg, #C8956C 0%, #8B5E3C 100%); }
 .sendBtn:disabled { opacity: .45; cursor: not-allowed; }
 
 @media (max-width: 480px) {

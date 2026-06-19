@@ -28,16 +28,10 @@
   border-radius: 0;
   filter: drop-shadow(0 0 6px rgba(200,149,108,.3));
 }
-.brandName {
-  font-family: var(--font-display);
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  background: linear-gradient(180deg, #DEB896 0%, #C8956C 60%, #8B5E3C 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+.brandWordmark {
+  height: 18px;
+  width: auto;
+  object-fit: contain;
 }
 
 /* Nav */
@@ -286,5 +280,5 @@
 }
 
 @media (max-width: 380px) {
-  .brandName { font-size: 16px; letter-spacing: .12em; }
+  .brandWordmark { height: 15px; }
 }

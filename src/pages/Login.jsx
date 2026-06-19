@@ -53,9 +53,9 @@ export default function Login() {
         {/* Logo */}
         <div className={styles.logoWrap}>
           <div className={styles.logoMark}>
-            <img src="/swarnix-logo.png" alt="Swarnix" className={styles.logoImg} />
+            <img src="/swarnix-logo.png" alt="" className={styles.logoImg} />
           </div>
-          <div className={styles.brandName}>Swarnix</div>
+          <img src="/swarnix-wordmark.png" alt="Swarnix" className={styles.brandWordmark} />
         </div>
 
         {/* Hero */}

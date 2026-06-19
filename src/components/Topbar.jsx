@@ -49,8 +49,8 @@ export default function Topbar({ activeTab, onTabChange, productCount }) {
       <header className={styles.topbar}>
         {/* Brand */}
         <div className={styles.brand}>
-          <img src="/swarnix-logo.png" alt="Swarnix" className={styles.brandLogo} />
-          <span className={styles.brandName}>SWARNIX</span>
+          <img src="/swarnix-logo.png" alt="" className={styles.brandLogo} />
+          <img src="/swarnix-wordmark.png" alt="Swarnix" className={styles.brandWordmark} />
         </div>
 
         {/* Nav tabs – desktop */}
