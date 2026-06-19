@@ -383,6 +383,7 @@ export default function Profile() {
                 />
                 <p className={styles.fieldHint}>
                   When a customer browses your jewellery collection via WhatsApp and then goes quiet, SWARNIX automatically sends them a warm, personalised follow-up after this many days of inactivity — gently inviting them back to explore your catalogue. Set to <strong>0</strong> to disable reminders.
+                  <br /><strong>Note:</strong> these reminder messages are chargeable by Meta as per WhatsApp Business API pricing.
                 </p>
               </div>
 
