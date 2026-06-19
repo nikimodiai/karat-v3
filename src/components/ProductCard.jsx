@@ -3,6 +3,19 @@ import { Pencil, Trash2, PackageCheck, PackageX, Image, Gem, Check } from 'lucid
 import { VARIANT_COLORS } from './VariantEditor';
 import styles from './ProductCard.module.css';
 
+const VISIBILITY_BADGE = {
+  vvip:     { label: 'VVIP Only',     className: 'visVvip' },
+  vvip_vip: { label: 'VVIP & VIP',    className: 'visVvipVip' },
+  all:      { label: 'All Customers', className: 'visAll' },
+};
+
+function VisibilityBadge({ visibility, className }) {
+  const cfg = VISIBILITY_BADGE[visibility] || VISIBILITY_BADGE.all;
+  return (
+    <span className={`${className} ${styles[cfg.className]}`}>{cfg.label}</span>
+  );
+}
+
 function colorHex(colorName) {
   const hit = VARIANT_COLORS.find(c => c.value === colorName);
   return hit?.hex ?? null;
@@ -108,6 +121,7 @@ export default function ProductCard({
           <div className={styles.listMeta}>
             {p.sku} · {p.category}{p.sub_category ? ` · ${p.sub_category}` : ''} {weightStr ? `· ${weightStr}` : ''}
           </div>
+          <VisibilityBadge visibility={p.visibility} className={styles.listVisBadge} />
         </div>
         {!selectable && (
           <div className={styles.listRight}>
@@ -160,6 +174,7 @@ export default function ProductCard({
           {isIn ? 'In Stock' : 'Sold Out'}
         </span>
         <div className={styles.skuBadge}>{p.sku}</div>
+        <VisibilityBadge visibility={p.visibility} className={styles.visBadge} />
       </div>
       <div className={styles.body}>
         <div className={styles.name}>{p.name}</div>
