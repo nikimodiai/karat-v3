@@ -280,6 +280,17 @@ export default function Marketing() {
             </span>
           </div>
 
+          <p className={styles.hint}>
+            WhatsApp marketing messages are chargeable by Meta per conversation.{' '}
+            <a
+              href="https://whatsappbusiness.com/products/platform-pricing/?country=India&currency=Indian%20Rupee%20(INR)&category=Authentication#rates"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View India pricing on Meta's site →
+            </a>
+          </p>
+
           {canWrite && (
             <button
               className="btn-gold"

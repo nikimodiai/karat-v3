@@ -64,6 +64,8 @@
 }
 
 .hint { font-size: 11px; color: var(--ink-soft); margin-top: 6px; line-height: 1.5; }
+.hint a { color: var(--gold-dk); font-weight: 600; text-decoration: none; }
+.hint a:hover { text-decoration: underline; }
 
 .errorBox {
   display: flex;
