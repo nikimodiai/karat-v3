@@ -4,7 +4,7 @@ import styles from './UpgradeNotice.module.css';
 
 // Inline banner version (in flow, dismissible)
 export function UpgradeBanner({ title, message, ctaLabel = 'Upgrade Plan', onCta, onDismiss }) {
-  const cta = onCta || (() => window.location.href = 'mailto:nikimodi81@gmail.com?subject=SWARNIX Plan Upgrade');
+  const cta = onCta || (() => window.location.href = 'mailto:support@nelishkaai.in?subject=SWARNIX Plan Upgrade');
   return (
     <div className={styles.banner}>
       <div className={styles.bannerIcon}><Crown size={16} /></div>
@@ -42,7 +42,7 @@ export function UpgradeDialog({ feature, currentPlan, recommendedPlan, message, 
         <div className={styles.dialogActions}>
           <button className="btn-ghost" onClick={onClose}>Maybe Later</button>
           <a
-            href={`mailto:nikimodi81@gmail.com?subject=${subject}`}
+            href={`mailto:support@nelishkaai.in?subject=${subject}`}
             className="btn-gold"
             style={{ textDecoration: 'none' }}
           >
@@ -63,7 +63,7 @@ export function LockedCard({ icon: Icon, title, message, currentPlan, ctaLabel =
       <p className={styles.lockedMsg}>{message}</p>
       <p className={styles.lockedMeta}>Current plan: <strong>{currentPlan}</strong></p>
       <a
-        href="mailto:nikimodi81@gmail.com?subject=SWARNIX Plan Upgrade"
+        href="mailto:support@nelishkaai.in?subject=SWARNIX Plan Upgrade"
         className="btn-gold"
         style={{ textDecoration: 'none', marginTop: 16 }}
       >

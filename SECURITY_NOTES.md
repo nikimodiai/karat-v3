@@ -273,5 +273,5 @@ Run these once a month:
 
 ## Reporting a vulnerability
 
-Email **nikimodi81@gmail.com**. Please don't open a public GitHub issue
+Email **support@nelishkaai.in**. Please don't open a public GitHub issue
 for security topics — give the team 7 days to patch before disclosure.

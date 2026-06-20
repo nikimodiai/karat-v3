@@ -277,7 +277,7 @@ The soft-delete pattern (`is_current=false` on delete) is preserved for audit-tr
 
 ## Support
 
-- Email: **nikimodi81@gmail.com**
+- Email: **support@nelishkaai.in**
 - Admin dashboard: `https://karat-theta.vercel.app` (production) — currently the same app, accessible only to approved owners
 
 ---

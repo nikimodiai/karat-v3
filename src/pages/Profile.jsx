@@ -39,7 +39,7 @@ function FeatureRow({ icon: Icon, label, active, note }) {
       {active
         ? <span className={styles.featureOn}><Check size={11} /> Active</span>
         : <a
-            href="mailto:nikimodi81@gmail.com?subject=SWARNIX Plan Upgrade"
+            href="mailto:support@nelishkaai.in?subject=SWARNIX Plan Upgrade"
             className={styles.featureUpgrade}
           >
             <Crown size={10} /> Upgrade
@@ -473,7 +473,7 @@ export default function Profile() {
               </div>
               {isOwner && (planName === 'trial' || planName === 'starter') && (
                 <a
-                  href="mailto:nikimodi81@gmail.com?subject=SWARNIX Plan Upgrade"
+                  href="mailto:support@nelishkaai.in?subject=SWARNIX Plan Upgrade"
                   className="btn-gold"
                   style={{ marginTop: 16, width: '100%', justifyContent: 'center', fontSize: 12, textDecoration: 'none' }}
                 >

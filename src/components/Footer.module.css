@@ -14,7 +14,8 @@
   margin: 0 auto;
 }
 .brand { display:flex; align-items:center; gap:7px; }
-.brandText { font-family:var(--font-display); font-size:13px; font-weight:600; color:#E8CC7A; letter-spacing:.12em; }
+.brandLogo { width:20px; height:20px; object-fit:contain; }
+.brandWordmark { height:13px; width:auto; object-fit:contain; }
 .sep { color:rgba(201,168,76,.3); }
 .copy { font-size:11px; color:rgba(255,255,255,.3); }
 .links { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }

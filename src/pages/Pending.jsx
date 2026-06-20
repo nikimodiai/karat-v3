@@ -32,7 +32,7 @@ export default function Pending() {
 
         <p className={styles.contact}>
           Questions? Contact{' '}
-          <a href="mailto:nikimodi81@gmail.com">nikimodi81@gmail.com</a>
+          <a href="mailto:support@nelishkaai.in">support@nelishkaai.in</a>
         </p>
 
         <button className={styles.btnLogout} onClick={logout}>
