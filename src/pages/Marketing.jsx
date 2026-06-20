@@ -194,9 +194,6 @@ export default function Marketing() {
           <h2 className={styles.title}>Marketing Messages</h2>
           <p className={styles.sub}>Send WhatsApp campaigns for Diwali, wedding season &amp; more — by customer tier</p>
         </div>
-        <button className={styles.refreshBtn} onClick={loadTemplates} disabled={loadingTemplates}>
-          <RefreshCw size={13} className={loadingTemplates ? styles.spin : ''} /> Refresh Templates
-        </button>
       </div>
 
       <div className={styles.body}>
@@ -215,11 +212,36 @@ export default function Marketing() {
 
           <div className="sec-label" style={{ marginTop: 18 }}>② WhatsApp Template</div>
           {templateError && (
-            <div className={styles.errorBox}><AlertCircle size={14} /> {templateError}</div>
+            <div className={styles.errorBox}>
+              <AlertCircle size={14} />
+              <span style={{ flex: 1 }}>{templateError}</span>
+              <button
+                type="button"
+                className={styles.refreshIconBtn}
+                onClick={loadTemplates}
+                disabled={loadingTemplates}
+                title="Refresh templates"
+                aria-label="Refresh templates"
+              >
+                <RefreshCw size={13} className={loadingTemplates ? styles.spin : ''} />
+              </button>
+            </div>
           )}
           {!templateError && templates.length > 0 && (
             <div className="fld">
-              <label className="lbl">Approved Template <span className="req">*</span></label>
+              <div className={styles.labelRow}>
+                <label className="lbl">Approved Template <span className="req">*</span></label>
+                <button
+                  type="button"
+                  className={styles.refreshIconBtn}
+                  onClick={loadTemplates}
+                  disabled={loadingTemplates}
+                  title="Refresh templates"
+                  aria-label="Refresh templates"
+                >
+                  <RefreshCw size={13} className={loadingTemplates ? styles.spin : ''} />
+                </button>
+              </div>
               <select
                 className="inp"
                 value={selectedTemplateName}
