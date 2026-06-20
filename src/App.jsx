@@ -12,6 +12,7 @@ import Profile from './pages/Profile';
 import TeamPage from './pages/TeamPage';
 import FAQ from './pages/FAQ';
 import Reviews from './pages/Reviews';
+import Marketing from './pages/Marketing';
 import Topbar from './components/Topbar';
 import Footer from './components/Footer';
 import VoiceStyleSection from './components/VoiceStyleSection';
@@ -108,6 +109,7 @@ function Shell({ activeTab, setActiveTab }) {
         {activeTab === 'analytics'  && <Analytics />}
         {activeTab === 'team'       && <TeamPage />}
         {activeTab === 'offers'     && <OffersTab />}
+        {activeTab === 'marketing'  && <Marketing />}
         {activeTab === 'voice'      && <VoiceTab />}
         {activeTab === 'faq'        && <FAQ />}
         {activeTab === 'reviews'    && <Reviews />}

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LayoutGrid, Users, BarChart2, User, LogOut, ChevronDown, Gem, Menu, X, Home, Shield, UserCog, Sparkles, HelpCircle, Tag, MessageSquare } from 'lucide-react';
+import { LayoutGrid, Users, BarChart2, User, LogOut, ChevronDown, Gem, Menu, X, Home, Shield, UserCog, Sparkles, HelpCircle, Tag, MessageSquare, Megaphone } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import styles from './Topbar.module.css';
 
@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { id: 'analytics',  label: 'Analytics',          icon: BarChart2 },
   { id: 'team',       label: 'Team',               icon: UserCog },
   { id: 'offers',     label: 'Offers',             icon: Tag },
+  { id: 'marketing',  label: 'Marketing',          icon: Megaphone, isNew: true },
   { id: 'voice',      label: 'Teach AI Your Style', icon: Sparkles, isNew: true },
   { id: 'faq',        label: 'FAQ',                icon: HelpCircle },
 ];

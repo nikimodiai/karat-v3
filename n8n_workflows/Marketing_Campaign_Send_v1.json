@@ -1,0 +1,193 @@
+{
+  "name": "Swarnix - Marketing Campaign Send v1",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "marketing-send",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "name": "Webhook: marketing-send",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-2400, 400],
+      "webhookId": "marketing-send-webhook"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Body shape (sent by src/pages/Marketing.jsx):\n// {\n//   owner_id, wa_access_token, whatsapp_phone_number_id,\n//   campaign_name, template_name, template_language,\n//   tier_filter, components, customers: [{ id, name, whatsapp_number }]\n// }\nconst body = $input.first().json.body || $input.first().json;\n\nconst customers = Array.isArray(body.customers) ? body.customers : [];\nif (customers.length === 0) {\n  throw new Error('No customers in audience — nothing to send.');\n}\nif (!body.wa_access_token || !body.whatsapp_phone_number_id) {\n  throw new Error('Store is missing WhatsApp credentials.');\n}\n\nreturn customers.map(c => ({\n  json: {\n    owner_id: body.owner_id,\n    wa_access_token: body.wa_access_token,\n    whatsapp_phone_number_id: body.whatsapp_phone_number_id,\n    campaign_name: body.campaign_name,\n    template_name: body.template_name,\n    template_language: body.template_language || 'en',\n    tier_filter: body.tier_filter || 'all',\n    components: body.components || [],\n    customer_id: c.id,\n    customer_name: c.name,\n    whatsapp_number: c.whatsapp_number\n  }\n}));\n"
+      },
+      "id": "a1b2c3d4-0002-4000-8000-000000000002",
+      "name": "Validate & Expand Customers",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-2160, 400]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "a1b2c3d4-0003-4000-8000-000000000003",
+      "name": "Loop Over Customers",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [-1920, 400]
+    },
+    {
+      "parameters": {
+        "amount": 1.2,
+        "unit": "seconds"
+      },
+      "id": "a1b2c3d4-0004-4000-8000-000000000004",
+      "name": "Rate Limit Delay",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [-1680, 320],
+      "webhookId": "marketing-send-wait"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalize \"+91 98765 43210\" style numbers to E.164 digits-only\n// for the Graph API \"to\" field.\nconst d = $input.first().json;\nconst digits = (d.whatsapp_number || '').replace(/[^0-9]/g, '');\nreturn [{ json: { ...d, to: digits } }];\n"
+      },
+      "id": "a1b2c3d4-0005-4000-8000-000000000005",
+      "name": "Format Phone Number",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-1440, 320]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://graph.facebook.com/v21.0/' + $json.whatsapp_phone_number_id + '/messages' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $json.wa_access_token }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ messaging_product: 'whatsapp', to: $json.to, type: 'template', template: { name: $json.template_name, language: { code: $json.template_language }, components: $json.components } }) }}",
+        "options": {
+          "response": {
+            "response": {
+              "neverError": true,
+              "fullResponse": true
+            }
+          }
+        }
+      },
+      "id": "a1b2c3d4-0006-4000-8000-000000000006",
+      "name": "Send WhatsApp Template (Meta Graph API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-1200, 320]
+    },
+    {
+      "parameters": {
+        "jsCode": "// $json here is the HTTP node's fullResponse: { statusCode, headers, body }\nconst resp = $input.first().json;\nconst orig = $('Format Phone Number').first().json;\nconst ok = resp.statusCode >= 200 && resp.statusCode < 300;\nconst messages = resp.body?.messages || [];\nconst errMsg = resp.body?.error?.message || (!ok ? `HTTP ${resp.statusCode}` : '');\n\nreturn [{ json: {\n  owner_id: orig.owner_id,\n  customer_id: orig.customer_id,\n  campaign_name: orig.campaign_name,\n  template_name: orig.template_name,\n  tier_filter: orig.tier_filter,\n  status: ok ? 'sent' : 'failed',\n  error_message: ok ? null : errMsg,\n  wa_message_id: messages[0]?.id || null\n}}];\n"
+      },
+      "id": "a1b2c3d4-0007-4000-8000-000000000007",
+      "name": "Build Log Row",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-960, 320]
+    },
+    {
+      "parameters": {
+        "url": "https://bigmdvjrvqyqzyrijdum.supabase.co/rest/v1/marketing_message_logs",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            { "name": "apikey", "value": "={{ $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Authorization", "value": "={{ 'Bearer ' + $env.SUPABASE_SERVICE_KEY }}" },
+            { "name": "Content-Type", "value": "application/json" },
+            { "name": "Prefer", "value": "return=minimal" }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($json) }}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0008-4000-8000-000000000008",
+      "name": "Log Send Result to Supabase",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-720, 320]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { ok: true, queued: ($json.body || $json).customers.length } }}",
+        "options": {}
+      },
+      "id": "a1b2c3d4-0009-4000-8000-000000000009",
+      "name": "Respond to App",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [-2160, 600]
+    }
+  ],
+  "connections": {
+    "Webhook: marketing-send": {
+      "main": [
+        [
+          { "node": "Validate & Expand Customers", "type": "main", "index": 0 },
+          { "node": "Respond to App", "type": "main", "index": 0 }
+        ]
+      ]
+    },
+    "Validate & Expand Customers": {
+      "main": [
+        [{ "node": "Loop Over Customers", "type": "main", "index": 0 }]
+      ]
+    },
+    "Loop Over Customers": {
+      "main": [
+        [],
+        [{ "node": "Rate Limit Delay", "type": "main", "index": 0 }]
+      ]
+    },
+    "Rate Limit Delay": {
+      "main": [
+        [{ "node": "Format Phone Number", "type": "main", "index": 0 }]
+      ]
+    },
+    "Format Phone Number": {
+      "main": [
+        [{ "node": "Send WhatsApp Template (Meta Graph API)", "type": "main", "index": 0 }]
+      ]
+    },
+    "Send WhatsApp Template (Meta Graph API)": {
+      "main": [
+        [{ "node": "Build Log Row", "type": "main", "index": 0 }]
+      ]
+    },
+    "Build Log Row": {
+      "main": [
+        [{ "node": "Log Send Result to Supabase", "type": "main", "index": 0 }]
+      ]
+    },
+    "Log Send Result to Supabase": {
+      "main": [
+        [{ "node": "Loop Over Customers", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

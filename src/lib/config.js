@@ -33,6 +33,10 @@ export const N8N_ADD_PRODUCT_VECTOR = N8N_BASE + '/add_product_vector';
 export const N8N_CONVERSATION_SUMMARY = N8N_BASE + '/conversation-summary';
 // "Ask Swarnix" SOP help chatbot: receives { owner_id, asked_by, question }, returns { answer, matchedSlugs[] }
 export const N8N_SOP_CHAT = N8N_BASE + '/swarnix-sop-chat';
+// Marketing campaign send: receives { owner_id, wa_access_token, whatsapp_phone_number_id,
+// campaign_name, template_name, template_language, components, customers[] }, sends one
+// WhatsApp template message per customer (rate-limited) and logs each result to Supabase.
+export const N8N_MARKETING_SEND = N8N_BASE + '/marketing-send';
 
 export const db = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
