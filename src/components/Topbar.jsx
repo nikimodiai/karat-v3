@@ -10,11 +10,9 @@ const NAV_ITEMS = [
   { id: 'inventory',  label: 'Inventory',          icon: LayoutGrid },
   { id: 'customers',  label: 'Customers',          icon: Users },
   { id: 'analytics',  label: 'Analytics',          icon: BarChart2 },
-  { id: 'team',       label: 'Team',               icon: UserCog },
   { id: 'offers',     label: 'Offers',             icon: Tag },
   { id: 'marketing',  label: 'Marketing',          icon: Megaphone, isNew: true },
   { id: 'voice',      label: 'Teach AI Your Style', icon: Sparkles, isNew: true },
-  { id: 'faq',        label: 'FAQ',                icon: HelpCircle },
 ];
 
 const PLAN_COLORS = {
@@ -106,8 +104,14 @@ export default function Topbar({ activeTab, onTabChange, productCount }) {
                 <button className={styles.ddItem} onClick={() => { setDropOpen(false); onTabChange('profile'); }}>
                   <User size={14} /> My Profile & Plan
                 </button>
+                <button className={styles.ddItem} onClick={() => { setDropOpen(false); onTabChange('team'); }}>
+                  <UserCog size={14} /> Team
+                </button>
                 <button className={`${styles.ddItem} ${styles.ddItemReviews}`} onClick={() => { setDropOpen(false); onTabChange('reviews'); }}>
                   <MessageSquare size={14} /> Review Moderation
+                </button>
+                <button className={styles.ddItem} onClick={() => { setDropOpen(false); onTabChange('faq'); }}>
+                  <HelpCircle size={14} /> FAQ
                 </button>
                 <div className={styles.ddDivider} />
                 <button className={`${styles.ddItem} ${styles.ddItemDanger}`} onClick={logout}>
@@ -146,10 +150,22 @@ export default function Topbar({ activeTab, onTabChange, productCount }) {
             <User size={16} strokeWidth={2} /> My Profile
           </button>
           <button
+            className={`${styles.mobileNavItem} ${activeTab === 'team' ? styles.mobileNavActive : ''}`}
+            onClick={() => { onTabChange('team'); setMobileOpen(false); }}
+          >
+            <UserCog size={16} strokeWidth={2} /> Team
+          </button>
+          <button
             className={`${styles.mobileNavItem} ${activeTab === 'reviews' ? styles.mobileNavActive : ''}`}
             onClick={() => { onTabChange('reviews'); setMobileOpen(false); }}
           >
             <MessageSquare size={16} strokeWidth={2} /> Review Moderation
+          </button>
+          <button
+            className={`${styles.mobileNavItem} ${activeTab === 'faq' ? styles.mobileNavActive : ''}`}
+            onClick={() => { onTabChange('faq'); setMobileOpen(false); }}
+          >
+            <HelpCircle size={16} strokeWidth={2} /> FAQ
           </button>
           <div className={styles.mobileDivider} />
           <button className={`${styles.mobileNavItem} ${styles.mobileNavDanger}`} onClick={logout}>
