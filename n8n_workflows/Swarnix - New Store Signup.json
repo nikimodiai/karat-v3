@@ -1,0 +1,123 @@
+{
+  "name": "Swarnix - New Store Signup",
+  "nodes": [
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={ \"success\": true, \"message\": \"Approval email sent to admin\" }",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "cd77ff2e-b7af-4176-8e99-55cbaca79f99",
+      "name": "Respond - Approval Sent",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        576,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "nikimodi81@gmail.com",
+        "subject": "={{ '🔔 New Store Signup Approval Required: ' + ($json.storeName || $json.name) }}",
+        "message": "={{ '<div style=\"font-family:Georgia,serif;max-width:600px;margin:0 auto;color:#333;\">'\n  + '<div style=\"background:linear-gradient(135deg,#1A3A5C,#2C5F8A);padding:28px;border-radius:8px 8px 0 0;\">'\n  + '<h1 style=\"color:#C9A84C;margin:0;font-size:22px;font-weight:400;\">✦ Swarnix — New Store Signup</h1>'\n  + '<p style=\"color:rgba(255,255,255,0.7);margin:6px 0 0;font-size:13px;\">' + $json.signupAt + '</p></div>'\n  + '<div style=\"background:#fffdf5;padding:28px;border:1px solid #e8d5a3;border-top:none;\">'\n  + '<p style=\"font-size:15px;margin-bottom:20px;\">A new jewellery store owner has signed up and is requesting access to the Swarnix inventory portal.</p>'\n  + '<table style=\"width:100%;border-collapse:collapse;margin-bottom:24px;\">'\n  + '<tr><td style=\"padding:8px 0;color:#888;width:130px;font-size:13px;\">Store Name</td><td style=\"font-size:14px;font-weight:600;\">' + ($json.storeName || 'Not provided') + '</td></tr>'\n  + '<tr><td style=\"padding:8px 0;color:#888;font-size:13px;\">Owner Name</td><td style=\"font-size:14px;font-weight:500;\">' + $json.name + '</td></tr>'\n  + '<tr><td style=\"padding:8px 0;color:#888;font-size:13px;\">Email</td><td style=\"font-size:14px;\">' + $json.email + '</td></tr>'\n  + '<tr><td style=\"padding:8px 0;color:#888;font-size:13px;\">Phone</td><td style=\"font-size:14px;\">' + ($json.phone || 'Not provided') + '</td></tr>'\n  + '<tr><td style=\"padding:8px 0;color:#888;font-size:13px;\">Address</td><td style=\"font-size:14px;\">' + ($json.address || 'Not provided') + '</td></tr>'\n  + '<tr><td style=\"padding:8px 0;color:#888;font-size:13px;\">Plan</td><td style=\"font-size:14px;font-weight:600;text-transform:capitalize;\">' + ($json.plan || 'Not provided') + '</td></tr>'\n  + '<tr><td style=\"padding:8px 0;color:#888;font-size:13px;\">User ID</td><td style=\"font-family:monospace;font-size:12px;color:#888;\">' + $json.userId + '</td></tr>'\n  + '</table>'\n  + '<p style=\"font-size:14px;font-weight:500;margin-bottom:16px;\">Click one of the buttons below to approve or reject:</p>'\n  + '<div style=\"display:flex;gap:12px;margin-bottom:24px;\">'\n  + '<a href=\"' + $json.acceptUrl + '\" style=\"display:inline-block;background:#166534;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;\">✓ Accept</a>'\n  + '<a href=\"' + $json.rejectUrl + '\" style=\"display:inline-block;background:#C0392B;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;\">✕ Reject</a>'\n  + '</div>'\n  + '<p style=\"font-size:12px;color:#999;\">If buttons don\\'t work, copy these URLs:<br/>Accept: ' + $json.acceptUrl + '<br/>Reject: ' + $json.rejectUrl + '</p>'\n  + '</div>'\n  + '<div style=\"background:#f9f4e8;padding:14px 28px;border:1px solid #e8d5a3;border-top:none;border-radius:0 0 8px 8px;font-size:12px;color:#999;\">Swarnix Inventory System</div></div>' }}",
+        "options": {}
+      },
+      "id": "aee451de-dc83-4ed7-b3cd-22141de7bb1f",
+      "name": "Send Approval Email to Admin",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        352,
+        64
+      ],
+      "webhookId": "b0ea7afb-99e7-452a-8c46-9d21c131e43e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "o7fZduR5GwlJVLqs",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const body = $input.first().json.body || $input.first().json;\nconst userId    = body.user_id    || '';\nconst email     = body.email      || '';\nconst name      = body.name       || email || 'Unknown Owner';\nconst storeName = body.store_name || '';\nconst phone     = body.phone      || '';\nconst address   = body.address    || '';\nconst plan      = body.plan       || '';\nconst signupAt  = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });\n\n// Build accept/reject URLs pointing back to n8n\nconst baseUrl = 'https://n8n.srv1639765.hstgr.cloud/webhook';\nconst token   = Buffer.from(JSON.stringify({ userId, email, name, storeName, phone, address, plan })).toString('base64');\nconst acceptUrl = baseUrl + '/store-decision?action=accept&token=' + encodeURIComponent(token);\nconst rejectUrl = baseUrl + '/store-decision?action=reject&token=' + encodeURIComponent(token);\n\nreturn [{ json: { userId, email, name, storeName, phone, address, plan, signupAt, acceptUrl, rejectUrl, token } }];"
+      },
+      "id": "0c9c6135-6be0-46f4-9faa-3999870392df",
+      "name": "Prepare Approval Email Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        128,
+        64
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "store-approval-request",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "8b48ae1d-47eb-4568-b226-3180fe0f5d27",
+      "name": "Webhook - New Store Signup",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -96,
+        64
+      ],
+      "webhookId": "store-approval-request"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Send Approval Email to Admin": {
+      "main": [
+        [
+          {
+            "node": "Respond - Approval Sent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Approval Email Data": {
+      "main": [
+        [
+          {
+            "node": "Send Approval Email to Admin",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - New Store Signup": {
+      "main": [
+        [
+          {
+            "node": "Prepare Approval Email Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "1ce1baa4-d059-488e-ae96-f43939c9fa65",
+  "meta": {
+    "instanceId": "926af9fe819bfca9c65f4c36d0a89dfa16c4f674f94393a7444d2e6d8385c53e"
+  },
+  "nodeGroups": [],
+  "id": "DEmGQJEmeqqHQ9vq",
+  "tags": []
+}

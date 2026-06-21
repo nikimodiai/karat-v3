@@ -1,0 +1,173 @@
+.screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0D1B2A 0%, #1A3A5C 60%, #2C5F8A 100%);
+  padding: 24px;
+}
+
+.box {
+  background: #fff;
+  border-radius: 18px;
+  padding: 44px 40px;
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+  box-shadow: 0 24px 64px rgba(0,0,0,.25);
+  animation: slideUp .4s ease;
+}
+
+.iconWrap {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(201,168,76,.12), rgba(201,168,76,.04));
+  border: 1.5px solid rgba(201,168,76,.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 18px;
+}
+
+.title {
+  font-family: 'Libre Baskerville', serif;
+  font-size: 23px;
+  color: #0D1B2A;
+  margin-bottom: 8px;
+}
+
+.sub {
+  font-size: 13px;
+  color: rgba(13,27,42,.55);
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.emailBadge {
+  display: inline-block;
+  background: #F4F7FA;
+  color: #2C5F8A;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 99px;
+  margin-bottom: 24px;
+}
+
+.label {
+  display: block;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0D1B2A;
+  margin-bottom: 7px;
+  letter-spacing: .01em;
+}
+.req { color: #C0392B; }
+.optional { color: rgba(13,27,42,.4); font-weight: 400; }
+
+.inputWrap {
+  position: relative;
+  margin-bottom: 16px;
+}
+.inputIcon {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(13,27,42,.35);
+  pointer-events: none;
+}
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px 12px 40px;
+  border: 1.5px solid rgba(13,27,42,.14);
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  color: #0D1B2A;
+  outline: none;
+  transition: border-color .18s;
+}
+.input:focus { border-color: #C9A84C; }
+.input::placeholder { color: rgba(13,27,42,.3); }
+
+.plans {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.planCard {
+  text-align: left;
+  background: #fff;
+  border: 1.5px solid rgba(13,27,42,.14);
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all .16s;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-family: 'DM Sans', sans-serif;
+}
+.planCard:hover { border-color: rgba(201,168,76,.5); }
+.planActive {
+  border-color: #C9A84C;
+  background: linear-gradient(135deg, rgba(201,168,76,.1), rgba(201,168,76,.03));
+  box-shadow: 0 0 0 1px #C9A84C inset;
+}
+.planHead {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.planName {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0D1B2A;
+}
+.planNote {
+  font-size: 11px;
+  color: rgba(13,27,42,.5);
+  line-height: 1.4;
+}
+
+.btnPrimary {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #C9A84C, #e8b84b);
+  color: #0B1829;
+  border: none;
+  border-radius: 10px;
+  padding: 13px;
+  font-size: 14px;
+  font-weight: 700;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: opacity .18s, transform .1s;
+}
+.btnPrimary:hover:not(:disabled) { opacity: .92; }
+.btnPrimary:active:not(:disabled) { transform: translateY(1px); }
+.btnPrimary:disabled { opacity: .5; cursor: not-allowed; }
+
+.btnLink {
+  background: none;
+  border: none;
+  color: rgba(13,27,42,.45);
+  font-size: 12px;
+  cursor: pointer;
+  margin-top: 14px;
+  font-family: 'DM Sans', sans-serif;
+}
+.btnLink:hover { color: #0D1B2A; text-decoration: underline; }
+
+@media (max-width: 420px) {
+  .plans { grid-template-columns: 1fr; }
+  .box { padding: 36px 24px; }
+}

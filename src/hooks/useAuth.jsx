@@ -113,20 +113,11 @@ export function AuthProvider({ children }) {
       .single();
 
     if (!storeData) {
-      setAuthStatus('pending');
-      // Fire signup notification once
+      // New owner — no store row yet. Ask them to complete the signup form
+      // (store name, phone, address, plan) before we notify the admin.
+      // If they've already submitted in this session, keep them on 'pending'.
       const signupKey = 'swarnix_signup_fired_' + u.id;
-      if (!sessionStorage.getItem(signupKey)) {
-        sessionStorage.setItem(signupKey, '1');
-        try {
-          const name  = u.user_metadata?.full_name || u.email || 'Unknown';
-          await fetch(N8N_SIGNUP_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ user_id: u.id, email: u.email || '', name, phone: u.phone || '' }),
-          });
-        } catch(e) {}
-      }
+      setAuthStatus(sessionStorage.getItem(signupKey) ? 'pending' : 'signup');
       return;
     }
 
@@ -227,6 +218,34 @@ export function AuthProvider({ children }) {
     if (error) throw error;
   }, []);
 
+  // ── New-store signup form submission (owner) ──────────────────────────────
+  // Called from the StoreSignup form once a brand-new Google owner fills in
+  // their store details. Fires the approval webhook with all details, then
+  // moves the owner to the 'pending' screen.
+  const submitStoreSignup = useCallback(async ({ storeName, phone, address, plan }) => {
+    const u = user;
+    if (!u) throw new Error('Not signed in');
+
+    const name = u.user_metadata?.full_name || u.email || 'Unknown';
+    const res = await fetch(N8N_SIGNUP_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        user_id: u.id,
+        email: u.email || '',
+        name,
+        store_name: storeName,
+        phone,
+        address: address || '',
+        plan,
+      }),
+    });
+    if (!res.ok) throw new Error('Could not submit your request. Please try again.');
+
+    sessionStorage.setItem('swarnix_signup_fired_' + u.id, '1');
+    setAuthStatus('pending');
+  }, [user]);
+
   // ── Username + password login (staff) ────────────────────────────────────
 
   const loginWithCredentials = useCallback(async (username, password) => {
@@ -292,7 +311,7 @@ export function AuthProvider({ children }) {
       user, store, storeUser,
       authStatus, isAuthReady,
       isOwner, userRole,
-      loginWithGoogle, loginWithCredentials,
+      loginWithGoogle, loginWithCredentials, submitStoreSignup,
       logout, refreshStore, updateStore,
     }}>
       {children}

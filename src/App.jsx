@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './hooks/useAuth';
 import { ToastProvider } from './hooks/useToast';
 import { StoreDataProvider, useStoreData } from './hooks/useStoreData';
 import Login from './pages/Login';
+import StoreSignup from './pages/StoreSignup';
 import Pending from './pages/Pending';
 import Dashboard from './pages/Dashboard';
 import Inventory from './pages/Inventory';
@@ -83,6 +84,7 @@ function AppShell() {
   }
 
   if (authStatus === 'login')   return <Login />;
+  if (authStatus === 'signup')  return <StoreSignup />;
   if (authStatus === 'pending') return <Pending />;
 
   return (
