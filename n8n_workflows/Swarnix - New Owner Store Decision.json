@@ -1,0 +1,338 @@
+{
+  "name": "Swarnix - New Owner Store Decision",
+  "nodes": [
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<!DOCTYPE html><html><head><meta charset='UTF-8'/><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Georgia,serif;display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#1A3A5C,#2C5F8A)}.box{background:#fff;border-radius:16px;padding:48px 40px;text-align:center;max-width:420px;width:90%;box-shadow:0 24px 64px rgba(0,0,0,.3)}.icon{font-size:52px;margin-bottom:16px}h2{font-size:22px;color:#C0392B;font-weight:400;margin:0 0 12px}p{color:#555;font-size:14px;line-height:1.65;margin-bottom:8px}.sub{font-size:12px;color:#999;margin-top:16px}</style></head><body><div class='box'><div class='icon'>&#x274C;</div><h2>Store Rejected</h2><p>The owner has been notified by email that their request was not approved.</p><p class='sub'>You can close this tab.</p></div></body></html>",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "id": "a120466c-65da-4bf3-8587-0adf959ad1c0",
+      "name": "Respond - Rejected",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -704,
+        512
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "Swarnix — Store Access Request",
+        "message": "={{ '<div style=\"font-family:Georgia,serif;max-width:560px;margin:0 auto;color:#333;\">'\n  + '<div style=\"background:linear-gradient(135deg,#1A3A5C,#2C5F8A);padding:28px;border-radius:8px 8px 0 0;\">'\n  + '<h1 style=\"color:#C9A84C;margin:0;font-size:22px;font-weight:400;\">✦ Swarnix</h1></div>'\n  + '<div style=\"background:#fffdf5;padding:28px;border:1px solid #e8d5a3;border-top:none;\">'\n  + '<p style=\"font-size:15px;\">Dear <strong>' + $json.name + '</strong>,</p>'\n  + '<p style=\"font-size:14px;color:#444;line-height:1.7;margin:16px 0;\">Thank you for signing up' + ($json.storeName ? (' your store <strong>' + $json.storeName + '</strong>') : '') + '. Unfortunately, your store access request has not been approved at this time.</p>'\n  + '<p style=\"font-size:14px;color:#444;line-height:1.7;\">If you believe this is an error or would like to discuss further, please reach out directly:</p>'\n  + '<p style=\"font-size:14px;margin:20px 0;\"><a href=\"mailto:nikimodi81@gmail.com\" style=\"color:#1A3A5C;font-weight:600;\">nikimodi81@gmail.com</a></p>'\n  + '</div>'\n  + '<div style=\"background:#f9f4e8;padding:14px 28px;border:1px solid #e8d5a3;border-top:none;border-radius:0 0 8px 8px;font-size:12px;color:#999;\">Swarnix Inventory Platform</div></div>' }}",
+        "options": {}
+      },
+      "id": "1dbe8114-44f8-40bc-94d6-58462f83ef42",
+      "name": "Email Owner - Rejected",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -480,
+        512
+      ],
+      "webhookId": "8ea2820a-554d-42f1-9d8b-2d4d7006a64f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "o7fZduR5GwlJVLqs",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "<!DOCTYPE html><html><head><meta charset='UTF-8'/><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:Georgia,serif;display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#1A3A5C,#2C5F8A)}.box{background:#fff;border-radius:16px;padding:48px 40px;text-align:center;max-width:420px;width:90%;box-shadow:0 24px 64px rgba(0,0,0,.3)}.icon{font-size:52px;margin-bottom:16px}h2{font-size:22px;color:#166534;font-weight:400;margin:0 0 12px}p{color:#555;font-size:14px;line-height:1.65;margin-bottom:8px}.sub{font-size:12px;color:#999;margin-top:16px}</style></head><body><div class='box'><div class='icon'>&#x2705;</div><h2>Store Approved!</h2><p>The owner has been notified by email and their account is now <strong>active</strong> in Swarnix.</p><p class='sub'>You can close this tab.</p></div></body></html>",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              }
+            ]
+          }
+        }
+      },
+      "id": "c5f22598-beb7-4f5f-b474-b296bce6e5b5",
+      "name": "Respond - Accepted",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -704,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Parse Decision & Token').first().json.email }}",
+        "subject": "✦ Welcome to Swarnix — Your store has been approved!",
+        "message": "={{ (function() {\n  var ownerName  = $('Parse Decision & Token').first().json.name || 'Store Owner';\n  var storeName  = $('Parse Decision & Token').first().json.storeName || '';\n  var planLabel  = $('Parse Decision & Token').first().json.plan || 'trial';\n  planLabel = planLabel.charAt(0).toUpperCase() + planLabel.slice(1);\n  return '<div style=\"font-family:Georgia,serif;max-width:560px;margin:0 auto;color:#333;\">'\n    + '<div style=\"background:linear-gradient(135deg,#1A3A5C,#2C5F8A);padding:28px;border-radius:8px 8px 0 0;\">'\n    + '<h1 style=\"color:#C9A84C;margin:0;font-size:22px;font-weight:400;\">✦ Welcome to Swarnix!</h1></div>'\n    + '<div style=\"background:#fffdf5;padding:28px;border:1px solid #e8d5a3;border-top:none;\">'\n    + '<p style=\"font-size:15px;\">Dear <strong>' + ownerName + '</strong>,</p>'\n    + '<p style=\"font-size:14px;color:#444;line-height:1.7;margin:16px 0;\">Your jewellery store' + (storeName ? (' <strong>' + storeName + '</strong>') : '') + ' has been <strong style=\"color:#166534;\">approved</strong> on the <strong>' + planLabel + '</strong> plan! You can now log in and start managing your inventory.</p>'\n    + '<div style=\"margin:24px 0;text-align:center;\">'\n    + '<a href=\"https://karat-seven.vercel.app/\" style=\"display:inline-block;background:#1A3A5C;color:#C9A84C;padding:14px 36px;border-radius:8px;text-decoration:none;font-size:14px;font-weight:600;\">Open Swarnix Inventory →</a>'\n    + '</div>'\n    + '<p style=\"font-size:13px;color:#888;\">Questions? Email <a href=\"mailto:nikimodi81@gmail.com\" style=\"color:#1A3A5C;\">nikimodi81@gmail.com</a></p>'\n    + '</div>'\n    + '<div style=\"background:#f9f4e8;padding:14px 28px;border:1px solid #e8d5a3;border-top:none;border-radius:0 0 8px 8px;font-size:12px;color:#999;\">Swarnix Inventory Platform</div></div>';\n})() }}",
+        "options": {}
+      },
+      "id": "b0d8f564-313c-4121-aeb5-77d78f102ea3",
+      "name": "Email Owner - Accepted",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        96,
+        320
+      ],
+      "webhookId": "5808f7ed-45e6-4afc-9039-9fd07cde9534",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "o7fZduR5GwlJVLqs",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "=https://bigmdvjrvqyqzyrijdum.supabase.co/rest/v1/subscription_plans",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "plan_name",
+              "value": "=eq.{{ $('Parse Decision & Token').first().json.plan || 'trial' }}"
+            },
+            {
+              "name": "select",
+              "value": "*"
+            }
+          ]
+        },
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "options": {}
+      },
+      "id": "f3a1c9de-6b8a-4b6e-9a3f-1c7e2d8b9a4e",
+      "name": "Get Plan Limits",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -480,
+        320
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_SUPABASE_SERVICE_KEY_CREDENTIAL_ID",
+          "name": "Supabase Service Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://bigmdvjrvqyqzyrijdum.supabase.co/rest/v1/stores",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ (function() {\n  var token = $('Parse Decision & Token').first().json;\n  var plan  = ($input.first().json && $input.first().json[0]) || {};\n  return JSON.stringify({\n    owner_id: token.userId,\n    email: token.email,\n    phone: token.phone,\n    owner_name: token.name,\n    store_name: token.storeName || token.name,\n    address: token.address || null,\n    status: 'active',\n    plan_name: token.plan || 'trial',\n    conversation_limit: plan.conversation_limit,\n    monthly_budget_inr: plan.monthly_budget_inr,\n    product_limit: plan.product_limit,\n    image_storage_gb: plan.image_storage_gb,\n    has_image_search: plan.has_image_search,\n    has_voice_search: plan.has_voice_search,\n    ai_models: plan.ai_models,\n    ai_models_limit: plan.ai_models_limit,\n    customer_tiers: plan.customer_tiers,\n    analytics: plan.analytics,\n    virtual_tryon: plan.selfie_tryon_limit\n  });\n})() }}",
+        "options": {}
+      },
+      "id": "31a12d52-9f4d-4384-8e24-46417cade796",
+      "name": "Supabase - Create Store",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -256,
+        320
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "REPLACE_WITH_SUPABASE_SERVICE_KEY_CREDENTIAL_ID",
+          "name": "Supabase Service Key"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "is-accept",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "accept",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "5ccdc003-9977-4a18-8599-aa1be75a8198",
+      "name": "Accept or Reject?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -928,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const q = $input.first().json.query || {};\nconst action = q.action || 'reject';\nlet decoded = {};\ntry {\n  decoded = JSON.parse(Buffer.from(decodeURIComponent(q.token || ''), 'base64').toString('utf8'));\n} catch(e) { decoded = {}; }\nconst name = decoded.name || decoded.email || 'Store Owner';\nreturn [{ json: {\n  action,\n  userId: decoded.userId || '',\n  email: decoded.email || '',\n  name,\n  storeName: decoded.storeName || '',\n  phone: decoded.phone || '',\n  address: decoded.address || '',\n  plan: decoded.plan || 'trial',\n} }];"
+      },
+      "id": "b72eac91-1efb-4995-a4ca-1f428dfb0cb0",
+      "name": "Parse Decision & Token",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1152,
+        416
+      ]
+    },
+    {
+      "parameters": {
+        "path": "store-decision",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "08b34cb2-1ea5-4491-97a8-922e78f8d09c",
+      "name": "Webhook - Store Decision",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -1376,
+        416
+      ],
+      "webhookId": "store-decision"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Respond - Rejected": {
+      "main": [
+        [
+          {
+            "node": "Email Owner - Rejected",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond - Accepted": {
+      "main": [
+        [
+          {
+            "node": "Get Plan Limits",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Plan Limits": {
+      "main": [
+        [
+          {
+            "node": "Supabase - Create Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase - Create Store": {
+      "main": [
+        [
+          {
+            "node": "Email Owner - Accepted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Accept or Reject?": {
+      "main": [
+        [
+          {
+            "node": "Respond - Accepted",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond - Rejected",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Decision & Token": {
+      "main": [
+        [
+          {
+            "node": "Accept or Reject?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook - Store Decision": {
+      "main": [
+        [
+          {
+            "node": "Parse Decision & Token",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "e394ac6a-e105-4adb-9a2f-8edf4e549b5a",
+  "meta": {
+    "instanceId": "926af9fe819bfca9c65f4c36d0a89dfa16c4f674f94393a7444d2e6d8385c53e"
+  },
+  "nodeGroups": [],
+  "id": "fuD7LuKJezcxmaVQ",
+  "tags": []
+}

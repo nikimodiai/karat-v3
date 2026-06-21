@@ -94,6 +94,67 @@
 .input:focus { border-color: #C9A84C; }
 .input::placeholder { color: rgba(13,27,42,.3); }
 
+.phoneRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.phoneInputWrap { margin-bottom: 0; flex: 1; }
+
+.ccWrap {
+  position: relative;
+  flex-shrink: 0;
+}
+.ccButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  padding: 12px 10px;
+  border: 1.5px solid rgba(13,27,42,.14);
+  border-radius: 10px;
+  background: #fff;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  color: #0D1B2A;
+  cursor: pointer;
+  transition: border-color .18s;
+}
+.ccButton:hover { border-color: rgba(201,168,76,.5); }
+
+.ccMenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 20;
+  background: #fff;
+  border: 1px solid rgba(13,27,42,.12);
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(0,0,0,.16);
+  max-height: 260px;
+  overflow-y: auto;
+  min-width: 200px;
+  padding: 6px;
+}
+.ccOption {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 13px;
+  font-family: 'DM Sans', sans-serif;
+  color: #0D1B2A;
+  cursor: pointer;
+}
+.ccOption:hover { background: #F4F7FA; }
+.ccOptionName { flex: 1; }
+.ccOptionDial { color: rgba(13,27,42,.45); }
+
 .plans {
   display: grid;
   grid-template-columns: 1fr 1fr;
