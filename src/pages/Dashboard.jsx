@@ -268,7 +268,7 @@ export default function Dashboard({ onNavigate }) {
               <GaugeBar label="Products"      used={products.length} limit={prodLimit} color="#C9A84C"/>
               <GaugeBar label="Credits" used={convUsed}        limit={convLimit} color="#17305A"/>
               {hasFeature(store, 'ai_models') && (
-                <GaugeBar label="AI Model Calls" used={aiUsed} limit={aiLimit} color="#7c3aed"/>
+                <GaugeBar label="AI Model Try-Ons" used={aiUsed} limit={aiLimit} color="#7c3aed"/>
               )}
             </div>
           </div>

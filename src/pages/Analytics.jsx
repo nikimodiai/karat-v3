@@ -112,6 +112,7 @@ export default function Analytics() {
   const aiUsed    = store?._ai_used    || 0;
   const aiLimit   = effectiveLimit(store, 'ai_models');
   const vtUsed    = store?._vt_used    || 0;
+  const vtLimit   = effectiveLimit(store, 'selfie_tryon');
 
   // ── Aggregates ─────────────────────────────────────────────────
   const catData = useMemo(() => {
@@ -212,10 +213,10 @@ export default function Analytics() {
           <UsageCard icon={MessageSquare} label="Credits" used={convUsed}        limit={convLimit}/>
           <UsageCard icon={Package}       label="Products"      used={products.length} limit={prodLimit}/>
           {hasFeature(store, 'ai_models') && (
-            <UsageCard icon={Cpu} label="AI Model Calls" used={aiUsed} limit={aiLimit}/>
+            <UsageCard icon={Cpu} label="AI Model Try-Ons" used={aiUsed} limit={aiLimit}/>
           )}
           {hasFeature(store, 'virtual_tryon') && (
-            <UsageCard icon={Shirt} label="Virtual Try-Ons" used={vtUsed} limit={Infinity}/>
+            <UsageCard icon={Shirt} label="Selfie Try-Ons" used={vtUsed} limit={vtLimit}/>
           )}
         </div>
 
