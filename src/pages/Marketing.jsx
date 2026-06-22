@@ -85,7 +85,7 @@ export default function Marketing() {
       );
       const data = await res.json();
       if (data.error) throw new Error(data.error.message);
-      const approved = (data.data || []).filter(t => t.status === 'APPROVED');
+      const approved = (data.data || []).filter(t => ['APPROVED', 'ACTIVE'].includes(t.status));
       setTemplates(approved);
       if (approved.length === 0) {
         setTemplateError('No approved templates found. Create a Marketing template in Meta Business Manager → WhatsApp Manager first.');
