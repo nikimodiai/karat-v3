@@ -85,6 +85,7 @@ export default function Marketing() {
       );
       const data = await res.json();
       if (data.error) throw new Error(data.error.message);
+      console.log('Meta templates raw response:', data.data);
       const approved = (data.data || []).filter(t => ['APPROVED', 'ACTIVE'].includes(t.status));
       setTemplates(approved);
       if (approved.length === 0) {
