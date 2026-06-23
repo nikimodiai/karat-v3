@@ -265,13 +265,12 @@ export default function WhatsAppConnect({ store, onConnected }) {
 
       <div className={styles.actions}>
         {!isConnected ? (
-          <button className={styles.connectBtn} onClick={handleConnect} disabled={busy}>
-            {busy ? (
-              <><div className="spinner spinner-sm" /> {phaseLabel}</>
-            ) : (
-              <><ExternalLink size={14} /> Connect Business WhatsApp</>
-            )}
-          </button>
+          <>
+            <button className={styles.connectBtn} disabled>
+              <ExternalLink size={14} /> Connect Business WhatsApp
+            </button>
+            <span className={styles.disabledNote}>Contact admin to set up WhatsApp Business</span>
+          </>
         ) : (
           <button className={styles.reconnectBtn} onClick={handleConnect} disabled={busy}>
             {busy ? (
