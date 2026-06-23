@@ -16,7 +16,7 @@ export default function Pending() {
         <h2 className={styles.title}>Access Pending Approval</h2>
         <p className={styles.sub}>
           Your account has been registered. An administrator will review your request
-          and activate your store shortly. You'll receive a WhatsApp notification once approved.
+          and activate your store shortly. You'll receive an email notification once approved.
         </p>
 
         <div className={styles.infoCard}>
