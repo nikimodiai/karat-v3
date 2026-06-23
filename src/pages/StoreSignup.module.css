@@ -217,6 +217,18 @@
 .btnPrimary:active:not(:disabled) { transform: translateY(1px); }
 .btnPrimary:disabled { opacity: .5; cursor: not-allowed; }
 
+.legalNote {
+  font-size: 11px;
+  color: rgba(13,27,42,.45);
+  line-height: 1.5;
+  margin-top: 14px;
+}
+.legalNote a {
+  color: rgba(13,27,42,.65);
+  text-decoration: underline;
+}
+.legalNote a:hover { color: #0D1B2A; }
+
 .btnLink {
   background: none;
   border: none;

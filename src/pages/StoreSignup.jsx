@@ -186,6 +186,18 @@ export default function StoreSignup() {
           <span>{loading ? 'Submitting…' : 'Request Access'}</span>
         </button>
 
+        <p className={styles.legalNote}>
+          By continuing, you agree to the{' '}
+          <a href="https://nelishkaai.in/terms-of-service" target="_blank" rel="noopener noreferrer">
+            Terms of Service
+          </a>{' '}
+          and{' '}
+          <a href="https://nelishkaai.in/privacy-policy" target="_blank" rel="noopener noreferrer">
+            Privacy Policy
+          </a>{' '}
+          of Nelishka AI Solutions.
+        </p>
+
         <button type="button" className={styles.btnLink} onClick={logout}>
           Sign out
         </button>
