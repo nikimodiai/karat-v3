@@ -45,15 +45,31 @@ const TYPE_COLOR = {
   Platinum: { bg: 'rgba(80,100,140,.1)',  text: '#3a4f7a', unit: 'rgba(80,100,140,.2)'  },
 };
 
+const RATES_CACHE_KEY = 'swarnix_cached_metal_rates';
+
+// Read the last-seen rates synchronously so the card paints instantly on
+// refresh instead of waiting behind Supabase's on-load auth token refresh
+// (which blocks DB queries for several seconds).
+function readCachedRates() {
+  try {
+    const raw = localStorage.getItem(RATES_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed?.rates) && parsed.rates.length) return parsed;
+  } catch (_) {}
+  return null;
+}
+
 export default function MetalRatesCard() {
-  const [rates,    setRates]    = useState([]);
-  const [rateDate, setRateDate] = useState(null);
-  const [loading,  setLoading]  = useState(true);
+  const cached = readCachedRates();
+  const [rates,    setRates]    = useState(cached?.rates || []);
+  const [rateDate, setRateDate] = useState(cached?.rateDate || null);
+  // Only show the spinner on a true cold load — with cached rates we refresh silently.
+  const [loading,  setLoading]  = useState(!cached);
   const [error,    setError]    = useState(null);
 
   useEffect(() => {
     async function load() {
-      setLoading(true);
       setError(null);
       const { data, error: err } = await db
         .from('daily_metal_rates')
@@ -61,7 +77,8 @@ export default function MetalRatesCard() {
         .order('rate_date', { ascending: false })
         .limit(50);
       if (err) {
-        setError(`Could not load rates — ${err.message}`);
+        // Keep showing cached rates if we have them; only surface the error on cold load.
+        if (!cached) setError(`Could not load rates — ${err.message}`);
         setLoading(false);
         return;
       }
@@ -71,8 +88,12 @@ export default function MetalRatesCard() {
       setRates(sorted);
       setRateDate(latestDate);
       setLoading(false);
+      try {
+        localStorage.setItem(RATES_CACHE_KEY, JSON.stringify({ rates: sorted, rateDate: latestDate }));
+      } catch (_) {}
     }
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Flat annotated list used by both strip (desktop) and ticker (mobile)

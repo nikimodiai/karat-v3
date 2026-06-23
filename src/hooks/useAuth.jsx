@@ -174,11 +174,22 @@ export function AuthProvider({ children }) {
     const { data: { subscription } } = db.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
         await handleUser(session.user);
-      } else if (event === 'SIGNED_OUT' || event === 'INITIAL_SESSION') {
+      } else if (event === 'SIGNED_OUT') {
+        // Explicit logout — always drop to login.
         if (!localStorage.getItem(STORE_USER_KEY)) {
           setUser(null); setStore(null);
           loadedUidRef.current = null;
           setAuthStatus('login');
+          setIsAuthReady(true);
+        }
+      } else if (event === 'INITIAL_SESSION') {
+        // INITIAL_SESSION can fire with a null session during the on-load
+        // token refresh/recovery, even when a valid session is cached. Only
+        // fall back to login if there's truly nothing to recover — otherwise
+        // let getSession()/the refresh resolve it, so a valid cached session
+        // never flashes the login screen.
+        if (!localStorage.getItem(STORE_USER_KEY) && !localStorage.getItem('swarnix-auth-v3')) {
+          setAuthStatus(prev => prev === 'loading' ? 'login' : prev);
           setIsAuthReady(true);
         }
       }
