@@ -111,7 +111,7 @@ function Shell({ activeTab, setActiveTab }) {
         {activeTab === 'analytics'  && <Analytics />}
         {activeTab === 'team'       && <TeamPage />}
         {activeTab === 'offers'     && <OffersTab />}
-        {activeTab === 'marketing'  && <Marketing />}
+        {activeTab === 'marketing'  && <Marketing onNavigate={setActiveTab} />}
         {activeTab === 'voice'      && <VoiceTab />}
         {activeTab === 'faq'        && <FAQ />}
         {activeTab === 'reviews'    && <Reviews />}

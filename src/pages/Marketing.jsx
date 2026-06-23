@@ -34,7 +34,7 @@ function bodyPlaceholderCount(template) {
   return matches ? new Set(matches).size : 0;
 }
 
-export default function Marketing() {
+export default function Marketing({ onNavigate }) {
   const { store } = useAuth();
   const { canWrite } = usePermissions();
   const { showToast } = useToast();
@@ -142,6 +142,7 @@ export default function Marketing() {
         message="Marketing campaigns send via your store's WhatsApp Business number. Connect it from My Profile & Plan before sending campaigns."
         currentPlan={planLabel}
         ctaLabel="Go to Profile"
+        onCta={() => onNavigate?.('profile')}
       />
     );
   }

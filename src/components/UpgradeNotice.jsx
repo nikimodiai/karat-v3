@@ -55,20 +55,30 @@ export function UpgradeDialog({ feature, currentPlan, recommendedPlan, message, 
 }
 
 // Big locked card (used as a full-page block for locked tabs)
-export function LockedCard({ icon: Icon, title, message, currentPlan, ctaLabel = 'Upgrade Plan' }) {
+export function LockedCard({ icon: Icon, title, message, currentPlan, ctaLabel = 'Upgrade Plan', onCta }) {
   return (
     <div className={styles.lockedCard}>
       {Icon && <Icon size={48} strokeWidth={1} color="rgba(13,27,42,.22)" />}
       <h2 className={styles.lockedTitle}>{title}</h2>
       <p className={styles.lockedMsg}>{message}</p>
       <p className={styles.lockedMeta}>Current plan: <strong>{currentPlan}</strong></p>
-      <a
-        href="mailto:support@nelishkaai.in?subject=SWARNIX Plan Upgrade"
-        className="btn-gold"
-        style={{ textDecoration: 'none', marginTop: 16 }}
-      >
-        <Crown size={13}/> {ctaLabel}
-      </a>
+      {onCta ? (
+        <button
+          className="btn-gold"
+          style={{ marginTop: 16 }}
+          onClick={onCta}
+        >
+          <Crown size={13}/> {ctaLabel}
+        </button>
+      ) : (
+        <a
+          href="mailto:support@nelishkaai.in?subject=SWARNIX Plan Upgrade"
+          className="btn-gold"
+          style={{ textDecoration: 'none', marginTop: 16 }}
+        >
+          <Crown size={13}/> {ctaLabel}
+        </a>
+      )}
     </div>
   );
 }
