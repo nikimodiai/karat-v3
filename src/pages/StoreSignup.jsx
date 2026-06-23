@@ -8,7 +8,7 @@ const PLANS = [
   { value: 'trial',        label: 'Trial',        note: 'Full Professional features to evaluate' },
   { value: 'starter',      label: 'Starter',      note: 'WhatsApp bot + inventory' },
   { value: 'professional', label: 'Professional', note: 'Voice/image search, CRM tiers, advanced AI' },
-  { value: 'enterprise',   label: 'Enterprise',   note: 'Unlimited everything, fair-use' },
+  { value: 'enterprise',   label: 'Enterprise',   note: 'Online webstore, enhanced limits' },
 ];
 
 // Common countries for an Indian jewellery-store customer base; India first/default.

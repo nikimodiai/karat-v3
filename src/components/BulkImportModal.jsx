@@ -413,6 +413,9 @@ export default function BulkImportModal({ onClose, onImportDone }) {
               <CheckCircle size={48} color="#16a34a" strokeWidth={1.5}/>
               <h3 className={styles.doneTitle}>Import complete!</h3>
               <ImportResultSummary result={importDone.result}/>
+              <div className={styles.warnBanner} style={{ marginTop: 14 }}>
+                <AlertTriangle size={14}/> AI-assisted imports can make mistakes — please double-check your inventory (prices, weights, categories) before publishing to customers.
+              </div>
               <div className={styles.footer} style={{ justifyContent: 'center' }}>
                 <button className="btn-gold" onClick={() => { onImportDone?.(); onClose(); }}>
                   <Package size={14}/> View Inventory
