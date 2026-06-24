@@ -84,6 +84,8 @@ export default function Dashboard({ onNavigate }) {
   const prodPct    = pctUsed(products.length, prodLimit);
   const aiUsed     = store?._ai_used   || 0;
   const aiLimit    = effectiveLimit(store, 'ai_models');
+  const designUsed  = store?._design_used || 0;
+  const designLimit = effectiveLimit(store, 'design_studio');
 
   const totalValue = useMemo(() => {
     return products.reduce((sum, p) => sum + (Number(p.price) || 0) * (Number(p.stock_qty) || 1), 0);
@@ -269,6 +271,9 @@ export default function Dashboard({ onNavigate }) {
               <GaugeBar label="Credits" used={convUsed}        limit={convLimit} color="#17305A"/>
               {hasFeature(store, 'ai_models') && (
                 <GaugeBar label="AI Model Try-Ons" used={aiUsed} limit={aiLimit} color="#7c3aed"/>
+              )}
+              {hasFeature(store, 'design_studio') && (
+                <GaugeBar label="Design Studio" used={designUsed} limit={designLimit} color="#0d9488"/>
               )}
             </div>
           </div>

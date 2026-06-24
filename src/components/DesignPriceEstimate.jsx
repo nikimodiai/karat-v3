@@ -1,0 +1,248 @@
+import React, { useEffect, useMemo, useState } from 'react';
+import { Calculator, Info, AlertTriangle } from 'lucide-react';
+import {
+  calcJewelleryPrice, fmtINR, MAKING_CHARGE_MODES,
+  resolveMetalRate,
+} from '../lib/pricing';
+import { db } from '../lib/config';
+import { toGoldCaratLabel } from '../lib/designTaxonomy';
+import styles from './DesignPriceEstimate.module.css';
+
+// Default per-design pricing inputs. These live inside params.pricing so
+// they're saved with the design and restored when it's reopened.
+export const DEFAULT_PRICING = {
+  making_mode: 'percent',   // 'per_gram' | 'percent' | 'flat'
+  making_value: '',
+  stone_weight_ct: '',
+  stone_rate_per_ct: '',
+  flat_stone_cost: '',
+  hallmark_fee: '45',
+  diamond_cert_fee: '',
+  gst_pct: '3',
+};
+
+// Pure estimate calculator. Reuses calcJewelleryPrice (ex-GST) from
+// lib/pricing, then adds GST as its own line so the breakdown matches the
+// formula: metal + stones + making + GST. `rates` is the normalized
+// daily_metal_rates list (metal_type + rate_per_gram).
+//
+// Returns { metalCost, makingCost, stoneCost, hallmark, diamondCert,
+//           subtotal, gstPct, gst, total, rateInfo } — or rateInfo.source
+// === 'missing' when there is no published rate for the chosen purity.
+export function computeDesignEstimate(params = {}, rates = []) {
+  const p = { ...DEFAULT_PRICING, ...(params.pricing || {}) };
+  const weight = Number(params.metal_weight_g) || 0;
+  const isSilver = params.metal_type === 'Silver';
+  const purityLabel = toGoldCaratLabel(params.metal_type, params.purity);
+  const rateInfo = resolveMetalRate(purityLabel, rates);
+
+  const base = calcJewelleryPrice({
+    goldGrams:        isSilver ? 0 : weight,
+    goldRatePerGram:  isSilver ? 0 : rateInfo.rate,
+    silverGrams:      isSilver ? weight : 0,
+    silverRatePerGram: isSilver ? rateInfo.rate : 0,
+    making:           p.making_value,
+    makingMode:       p.making_mode,
+    stoneWeightCt:    p.stone_weight_ct,
+    stoneRatePerCt:   p.stone_rate_per_ct,
+    flatStoneCost:    p.flat_stone_cost,
+    hallmarkFee:      p.hallmark_fee,
+    diamondCertFee:   p.diamond_cert_fee,
+  });
+
+  const subtotal = base.total;                       // ex-GST
+  const gstPct = Number(p.gst_pct) || 0;
+  const gst = Math.round(subtotal * (gstPct / 100));
+  const total = subtotal + gst;
+
+  return {
+    metalCost: base.metalCost,
+    makingCost: base.makingCost,
+    stoneCost: base.stoneCost,
+    hallmark: base.hallmark,
+    diamondCert: base.diamondCert,
+    subtotal,
+    gstPct,
+    gst,
+    total,
+    rateInfo,
+  };
+}
+
+// Load + normalize today's metal rates, the same way DynamicPricingPanel
+// does (strip the _am/_pm IBJA suffix, map rate_inr → rate_per_gram).
+function useMetalRates() {
+  const [rates, setRates] = useState([]);
+  useEffect(() => {
+    db.from('daily_metal_rates')
+      .select('rate_date, metal_key, rate_inr')
+      .order('rate_date', { ascending: false })
+      .limit(50)
+      .then(({ data, error }) => {
+        if (error || !data?.length) return;
+        const latest = data[0].rate_date;
+        setRates(
+          data.filter(r => r.rate_date === latest).map(r => ({
+            metal_type: r.metal_key.replace(/_(am|pm)$/i, ''),
+            rate_per_gram: Number(r.rate_inr),
+          }))
+        );
+      });
+  }, []);
+  return rates;
+}
+
+// Live, editable price estimate. Edits write back into params.pricing via
+// setParams; the computed breakdown is pushed up through onEstimate so the
+// page can persist it with the design.
+export default function DesignPriceEstimate({ params, setParams, onEstimate }) {
+  const rates = useMetalRates();
+  const p = { ...DEFAULT_PRICING, ...(params.pricing || {}) };
+
+  const est = useMemo(() => computeDesignEstimate(params, rates), [params, rates]);
+
+  // Hand the freshest breakdown to the parent for saving.
+  useEffect(() => { onEstimate?.(est); }, [est, onEstimate]);
+
+  const setPricing = (key, val) =>
+    setParams(f => ({ ...f, pricing: { ...DEFAULT_PRICING, ...(f.pricing || {}), [key]: val } }));
+
+  const rateMissing = est.rateInfo.source === 'missing' || est.rateInfo.rate === 0;
+  const purityLabel = toGoldCaratLabel(params.metal_type, params.purity);
+
+  return (
+    <div className={styles.panel}>
+      <div className={styles.head}>
+        <Calculator size={14} />
+        <span>Price estimate</span>
+        <span className={styles.estimateTag}>Estimate</span>
+      </div>
+
+      {/* Metal rate status — never invents a number */}
+      {rateMissing ? (
+        <div className={styles.rateWarn}>
+          <AlertTriangle size={13} />
+          <span>
+            No published rate for {purityLabel || 'this metal'} yet. Today's rates load
+            from the dashboard — metal cost shows ₹0 until a rate is set.
+          </span>
+        </div>
+      ) : (
+        <div className={styles.rateOk}>
+          Today's {purityLabel} rate: <strong>{fmtINR(est.rateInfo.displayRate)}</strong>
+          <small>{est.rateInfo.unitLabel}</small>
+          {est.rateInfo.source === 'derived' && <em> (derived from 999 base)</em>}
+        </div>
+      )}
+
+      {/* Editable per-design charges */}
+      <div className={styles.inputs}>
+        <div className={styles.row3}>
+          <div className={styles.field}>
+            <label>Making mode</label>
+            <select value={p.making_mode} onChange={e => setPricing('making_mode', e.target.value)}>
+              {MAKING_CHARGE_MODES.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+            </select>
+          </div>
+          <div className={styles.field}>
+            <label>Making value</label>
+            <input
+              type="number" min="0" inputMode="decimal"
+              value={p.making_value}
+              onChange={e => setPricing('making_value', e.target.value)}
+              placeholder={p.making_mode === 'per_gram' ? '₹ / gram' : p.making_mode === 'percent' ? '% of metal' : 'Flat ₹'}
+            />
+          </div>
+          <div className={styles.field}>
+            <label>GST %</label>
+            <input
+              type="number" min="0" step="0.1" inputMode="decimal"
+              value={p.gst_pct}
+              onChange={e => setPricing('gst_pct', e.target.value)}
+              placeholder="e.g. 3"
+            />
+          </div>
+        </div>
+
+        <div className={styles.row3}>
+          <div className={styles.field}>
+            <label>Stone weight (ct)</label>
+            <input
+              type="number" min="0" step="0.01" inputMode="decimal"
+              value={p.stone_weight_ct}
+              onChange={e => setPricing('stone_weight_ct', e.target.value)}
+              placeholder="total carats"
+            />
+          </div>
+          <div className={styles.field}>
+            <label>Stone rate (₹/ct)</label>
+            <input
+              type="number" min="0" inputMode="decimal"
+              value={p.stone_rate_per_ct}
+              onChange={e => setPricing('stone_rate_per_ct', e.target.value)}
+              placeholder="enter per-carat rate"
+            />
+          </div>
+          <div className={styles.field}>
+            <label>Other stone cost (₹)</label>
+            <input
+              type="number" min="0" inputMode="decimal"
+              value={p.flat_stone_cost}
+              onChange={e => setPricing('flat_stone_cost', e.target.value)}
+              placeholder="pearls, enamel…"
+            />
+          </div>
+        </div>
+
+        <div className={styles.row2}>
+          <div className={styles.field}>
+            <label>Hallmark fee (₹)</label>
+            <input
+              type="number" min="0" inputMode="decimal"
+              value={p.hallmark_fee}
+              onChange={e => setPricing('hallmark_fee', e.target.value)}
+            />
+          </div>
+          <div className={styles.field}>
+            <label>Diamond cert fee (₹)</label>
+            <input
+              type="number" min="0" inputMode="decimal"
+              value={p.diamond_cert_fee}
+              onChange={e => setPricing('diamond_cert_fee', e.target.value)}
+              placeholder="optional"
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Breakdown */}
+      <div className={styles.breakdown}>
+        <Row label={`Metal (${Number(params.metal_weight_g) || 0} g)`} value={est.metalCost} />
+        <Row label="Making charges" value={est.makingCost} />
+        <Row label="Stones" value={est.stoneCost} />
+        <Row label="Hallmark" value={est.hallmark} />
+        <Row label="Diamond cert" value={est.diamondCert} />
+        <div className={styles.divider} />
+        <Row label="Subtotal" value={est.subtotal} />
+        <Row label={`GST (${est.gstPct}%)`} value={est.gst} />
+        <div className={styles.divider} />
+        <Row label="Estimated total" value={est.total} big />
+      </div>
+
+      <div className={styles.footnote}>
+        <Info size={11} />
+        An estimate only. Metal cost uses today's published rate × weight; you set making,
+        stone and GST values above.
+      </div>
+    </div>
+  );
+}
+
+function Row({ label, value, big }) {
+  return (
+    <div className={`${styles.brkRow} ${big ? styles.brkBig : ''}`}>
+      <span>{label}</span>
+      <span>{fmtINR(value)}</span>
+    </div>
+  );
+}

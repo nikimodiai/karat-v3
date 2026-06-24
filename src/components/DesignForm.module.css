@@ -1,0 +1,166 @@
+.form { display: flex; flex-direction: column; gap: 12px; }
+
+/* ── Mode selector ── */
+.modeRow { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.modeBtn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 12px 14px;
+  border: 1.5px solid var(--border-card);
+  border-radius: var(--r);
+  background: #fff;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all .15s;
+  text-align: left;
+}
+.modeBtn svg { color: var(--gold); }
+.modeBtn small { font-size: 11px; font-weight: 400; color: var(--ink-soft); }
+.modeBtn:hover { border-color: var(--gold); }
+.modeBtnActive {
+  border-color: var(--gold);
+  background: rgba(200,149,108,.08);
+  box-shadow: 0 0 0 3px var(--gold-glow);
+}
+
+/* ── Reference upload ── */
+.refWrap { display: flex; flex-direction: column; gap: 8px; }
+.refDrop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 22px 16px;
+  border: 1.5px dashed var(--gold);
+  border-radius: var(--r);
+  background: rgba(200,149,108,.05);
+  color: var(--ink-soft);
+  font-size: 13px;
+  text-align: center;
+  cursor: pointer;
+  transition: background .15s;
+}
+.refDrop:hover { background: rgba(200,149,108,.1); color: var(--ink); }
+.refDrop svg { color: var(--gold); }
+.refDrop small { font-size: 11px; opacity: .8; }
+.refCam {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 8px; border: 1.5px dashed var(--border-card); border-radius: var(--r-sm);
+  background: rgba(200,149,108,.04); color: var(--gold-dk);
+  font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.refCam:hover { border-color: var(--gold); }
+.refPreview { position: relative; border-radius: var(--r); overflow: hidden; border: 1.5px solid var(--border-card); }
+.refPreview img { width: 100%; max-height: 280px; object-fit: contain; display: block; background: var(--cream); }
+.refRemove {
+  position: absolute; top: 8px; right: 8px;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: rgba(0,0,0,.55); border: none; color: #fff;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.refRemove:hover { background: rgba(190,18,60,.85); }
+
+/* ── Collapsible steps ── */
+.step {
+  border: 1px solid var(--border-card);
+  border-radius: var(--r);
+  background: #fff;
+  overflow: hidden;
+}
+.stepHead {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 14px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-body);
+  text-align: left;
+}
+.stepHead svg:last-child { margin-left: auto; color: var(--ink-soft); flex-shrink: 0; }
+.stepNum {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: var(--gold-lt);
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.stepTitle { font-size: 14px; font-weight: 600; color: var(--ink); }
+.stepTitle small { font-weight: 400; color: var(--ink-soft); font-size: 12px; }
+.stepBody { padding: 4px 14px 16px; border-top: 1px solid var(--border-soft); padding-top: 14px; }
+
+.toggle {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 14px; font-size: 13px; color: var(--ink); cursor: pointer;
+}
+.toggle input { width: 16px; height: 16px; accent-color: var(--gold-dk); }
+
+.emptyHint { font-size: 12px; color: var(--ink-soft); line-height: 1.5; }
+
+/* ── Accent rows ── */
+.accentRow { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 12px; }
+.accentGrid { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.accentRemove {
+  margin-top: 22px;
+  width: 34px; height: 34px; flex-shrink: 0;
+  border: 1.5px solid var(--border-card); border-radius: var(--r-sm);
+  background: #fff; color: var(--danger); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.accentRemove:hover { background: var(--danger-bg); border-color: var(--danger); }
+.addBtn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px;
+  border: 1.5px solid var(--border-card); border-radius: var(--r-sm);
+  background: rgba(200,149,108,.06); color: var(--gold-dk);
+  font-size: 13px; font-weight: 600; font-family: var(--font-body); cursor: pointer;
+}
+.addBtn:hover { background: rgba(200,149,108,.14); border-color: var(--gold); }
+
+/* ── Motif chips ── */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  padding: 8px 14px;
+  border: 1.5px solid var(--border-card); border-radius: 99px;
+  background: #fff; color: var(--ink);
+  font-size: 13px; font-family: var(--font-body); cursor: pointer; transition: all .14s;
+}
+.chip:hover { border-color: var(--gold); }
+.chipActive { background: var(--navy); color: var(--gold-lt); border-color: var(--navy); }
+
+/* ── Generate bar ── */
+.generateBar {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 0 2px;
+  background: linear-gradient(to top, var(--cream) 70%, transparent);
+}
+.generateBar :global(.btn-gold) { padding: 12px 26px; font-size: 14px; }
+.usage {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 12px; color: var(--ink-soft); margin-right: auto;
+}
+
+@media (max-width: 640px) {
+  .modeRow { grid-template-columns: 1fr; }
+  .accentGrid { grid-template-columns: 1fr 1fr; }
+  .generateBar :global(.btn-gold) { width: 100%; justify-content: center; }
+  .usage { width: 100%; margin-bottom: 4px; }
+}

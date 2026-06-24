@@ -29,6 +29,7 @@ export const PLAN_LIMITS = {
     image_storage:  1,        // GB
     ai_models:      20,       // AI Models Try-On / month
     selfie_tryon:   10,       // Selfie Try-On for Customers / month
+    design_studio:  15,       // Design Studio generations / month
     monthly_inr:    0,
     features: {
       whatsapp:        true,
@@ -39,6 +40,7 @@ export const PLAN_LIMITS = {
       teach_ai_style:  false,
       ai_models:       true,
       virtual_tryon:   true,
+      design_studio:   true,
       marketing_messages: false,
       analytics:       'PROFESSIONAL',
     },
@@ -49,6 +51,7 @@ export const PLAN_LIMITS = {
     image_storage:  5,
     ai_models:      50,
     selfie_tryon:   30,
+    design_studio:  0,        // off on Starter (feature gated below)
     monthly_inr:    3999,
     features: {
       whatsapp:        true,
@@ -59,6 +62,7 @@ export const PLAN_LIMITS = {
       teach_ai_style:  false,
       ai_models:       true,
       virtual_tryon:   true,
+      design_studio:   false,
       marketing_messages: false,
       analytics:       'STARTER',
     },
@@ -69,6 +73,7 @@ export const PLAN_LIMITS = {
     image_storage:  25,
     ai_models:      200,
     selfie_tryon:   100,
+    design_studio:  100,
     monthly_inr:    8999,
     features: {
       whatsapp:        true,
@@ -79,6 +84,7 @@ export const PLAN_LIMITS = {
       teach_ai_style:  true,
       ai_models:       true,
       virtual_tryon:   true,
+      design_studio:   true,
       marketing_messages: true,
       analytics:       'PROFESSIONAL',
     },
@@ -89,6 +95,7 @@ export const PLAN_LIMITS = {
     image_storage:  Infinity,
     ai_models:      500,
     selfie_tryon:   300,
+    design_studio:  300,
     monthly_inr:    17999,
     features: {
       whatsapp:        true,
@@ -99,6 +106,7 @@ export const PLAN_LIMITS = {
       teach_ai_style:  true,
       ai_models:       true,
       virtual_tryon:   true,
+      design_studio:   true,
       marketing_messages: true,
       analytics:       'ENTERPRISE',
     },
@@ -117,7 +125,7 @@ export function planLimits(store) {
 
 // Returns the *effective* limit for a resource: the store's per-tenant
 // override (if set in the DB) or the plan default.
-// resource ∈ 'conversations' | 'products' | 'image_storage' | 'ai_models' | 'selfie_tryon'
+// resource ∈ 'conversations' | 'products' | 'image_storage' | 'ai_models' | 'selfie_tryon' | 'design_studio'
 export function effectiveLimit(store, resource) {
   const plan = planLimits(store);
   const ov = store && {
@@ -126,6 +134,7 @@ export function effectiveLimit(store, resource) {
     image_storage:  store.image_storage_gb,
     ai_models:      store.ai_models_limit,
     selfie_tryon:   store.virtual_tryon,   // virtual_tryon column = Selfie Try-On limit
+    design_studio:  store.design_studio_limit,
   }[resource];
   // Treat 0 as "use plan default"; treat null/undefined the same.
   if (ov === null || ov === undefined || ov === 0) return plan[resource];
@@ -142,6 +151,7 @@ export function hasFeature(store, featureKey) {
     customer_tiers: store.customer_tiers,
     ai_models:      store.ai_models,
     virtual_tryon:  store.virtual_tryon,
+    design_studio:  store.design_studio,
   }[featureKey];
   if (typeof dbToggle === 'boolean') return dbToggle;
   return !!planLimits(store).features[featureKey];

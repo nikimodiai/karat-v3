@@ -1,0 +1,139 @@
+.outputs { display: flex; flex-direction: column; gap: 14px; }
+
+.block {
+  background: transparent;
+}
+
+.blockHead {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 10px;
+}
+.blockHead svg { color: var(--gold); }
+
+/* ── Render area ── */
+.generating {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 200px;
+  border: 1.5px dashed var(--border-card);
+  border-radius: var(--r);
+  background: rgba(200,149,108,.04);
+  font-size: 13px;
+  color: var(--ink-mid);
+}
+.generating small { font-size: 11px; color: var(--ink-soft); }
+
+.placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 180px;
+  border: 1.5px dashed var(--border-card);
+  border-radius: var(--r);
+  background: #fff;
+  color: var(--ink-soft);
+  font-size: 13px;
+  text-align: center;
+  padding: 20px;
+}
+.placeholder svg { opacity: .5; }
+
+.renderGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+.renderCell {
+  position: relative;
+  border-radius: var(--r);
+  overflow: hidden;
+  border: 1.5px solid var(--border-card);
+  background: var(--cream);
+}
+.renderCell img { width: 100%; height: auto; display: block; object-fit: contain; }
+.zoomBtn {
+  position: absolute; top: 6px; right: 6px;
+  width: 26px; height: 26px; border-radius: 6px;
+  background: rgba(0,0,0,.5); border: none; color: #fff;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  backdrop-filter: blur(3px);
+}
+.zoomBtn:hover { background: rgba(0,0,0,.72); }
+
+.renderActions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.secondaryBtn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 8px 14px;
+  border: 1.5px solid var(--border-card); border-radius: var(--r-sm);
+  background: #fff; color: var(--ink);
+  font-size: 13px; font-weight: 600; font-family: var(--font-body); cursor: pointer;
+  transition: all .15s;
+}
+.secondaryBtn:hover { border-color: var(--gold); background: rgba(200,149,108,.06); }
+.secondaryBtn:disabled { opacity: .5; cursor: not-allowed; }
+
+.error {
+  display: flex; align-items: center; gap: 7px;
+  margin-top: 10px; font-size: 12px; line-height: 1.4;
+  color: var(--danger); background: var(--danger-bg);
+  border-radius: var(--r-sm); padding: 9px 11px;
+}
+.error svg { flex-shrink: 0; }
+
+/* ── Decision ── */
+.decision {
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+.decisionBtns { display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; }
+.discardBtn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 18px;
+  border: 1.5px solid var(--danger-bg); border-radius: var(--r-sm);
+  background: var(--danger-bg); color: var(--danger);
+  font-size: 13px; font-weight: 600; font-family: var(--font-body); cursor: pointer;
+  margin-right: auto;
+}
+.discardBtn:hover { background: rgba(190,18,60,.16); }
+.discardBtn:disabled { opacity: .5; cursor: not-allowed; }
+
+.publishedNote {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 13px; color: var(--success);
+  background: var(--success-bg); border-radius: var(--r-sm);
+  padding: 9px 12px; margin-bottom: 12px;
+}
+.decisionHint { font-size: 11px; color: var(--ink-soft); margin-top: 8px; text-align: right; }
+
+/* ── Zoom overlay ── */
+.zoomOverlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(0,0,0,.82); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+}
+.zoomOverlay img { max-width: 92vw; max-height: 88vh; object-fit: contain; border-radius: var(--r); box-shadow: 0 24px 64px rgba(0,0,0,.5); }
+.zoomClose {
+  position: absolute; top: 18px; right: 18px;
+  width: 38px; height: 38px; border-radius: 50%;
+  background: rgba(255,255,255,.15); border: 1.5px solid rgba(255,255,255,.25);
+  color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.zoomClose:hover { background: rgba(190,18,60,.75); }
+
+@media (max-width: 640px) {
+  .decisionBtns { flex-direction: column-reverse; }
+  .decisionBtns > * { width: 100%; justify-content: center; }
+  .discardBtn { margin-right: 0; }
+  .decisionHint { text-align: center; }
+}
