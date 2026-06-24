@@ -7,6 +7,7 @@ import StoreSignup from './pages/StoreSignup';
 import Pending from './pages/Pending';
 import Dashboard from './pages/Dashboard';
 import Inventory from './pages/Inventory';
+import DesignStudio from './pages/DesignStudio';
 import Customers from './pages/Customers';
 import Analytics from './pages/Analytics';
 import Profile from './pages/Profile';
@@ -107,6 +108,7 @@ function Shell({ activeTab, setActiveTab }) {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
         {activeTab === 'dashboard'  && <Dashboard onNavigate={setActiveTab} />}
         {activeTab === 'inventory'  && <Inventory />}
+        {activeTab === 'design'     && <DesignStudio />}
         {activeTab === 'customers'  && <Customers />}
         {activeTab === 'analytics'  && <Analytics />}
         {activeTab === 'team'       && <TeamPage />}

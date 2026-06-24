@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LayoutGrid, Users, BarChart2, User, LogOut, ChevronDown, Gem, Menu, X, Home, Shield, UserCog, Sparkles, HelpCircle, Tag, MessageSquare, Megaphone } from 'lucide-react';
+import { LayoutGrid, Users, BarChart2, User, LogOut, ChevronDown, Gem, Menu, X, Home, Shield, UserCog, Sparkles, HelpCircle, Tag, MessageSquare, Megaphone, Wand2 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import styles from './Topbar.module.css';
 
@@ -8,6 +8,7 @@ const ROLE_LABELS = { owner: 'Owner', admin: 'Admin', read_write: 'Read & Write'
 const NAV_ITEMS = [
   { id: 'dashboard',  label: 'Dashboard',         icon: Home },
   { id: 'inventory',  label: 'Inventory',          icon: LayoutGrid },
+  { id: 'design',     label: 'Design Studio',      icon: Wand2, isNew: true },
   { id: 'customers',  label: 'Customers',          icon: Users },
   { id: 'analytics',  label: 'Analytics',          icon: BarChart2 },
   { id: 'offers',     label: 'Offers',             icon: Tag },
