@@ -50,6 +50,7 @@ export function buildSpecSheet(params = {}, estimate = null) {
     motifs: named,
     occasion: params.occasion || '',
     target_wearer: params.target_wearer || '',
+    extra_details: params.extra_details || '',
     notes: params.spec_notes || '',
     estimated_total: estimate?.total ?? null,
   };
@@ -87,6 +88,7 @@ function printSpec(spec) {
     ['Motifs', spec.motifs.length ? spec.motifs.join(', ') : '—'],
     ['Occasion', spec.occasion || '—'],
     ['Wearer', spec.target_wearer || '—'],
+    ['Special note', spec.extra_details || '—'],
     ['Notes', spec.notes || '—'],
   ];
   const html = `<!doctype html><html><head><meta charset="utf-8"><title>Maker's Spec Sheet</title>
@@ -164,6 +166,7 @@ export default function SpecSheet({ params, setParams, estimate }) {
         <Item label="Motifs">{spec.motifs.join(', ')}</Item>
         <Item label="Occasion">{spec.occasion}</Item>
         <Item label="Wearer">{spec.target_wearer}</Item>
+        <Item label="Special note">{spec.extra_details}</Item>
       </div>
 
       <div className={styles.notesWrap}>
