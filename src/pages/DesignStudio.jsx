@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Wand2, Library, Plus, ArrowLeft, Lock, Gem } from 'lucide-react';
+import { Wand2, Library, Plus, ArrowLeft, Lock, Gem, Maximize2, X } from 'lucide-react';
 import {
   db, N8N_DESIGN_GENERATE, N8N_ADD_PRODUCT_VECTOR,
   CLOUDINARY_CLOUD, CLOUDINARY_PRESET,
@@ -28,6 +28,7 @@ function freshParams() {
     dimensions: {},
     motifs: [], motif_custom: '',
     occasion: '', target_wearer: 'Women',
+    extra_details: '',
     pricing: undefined,
     spec_notes: '',
   };
@@ -80,6 +81,7 @@ function buildDescription(spec) {
   if (spec.finish) lines.push(`${spec.finish} finish.`);
   const dims = Object.entries(spec.dimensions || {}).filter(([, v]) => v).map(([k, v]) => `${k.replace(/_/g, ' ')} ${v}`).join(', ');
   if (dims) lines.push(`Dimensions: ${dims}.`);
+  if (spec.extra_details) lines.push(spec.extra_details);
   if (spec.notes) lines.push(spec.notes);
   lines.push('Designed in Swarnix Design Studio.');
   return lines.join(' ');
@@ -452,6 +454,8 @@ export default function DesignStudio() {
 
 // ── Library grid ──────────────────────────────────────────────────────
 function LibraryView({ library, loading, onOpen }) {
+  const [zoom, setZoom] = useState(null);
+
   if (loading) {
     return <div className={styles.libState}><div className="spinner" /></div>;
   }
@@ -465,21 +469,47 @@ function LibraryView({ library, loading, onOpen }) {
     );
   }
   return (
-    <div className={styles.libGrid}>
-      {library.map(d => (
-        <button key={d.id} className={styles.libCard} onClick={() => onOpen(d)}>
-          <div className={styles.libThumb}>
-            {d.primary_render_url
-              ? <img src={d.primary_render_url} alt={d.piece_type || 'design'} />
-              : <Gem size={26} />}
-            {d.status === 'published' && <span className={styles.libBadge}>Published</span>}
+    <>
+      <div className={styles.libGrid}>
+        {library.map(d => (
+          <div
+            key={d.id}
+            className={styles.libCard}
+            role="button"
+            tabIndex={0}
+            onClick={() => onOpen(d)}
+            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onOpen(d); } }}
+          >
+            <div className={styles.libThumb}>
+              {d.primary_render_url
+                ? <img src={d.primary_render_url} alt={d.piece_type || 'design'} />
+                : <Gem size={26} />}
+              {d.status === 'published' && <span className={styles.libBadge}>Published</span>}
+              {d.primary_render_url && (
+                <button
+                  type="button"
+                  className={styles.libMax}
+                  title="View full size"
+                  onClick={e => { e.stopPropagation(); setZoom(d.primary_render_url); }}
+                >
+                  <Maximize2 size={13} />
+                </button>
+              )}
+            </div>
+            <div className={styles.libMeta}>
+              <strong>{[d.style, d.piece_type].filter(Boolean).join(' · ') || 'Design'}</strong>
+              <span>{d.price_estimate?.total ? '₹' + Number(d.price_estimate.total).toLocaleString('en-IN') : 'No estimate'}</span>
+            </div>
           </div>
-          <div className={styles.libMeta}>
-            <strong>{[d.style, d.piece_type].filter(Boolean).join(' · ') || 'Design'}</strong>
-            <span>{d.price_estimate?.total ? '₹' + Number(d.price_estimate.total).toLocaleString('en-IN') : 'No estimate'}</span>
-          </div>
-        </button>
-      ))}
-    </div>
+        ))}
+      </div>
+
+      {zoom && (
+        <div className={styles.libZoomOverlay} onClick={() => setZoom(null)}>
+          <button className={styles.libZoomClose} onClick={() => setZoom(null)}><X size={18} /></button>
+          <img src={zoom} alt="design full size" onClick={e => e.stopPropagation()} />
+        </div>
+      )}
+    </>
   );
 }

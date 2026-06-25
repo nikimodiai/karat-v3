@@ -6,6 +6,7 @@ import {
 } from '../lib/pricing';
 import { db } from '../lib/config';
 import { toGoldCaratLabel } from '../lib/designTaxonomy';
+import InfoTip from './InfoTip';
 import styles from './DesignPriceEstimate.module.css';
 
 // Default per-design pricing inputs. These live inside params.pricing so
@@ -115,6 +116,7 @@ export default function DesignPriceEstimate({ params, setParams, onEstimate }) {
       <div className={styles.head}>
         <Calculator size={14} />
         <span>Price estimate</span>
+        <InfoTip text="A rough price only. Gold cost uses today's rate × weight; you set the making, stone and GST values below." label="Price estimate" />
         <span className={styles.estimateTag}>Estimate</span>
       </div>
 
@@ -139,7 +141,7 @@ export default function DesignPriceEstimate({ params, setParams, onEstimate }) {
       <div className={styles.inputs}>
         <div className={styles.row3}>
           <div className={styles.field}>
-            <label>Making mode</label>
+            <label>Making mode <InfoTip text="How you charge for making the piece: a rate per gram, a percent of the gold value, or a flat amount." label="Making mode" /></label>
             <select value={p.making_mode} onChange={e => setPricing('making_mode', e.target.value)}>
               {MAKING_CHARGE_MODES.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
             </select>
@@ -154,7 +156,7 @@ export default function DesignPriceEstimate({ params, setParams, onEstimate }) {
             />
           </div>
           <div className={styles.field}>
-            <label>GST %</label>
+            <label>GST % <InfoTip text="Government tax added on top. Usually 3% on gold jewellery in India." label="GST %" /></label>
             <input
               type="number" min="0" step="0.1" inputMode="decimal"
               value={p.gst_pct}
@@ -175,7 +177,7 @@ export default function DesignPriceEstimate({ params, setParams, onEstimate }) {
             />
           </div>
           <div className={styles.field}>
-            <label>Stone rate (₹/ct)</label>
+            <label>Stone rate (₹/ct) <InfoTip text="Price per carat for the stones. Leave blank if there is no stone." label="Stone rate" /></label>
             <input
               type="number" min="0" inputMode="decimal"
               value={p.stone_rate_per_ct}

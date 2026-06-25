@@ -96,7 +96,7 @@ export function composeDesignPrompt(params = {}, { mode = 'scratch' } = {}) {
     metal_type, purity, finish, hallmark,
     center = {}, accents = [],
     dimensions = {}, motifs = [], motif_custom = '',
-    occasion, target_wearer,
+    occasion, target_wearer, extra_details = '',
   } = params;
 
   // The piece itself: "a temple-style Jhumka earring pair in 22K yellow gold".
@@ -137,14 +137,19 @@ export function composeDesignPrompt(params = {}, { mode = 'scratch' } = {}) {
     ? ' The piece is BIS-hallmarked (do not render visible hallmark stamps in the photo).'
     : '';
 
+  // The owner's own words (Step 9) — appended verbatim so anything the form
+  // didn't cover (e.g. "keep small diamonds hanging at the bottom") is honoured.
+  const extra = String(extra_details || '').trim();
+  const extraNote = extra ? ` Additional instructions from the jeweller: ${extra}.` : '';
+
   if (mode === 'reference') {
     return (
       'Using the supplied reference image as inspiration for the overall ' +
       'silhouette and feel, recreate it as the following piece. Keep the ' +
       'spirit of the reference but apply these specifications exactly: ' +
-      description + ' ' + framing + hallmarkNote
+      description + extraNote + ' ' + framing + hallmarkNote
     );
   }
 
-  return description + ' ' + framing + hallmarkNote;
+  return description + extraNote + ' ' + framing + hallmarkNote;
 }

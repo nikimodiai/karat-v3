@@ -1,0 +1,60 @@
+.wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ink-soft);
+  cursor: pointer;
+  flex-shrink: 0;
+  border-radius: 50%;
+  transition: color .14s, background .14s;
+}
+.btn:hover { color: var(--gold-dk); background: rgba(200,149,108,.12); }
+
+.pop {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 500;
+  width: max-content;
+  max-width: 230px;
+  background: var(--navy);
+  color: #F4ECE2;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.45;
+  text-transform: none;
+  letter-spacing: 0;
+  text-align: left;
+  padding: 9px 11px;
+  border-radius: 8px;
+  box-shadow: 0 8px 28px rgba(0,0,0,.32);
+  pointer-events: none;
+}
+/* little arrow */
+.pop::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--navy);
+}
+
+/* Keep the bubble on-screen near the right edge on narrow phones */
+@media (max-width: 520px) {
+  .pop { left: auto; right: 0; transform: none; max-width: 200px; }
+  .pop::after { left: auto; right: 6px; transform: none; }
+}
