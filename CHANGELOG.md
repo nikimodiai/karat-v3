@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## Unreleased
+
+### Added
+- **Image background swap** in Add/Edit Product (`src/components/BackgroundPicker.jsx`)
+  Wand button on each photo cuts out the jewellery (self-hosted rembg, ₹0) and
+  drops it on Transparent / White / Studio Blue / Brand Navy / Cream / Black or a
+  custom colour. Live preview, then Apply — all backgrounds are free Cloudinary
+  delivery transforms.
+- **Auto-arrange Set** (`src/components/SetComposer.jsx`)
+  Composites uploaded pieces (necklace centred, earrings flanking — one earring is
+  auto-mirrored) into a single product image via free Cloudinary overlays. Pick
+  centre/side pieces, layout (top corners / mid sides) and background.
+- **`src/lib/imageStudio.js`** — Cloudinary URL builders (`bgFillUrl`,
+  `composeSetUrl`), `removeBackground` (rembg webhook), brand swatch palette.
+- **`n8n_workflows/Swarnix_BgRemove_v1.js`** + **`REMBG_SETUP.md`** — rembg
+  service + `/swarnix-bg-remove` webhook (uploads transparent PNGs to Cloudinary).
+- **`N8N_BG_REMOVE`** endpoint in `src/lib/config.js`.
+
 ## v3.0.0 — 2026-05-24
 
 Major release. Addresses 12 feature requests + critical security fix +

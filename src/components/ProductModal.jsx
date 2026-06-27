@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { X, Upload, Trash2, Tag, Zap, Image as ImageIcon, Layers, Sparkles, Camera, ChevronDown, ChevronUp, Gem, Award, Maximize2, Share2, Copy, Check } from 'lucide-react';
+import { X, Upload, Trash2, Tag, Zap, Image as ImageIcon, Layers, Sparkles, Camera, ChevronDown, ChevronUp, Gem, Award, Maximize2, Share2, Copy, Check, Wand2, LayoutGrid } from 'lucide-react';
 import { shareImageFile } from '../lib/imageUtils';
+import BackgroundPicker from './BackgroundPicker';
+import SetComposer from './SetComposer';
 import {
   CATEGORIES, SUBCATEGORY_MAP, METAL_PURITY_GROUPS, DIAMOND_PURITIES,
   SILVER_CATEGORIES, MAX_IMAGE_BYTES, db,
@@ -96,6 +98,8 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
   const [lightboxUrl,       setLightboxUrl]       = useState(null);
   const [lbCopied,          setLbCopied]          = useState(false);
   const [lbShareOpen,       setLbShareOpen]       = useState(false);
+  const [bgEditorIdx,       setBgEditorIdx]       = useState(null);  // slot index whose background is being edited
+  const [composerOpen,      setComposerOpen]      = useState(false);
 
   // Certificate uploads: { hallmark, diamond } — each holds a File or null
   const [certFiles,  setCertFiles]  = useState({ hallmark: null, diamond: null });
@@ -293,6 +297,27 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
   }, [slotFiles]);
 
   const previewSrc = (i) => slotBlobUrls[i] || existingUrls[i] || null;
+
+  // Background editor → replace the slot with the background-filled Cloudinary URL.
+  const applyBackground = useCallback((idx, url) => {
+    setSlotBlobUrls(prev => {
+      const n = [...prev];
+      if (n[idx]) URL.revokeObjectURL(n[idx]);
+      n[idx] = null;
+      return n;
+    });
+    setSlotFiles(prev => { const n = [...prev]; n[idx] = null; return n; });
+    setExisting(prev => { const n = [...prev]; n[idx] = url; return n; });
+    setBgEditorIdx(null);
+  }, []);
+
+  // Filled image slots, for the Set composer.
+  const piecesForComposer = useMemo(
+    () => [0,1,2,3,4]
+      .map(i => ({ key: i, src: slotBlobUrls[i] || existingUrls[i] || null, file: slotFiles[i], url: existingUrls[i] }))
+      .filter(p => p.src),
+    [slotBlobUrls, existingUrls, slotFiles]
+  );
 
   const handleCertFile = (type, file) => {
     if (!file) return;
@@ -888,6 +913,9 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
                   {src ? (
                     <>
                       <img src={src} alt="" className={styles.imgPreview} />
+                      <button className={styles.imgBg} onClick={() => setBgEditorIdx(i)} title="Change background">
+                        <Wand2 size={11} />
+                      </button>
                       <button className={styles.imgMaximize} onClick={() => { setLightboxUrl(src); setLbShareOpen(false); setLbCopied(false); }} title="View full size">
                         <Maximize2 size={11} />
                       </button>
@@ -925,6 +953,14 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
                 </div>
               );
             })}
+          </div>
+          <div className={styles.imgTools}>
+            <button type="button" className={styles.imgToolBtn} onClick={() => setComposerOpen(true)} disabled={piecesForComposer.length < 2} title={piecesForComposer.length < 2 ? 'Upload at least 2 pieces first' : 'Arrange a set from your pieces'}>
+              <LayoutGrid size={13} /> Auto-arrange Set
+            </button>
+            <span className={styles.imgToolHint}>
+              <Wand2 size={11} /> Tap the wand on any photo to swap its background (transparent / white / blue …)
+            </span>
           </div>
           <p className={styles.imgNote}>
             Primary image (slot 1) must be a clear jewellery only photo — plain background, no model — it is used for image search for WhatsApp customers. Max 5 MB file size each.
@@ -1010,6 +1046,25 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
             </div>
           </div>
         </div>
+      )}
+
+      {/* Background editor */}
+      {bgEditorIdx !== null && (
+        <BackgroundPicker
+          file={slotFiles[bgEditorIdx]}
+          url={existingUrls[bgEditorIdx]}
+          onApply={(url) => applyBackground(bgEditorIdx, url)}
+          onClose={() => setBgEditorIdx(null)}
+        />
+      )}
+
+      {/* Auto-arrange Set composer */}
+      {composerOpen && (
+        <SetComposer
+          pieces={piecesForComposer}
+          onAdd={handleAIImage}
+          onClose={() => setComposerOpen(false)}
+        />
       )}
     </div>
   );

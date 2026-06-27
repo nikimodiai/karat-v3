@@ -104,6 +104,25 @@
 }
 .imgMaximize:hover { background: rgba(0,0,0,.8); }
 
+.imgBg {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(201,168,76,.92);
+  border: none;
+  color: #0D1B2A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background .15s;
+  z-index: 2;
+}
+.imgBg:hover { background: rgba(201,168,76,1); }
+
 .imgRemove {
   position: absolute;
   bottom: 4px;
@@ -170,6 +189,29 @@
   flex-shrink: 0;
 }
 .imgCam:hover { background: rgba(23,48,90,.14); border-color: var(--navy); }
+
+.imgTools {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+  margin-top: 12px;
+}
+.imgToolBtn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 13px;
+  font-size: 12px; font-weight: 600;
+  color: var(--navy);
+  background: #fff;
+  border: 1.5px solid var(--navy);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all .15s;
+  font-family: var(--font-body);
+}
+.imgToolBtn:hover:not(:disabled) { background: rgba(23,48,90,.05); }
+.imgToolBtn:disabled { opacity: .45; cursor: not-allowed; border-color: var(--border-card); color: var(--ink-soft); }
+.imgToolHint {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--ink-soft);
+}
 
 .imgNote {
   font-size: 11.5px;

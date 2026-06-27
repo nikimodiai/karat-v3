@@ -1,0 +1,128 @@
+.modal {
+  background: #fff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 92vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 32px 80px rgba(0,0,0,.32);
+  animation: slideUp .2s ease;
+  overflow: hidden;
+}
+
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--border-card);
+}
+.title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 15px; font-weight: 700; color: var(--navy); margin: 0;
+}
+.closeBtn {
+  background: none; border: none; cursor: pointer;
+  color: var(--ink-soft); display: flex; padding: 4px;
+}
+
+.body { padding: 16px 18px; overflow-y: auto; }
+
+.emptyNote {
+  font-size: 13px; color: var(--ink-soft); text-align: center;
+  padding: 24px 12px; line-height: 1.6;
+}
+
+.stepLabel {
+  font-size: 11px; font-weight: 700; color: var(--navy);
+  text-transform: uppercase; letter-spacing: .04em;
+  margin: 14px 0 8px;
+}
+.stepLabel:first-child { margin-top: 0; }
+.stepLabel small { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--ink-soft); margin-left: 4px; }
+
+.thumbRow {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.thumb {
+  position: relative;
+  width: 64px; height: 64px;
+  border-radius: 9px;
+  overflow: hidden;
+  border: 2px solid var(--border-card);
+  background: var(--cream);
+  cursor: pointer;
+  padding: 0;
+  transition: border-color .14s;
+}
+.thumb img { width: 100%; height: 100%; object-fit: cover; }
+.thumb:hover { border-color: var(--gold-dk); }
+.thumbCenter { border-color: var(--navy); }
+.thumbSide   { border-color: var(--gold-dk); box-shadow: 0 0 0 1px var(--gold-dk); }
+.thumbDisabled { opacity: .4; cursor: not-allowed; }
+.thumbBadge {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: rgba(13,27,42,.82); color: #fff;
+  font-size: 8.5px; font-weight: 700; text-align: center;
+  padding: 1px 0; letter-spacing: .03em;
+}
+
+.layoutRow { display: flex; gap: 8px; margin-bottom: 12px; }
+.layoutBtn {
+  flex: 1; padding: 8px; font-size: 12px;
+  border: 1.5px solid var(--border-card); border-radius: 9px;
+  background: #fff; cursor: pointer; color: var(--ink-mid);
+  transition: all .14s;
+}
+.layoutBtn:hover { border-color: var(--gold-dk); }
+.layoutActive { border-color: var(--navy); background: rgba(23,48,90,.04); color: var(--navy); font-weight: 600; }
+
+.swatchRow { display: flex; gap: 8px; flex-wrap: wrap; }
+.swatch {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 2px solid var(--border-card); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  background: #fff; padding: 0; transition: border-color .14s;
+}
+.swatch:hover { border-color: var(--gold-dk); }
+.swatchActive { border-color: var(--navy); }
+.swatchChip {
+  width: 22px; height: 22px; border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.06);
+}
+.swatchChecker {
+  background-image:
+    linear-gradient(45deg, #ccc 25%, transparent 25%),
+    linear-gradient(-45deg, #ccc 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #ccc 75%),
+    linear-gradient(-45deg, transparent 75%, #ccc 75%);
+  background-size: 8px 8px;
+  background-position: 0 0, 0 4px, 4px -4px, -4px 0;
+  background-color: #fff;
+}
+
+.preview {
+  width: 100%; aspect-ratio: 1; margin-top: 14px;
+  border-radius: 12px; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border-card);
+  background-image:
+    linear-gradient(45deg, #eee 25%, transparent 25%),
+    linear-gradient(-45deg, #eee 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #eee 75%),
+    linear-gradient(-45deg, transparent 75%, #eee 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+}
+.previewImg { width: 100%; height: 100%; object-fit: contain; }
+.center {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  color: var(--ink-soft); font-size: 13px; text-align: center; padding: 16px;
+}
+.center small { font-size: 11px; opacity: .7; }
+.errText { color: #C0392B; font-size: 12.5px; }
+
+.footer {
+  display: flex; justify-content: flex-end; gap: 10px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--border-card);
+}
