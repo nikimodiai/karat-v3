@@ -164,7 +164,9 @@ export function hasFeature(store, featureKey) {
     ai_models:      store.ai_models,
     virtual_tryon:  store.virtual_tryon,
     design_studio:  store.design_studio,
-    ai_studio_suite: store.ai_studio_suite,  // optional per-store override; on for every plan by default
+    // ai_studio_suite has no per-store override column — it falls through to
+    // the plan default below (on for every plan). Don't reference a column that
+    // doesn't exist here, or STORE_SELECT/hasFeature could break the store load.
   }[featureKey];
   if (typeof dbToggle === 'boolean') return dbToggle;
   return !!planLimits(store).features[featureKey];
