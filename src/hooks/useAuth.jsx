@@ -98,7 +98,7 @@ export function AuthProvider({ children }) {
     setAuthStatus('login');
   }, []);
 
-  const STORE_SELECT = 'id, owner_id, status, store_name, owner_name, customer_tiers, plan_name, subscription_status, plan_expires_at, phone, email, whatsapp_phone, owner_whatsapp, has_image_search, has_voice_search, ai_models, ai_models_limit, virtual_tryon, analytics, product_limit, image_storage_gb, conversation_limit, monthly_budget_inr, address, _conv_used, _ai_used, _vt_used, _design_used, design_studio_limit, _ai_studio_suite_used, _ai_studio_suite_limit, ai_studio_suite, voice_profile, voice_examples, voice_updated_at, selfie_tryon_tier, whatsapp_phone_number_id, waba_id, wa_access_token, logo_url, name_style_url';
+  const STORE_SELECT = 'id, owner_id, status, store_name, owner_name, customer_tiers, plan_name, subscription_status, plan_expires_at, phone, email, whatsapp_phone, owner_whatsapp, has_image_search, has_voice_search, ai_models, ai_models_limit, virtual_tryon, analytics, product_limit, image_storage_gb, conversation_limit, monthly_budget_inr, address, _conv_used, _ai_used, _vt_used, _design_used, design_studio_limit, _ai_studio_suite_used, _ai_studio_suite_limit, voice_profile, voice_examples, voice_updated_at, selfie_tryon_tier, whatsapp_phone_number_id, waba_id, wa_access_token, logo_url, name_style_url';
 
   const loadStoreById = useCallback(async (storeId) => {
     const { data } = await db.from('stores').select(STORE_SELECT).eq('id', storeId).single();
@@ -106,11 +106,18 @@ export function AuthProvider({ children }) {
   }, []);
 
   const loadStore = useCallback(async (u) => {
-    const { data: storeData } = await db
+    const { data: storeData, error: storeErr } = await db
       .from('stores')
       .select(STORE_SELECT)
       .eq('owner_id', u.id)
       .single();
+
+    // Distinguish "no store row" (PGRST116) from a real query error (e.g. a bad
+    // column in STORE_SELECT). Only the former means "new owner → signup"; a
+    // query error must NOT boot a returning owner to the signup screen.
+    if (storeErr && storeErr.code !== 'PGRST116') {
+      throw storeErr;
+    }
 
     if (!storeData) {
       // New owner — no store row yet. Ask them to complete the signup form
