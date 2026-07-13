@@ -101,11 +101,11 @@ export default function Profile() {
 
   // Effective limits & usage
   const convUsed          = store?._conv_used || 0;
-  const aiUsed            = store?._ai_used   || 0;
+  const suiteUsed         = store?._ai_studio_suite_used || 0;
   const vtUsed            = store?._vt_used   || 0;
   const convLimit         = effectiveLimit(store, 'conversations');
   const prodLimit         = effectiveLimit(store, 'products');
-  const aiLimit           = effectiveLimit(store, 'ai_models');
+  const suiteLimit        = effectiveLimit(store, 'ai_studio_suite');
   const selfieTryonLimit  = effectiveLimit(store, 'selfie_tryon');
   const storageLimit      = effectiveLimit(store, 'image_storage');
 
@@ -117,7 +117,7 @@ export default function Profile() {
     { icon: Camera,      label: 'Voice Search',              active: hasFeature(store, 'voice_search') },
     { icon: Camera,      label: 'Image Search',              active: hasFeature(store, 'image_search') },
     { icon: Users,       label: 'Customer Tiers (VVIP/VIP)', active: hasFeature(store, 'customer_tiers') },
-    { icon: Cpu,         label: 'AI Models Try-On',          active: hasFeature(store, 'ai_models') },
+    { icon: Cpu,         label: 'AI Studio Suite',           active: hasFeature(store, 'ai_studio_suite') },
     { icon: Shirt,       label: 'Selfie Try-On',             active: hasFeature(store, 'virtual_tryon') },
     { icon: BarChart2,   label: 'Analytics',                 active: !!planSpec.features.analytics, note: planSpec.features.analytics },
   ];
@@ -458,9 +458,9 @@ export default function Profile() {
             <div className={styles.card}>
               <div className={styles.cardTitle}><Crown size={14} color="#C9A84C" /> Plan Limits & Usage</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 4 }}>
-                <LimitRow icon={MessageSquare} label="Credits / month"    used={convUsed}     limit={convLimit}/>
+                <LimitRow icon={MessageSquare} label="Conversations / month" used={convUsed}   limit={convLimit}/>
                 <LimitRow icon={ShoppingBag}   label="Products"           used={productCount} limit={prodLimit}/>
-                <LimitRow icon={Cpu}           label="AI Models Try-On"   used={aiUsed}       limit={aiLimit}/>
+                <LimitRow icon={Cpu}           label="Studio Credits"     used={suiteUsed}    limit={suiteLimit}/>
                 <LimitRow icon={Shirt}         label="Selfie Try-On"      used={vtUsed}       limit={selfieTryonLimit}/>
               </div>
             </div>

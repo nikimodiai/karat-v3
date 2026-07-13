@@ -25,8 +25,8 @@
 .dropZone span { font-size: 14px; font-weight: 600; color: var(--navy); }
 .dropZone small { font-size: 11px; }
 .dropZone svg { color: var(--gold); }
+.srcBtns { display: flex; gap: 8px; }
 .camBtn {
-  align-self: flex-start;
   display: inline-flex; align-items: center; gap: 6px;
   padding: 7px 13px; border: 1.5px solid var(--border-card); border-radius: var(--r-sm);
   background: #fff; color: var(--ink); font-size: 12px; font-weight: 600;

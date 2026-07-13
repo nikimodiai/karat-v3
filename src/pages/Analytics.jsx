@@ -210,7 +210,7 @@ export default function Analytics() {
         {/* ── Usage This Month ───────────────────────────────────── */}
         <SectionTitle icon={Activity}>Usage This Month</SectionTitle>
         <div className={styles.usageGrid}>
-          <UsageCard icon={MessageSquare} label="Credits" used={convUsed}        limit={convLimit}/>
+          <UsageCard icon={MessageSquare} label="Conversations" used={convUsed}        limit={convLimit}/>
           <UsageCard icon={Package}       label="Products"      used={products.length} limit={prodLimit}/>
           {hasFeature(store, 'ai_models') && (
             <UsageCard icon={Cpu} label="AI Model Try-Ons" used={aiUsed} limit={aiLimit}/>
@@ -343,7 +343,7 @@ export default function Analytics() {
                     <XAxis dataKey="month" tick={{fontSize:11,fontFamily:'DM Sans',fill:'rgba(11,24,41,.45)'}} axisLine={false} tickLine={false}/>
                     <YAxis tick={{fontSize:9,fontFamily:'DM Sans',fill:'rgba(11,24,41,.35)'}} axisLine={false} tickLine={false} allowDecimals={false}/>
                     <Tooltip content={<CustomTooltip/>}/>
-                    <Area type="monotone" dataKey="credits" name="Credits"
+                    <Area type="monotone" dataKey="credits" name="Conversations"
                       stroke="#C9A84C" strokeWidth={2} fill="url(#convGrad)"
                       dot={{r:4,fill:'#C9A84C',strokeWidth:0}} activeDot={{r:6}}/>
                   </AreaChart>

@@ -36,12 +36,13 @@ export function canUseSuite(store, need = 1) {
   return left === Infinity || left >= need;
 }
 
-// Human label for the usage line, e.g. "42/150 this month" (null if unlimited).
+// Human label for the usage line, e.g. "42/150 Studio credits this month"
+// (null if unlimited).
 export function suiteUsageText(store) {
   const limit = effectiveLimit(store, 'ai_studio_suite');
   if (limit === Infinity) return null;
   const used = Math.floor(store?._ai_studio_suite_used || 0);
-  return `${used}/${limit} this month`;
+  return `${used}/${limit} Studio credits this month`;
 }
 
 // Add `units` to the store's monthly counter. Returns the new used value.

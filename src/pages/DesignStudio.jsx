@@ -15,6 +15,7 @@ import { buildSpecSheet } from '../components/SpecSheet';
 import DesignForm from '../components/DesignForm';
 import DesignOutputs from '../components/DesignOutputs';
 import PublishDesignDialog from '../components/PublishDesignDialog';
+import StudioLibraryPicker from '../components/StudioLibraryPicker';
 import styles from './DesignStudio.module.css';
 
 // Sensible starting point so an owner can pick a piece type and generate fast.
@@ -111,6 +112,7 @@ export default function DesignStudio({ onBack }) {
   const [publishing, setPublishing] = useState(false);
   const [publishOpen, setPublishOpen] = useState(false);
   const [suggestedSku, setSuggestedSku] = useState('');
+  const [libOpen, setLibOpen] = useState(false);
 
   const [library, setLibrary] = useState([]);
   const [libraryLoading, setLibraryLoading] = useState(false);
@@ -138,6 +140,23 @@ export default function DesignStudio({ onBack }) {
     setReferencePreview(null);
     setReferenceUrl(null);
     if (objectUrlRef.current) { URL.revokeObjectURL(objectUrlRef.current); objectUrlRef.current = null; }
+  };
+  // Pick a reference from the Studio Library. runGenerate sends the reference as
+  // a multipart file part, so fetch the hosted URL into a File.
+  const pickReferenceFromLibrary = async (url) => {
+    setLibOpen(false);
+    try {
+      const resp = await fetch(url, { mode: 'cors' });
+      const blob = await resp.blob();
+      const file = new File([blob], `ref_${Date.now()}.jpg`, { type: blob.type || 'image/jpeg' });
+      setError(null);
+      setReferenceFile(file);
+      setReferenceUrl(url);   // already hosted — persist reuses it without re-upload
+      if (objectUrlRef.current) { URL.revokeObjectURL(objectUrlRef.current); objectUrlRef.current = null; }
+      setReferencePreview(url);
+    } catch {
+      setError('Could not load that image from your library. Try another or upload a file.');
+    }
   };
   useEffect(() => () => { if (objectUrlRef.current) URL.revokeObjectURL(objectUrlRef.current); }, []);
 
@@ -417,7 +436,7 @@ export default function DesignStudio({ onBack }) {
 
       {!canUse && (
         <div className={styles.limitNote}>
-          You've used all {fmtLimit(effectiveLimit(store, 'ai_studio_suite'))} AI Studio Suite generations this month. Saved designs still publish; new renders resume next cycle or after an upgrade.
+          You've used all {fmtLimit(effectiveLimit(store, 'ai_studio_suite'))} Studio credits this month. Saved designs still publish; new renders resume next cycle or after an upgrade.
         </div>
       )}
 
@@ -429,6 +448,7 @@ export default function DesignStudio({ onBack }) {
               mode={mode} setMode={setMode}
               referencePreview={referencePreview}
               onPickReference={pickReference} onClearReference={clearReference}
+              onPickReferenceFromLibrary={() => setLibOpen(true)}
               onGenerate={() => runGenerate(false)}
               generating={generating}
               generateDisabled={generateDisabled}
@@ -456,6 +476,10 @@ export default function DesignStudio({ onBack }) {
           suggestedSku={suggestedSku} checkSKU={checkSKU}
           publishing={publishing} onConfirm={doPublish} onClose={() => setPublishOpen(false)}
         />
+      )}
+
+      {libOpen && (
+        <StudioLibraryPicker onClose={() => setLibOpen(false)} onPick={pickReferenceFromLibrary} />
       )}
     </div>
   );

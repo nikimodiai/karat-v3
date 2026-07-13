@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { Upload, Camera, X, Sparkles, RefreshCw, AlertCircle, Maximize2, Download } from 'lucide-react';
+import { Upload, Camera, X, Sparkles, RefreshCw, AlertCircle, Maximize2, Download, Images } from 'lucide-react';
 import { db, MAX_IMAGE_BYTES } from '../../lib/config';
 import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../hooks/useToast';
@@ -7,6 +7,7 @@ import { canUseSuite, suiteUsageText, chargeSuite } from '../../lib/studioSuite'
 import { hasFeature } from '../../lib/plans';
 import { uploadRetouchImage, runRetouch } from '../../lib/retouch';
 import { SuiteFeatureHeader } from '../StudioSuite';
+import StudioLibraryPicker from '../../components/StudioLibraryPicker';
 import hub from '../StudioSuite.module.css';
 import styles from './RetouchFeature.module.css';
 
@@ -15,7 +16,7 @@ import styles from './RetouchFeature.module.css';
  *   • Studio Photo  → mode 'retouch', pick a background style.
  *   • Metal Swap    → mode 'variant', pick a target metal (+ optional background).
  * Both call the SAME n8n /retouch workflow and save to app_gallery with their
- * own `kind`. Charges the shared Studio Suite meter (1 unit) on success.
+ * own `kind`. Charges the shared Studio Suite meter (1 Studio credit) on success.
  *
  * Props: { onBack, mode, kind, icon, title, sub, styleOptions, defaultStyle,
  *          metalOptions?, defaultMetal? }
@@ -29,7 +30,8 @@ export default function RetouchFeature({
   const fileRef = useRef(null);
   const camRef = useRef(null);
 
-  const [srcFile, setSrcFile] = useState(null);
+  const [srcFile, setSrcFile] = useState(null);   // device file (needs upload)
+  const [srcUrl, setSrcUrl] = useState(null);      // already-hosted URL (library pick)
   const [srcPreview, setSrcPreview] = useState(null);
   const [style, setStyle] = useState(defaultStyle);
   const [metal, setMetal] = useState(defaultMetal || null);
@@ -37,6 +39,7 @@ export default function RetouchFeature({
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
   const [lightbox, setLightbox] = useState(false);
+  const [libOpen, setLibOpen] = useState(false);
 
   const featureOn = hasFeature(store, 'ai_studio_suite');
   const canUse = canUseSuite(store, 1);
@@ -48,8 +51,20 @@ export default function RetouchFeature({
     if (!file.type.startsWith('image/')) { setError('Please select an image file.'); return; }
     setError(null);
     setResult(null);
+    setSrcUrl(null);
     setSrcFile(file);
     setSrcPreview(URL.createObjectURL(file));
+  };
+
+  // Picked an already-generated image from the Studio Library — it's already a
+  // hosted URL, so no upload is needed.
+  const pickFromLibrary = (url) => {
+    setError(null);
+    setResult(null);
+    setSrcFile(null);
+    setSrcUrl(url);
+    setSrcPreview(url);
+    setLibOpen(false);
   };
 
   const handleDrop = useCallback((e) => {
@@ -60,6 +75,7 @@ export default function RetouchFeature({
 
   const reset = () => {
     setSrcFile(null);
+    setSrcUrl(null);
     setSrcPreview(null);
     setResult(null);
     setError(null);
@@ -67,12 +83,13 @@ export default function RetouchFeature({
   };
 
   const generate = async () => {
-    if (!srcFile || !canUse || busy) return;
+    if ((!srcFile && !srcUrl) || !canUse || busy) return;
     setBusy(true);
     setError(null);
     setResult(null);
     try {
-      const imageUrl = await uploadRetouchImage(srcFile, `${kind}_${store.owner_id}_${Date.now()}.jpg`);
+      // Library picks are already hosted; device files need a Cloudinary upload.
+      const imageUrl = srcUrl || await uploadRetouchImage(srcFile, `${kind}_${store.owner_id}_${Date.now()}.jpg`);
       const url = await runRetouch({
         ownerId: store.owner_id,
         imageUrl,
@@ -82,7 +99,7 @@ export default function RetouchFeature({
       });
       setResult(url);
 
-      // Charge one unit and save to the shared library.
+      // Charge one Studio credit and save to the shared library.
       await chargeSuite(store.owner_id, 1);
       const label = mode === 'variant'
         ? (metalOptions?.find((m) => m.v === metal)?.label || metal)
@@ -150,9 +167,14 @@ export default function RetouchFeature({
                   <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }}
                     onChange={(e) => handleFile(e.target.files?.[0])} />
                 </div>
-                <button type="button" className={styles.camBtn} onClick={() => camRef.current?.click()}>
-                  <Camera size={15} /> Camera
-                </button>
+                <div className={styles.srcBtns}>
+                  <button type="button" className={styles.camBtn} onClick={() => camRef.current?.click()}>
+                    <Camera size={15} /> Camera
+                  </button>
+                  <button type="button" className={styles.camBtn} onClick={() => setLibOpen(true)}>
+                    <Images size={15} /> Library
+                  </button>
+                </div>
                 <input ref={camRef} type="file" accept="image/*" capture="environment" style={{ display: 'none' }}
                   onChange={(e) => handleFile(e.target.files?.[0])} />
               </div>
@@ -186,7 +208,7 @@ export default function RetouchFeature({
                 </button>
                 {!canUse && (
                   <div className={styles.limitNote}>
-                    You’ve used all your AI Studio Suite generations this month. They reset next cycle or after an upgrade.
+                    You’ve used all your Studio credits this month. They reset next cycle or after an upgrade.
                   </div>
                 )}
               </>
@@ -220,6 +242,10 @@ export default function RetouchFeature({
             <img src={result} alt="result full" className={styles.lbImg} />
           </div>
         </div>
+      )}
+
+      {libOpen && (
+        <StudioLibraryPicker onClose={() => setLibOpen(false)} onPick={pickFromLibrary} />
       )}
     </div>
   );

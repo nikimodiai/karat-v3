@@ -82,10 +82,10 @@ export default function Dashboard({ onNavigate }) {
   const convPct    = pctUsed(convUsed, convLimit);
   const prodLimit  = effectiveLimit(store, 'products');
   const prodPct    = pctUsed(products.length, prodLimit);
-  const aiUsed     = store?._ai_used   || 0;
-  const aiLimit    = effectiveLimit(store, 'ai_models');
-  const designUsed  = store?._design_used || 0;
-  const designLimit = effectiveLimit(store, 'design_studio');
+  // Unified AI Studio Suite meter (replaces the separate AI Model / Design
+  // Studio meters — those columns still exist but are no longer surfaced).
+  const suiteUsed  = store?._ai_studio_suite_used || 0;
+  const suiteLimit = effectiveLimit(store, 'ai_studio_suite');
 
   const totalValue = useMemo(() => {
     return products.reduce((sum, p) => sum + (Number(p.price) || 0) * (Number(p.stock_qty) || 1), 0);
@@ -174,7 +174,7 @@ export default function Dashboard({ onNavigate }) {
             color="#be123c" bg="rgba(190,18,60,.08)"
           />
           <StatCard
-            icon={MessageSquare} label="Credits Used" value={convUsed}
+            icon={MessageSquare} label="Conversations Used" value={convUsed}
             sub={`of ${fmtLimit(convLimit)} this month`}
             color="#17305A" bg="rgba(23,48,90,.09)"
           />
@@ -268,12 +268,9 @@ export default function Dashboard({ onNavigate }) {
             </div>
             <div className={styles.gaugeList}>
               <GaugeBar label="Products"      used={products.length} limit={prodLimit} color="#C9A84C"/>
-              <GaugeBar label="Credits" used={convUsed}        limit={convLimit} color="#17305A"/>
-              {hasFeature(store, 'ai_models') && (
-                <GaugeBar label="AI Model Try-Ons" used={aiUsed} limit={aiLimit} color="#7c3aed"/>
-              )}
-              {hasFeature(store, 'design_studio') && (
-                <GaugeBar label="Design Studio" used={designUsed} limit={designLimit} color="#0d9488"/>
+              <GaugeBar label="Conversations" used={convUsed}        limit={convLimit} color="#17305A"/>
+              {hasFeature(store, 'ai_studio_suite') && (
+                <GaugeBar label="Studio Credits" used={suiteUsed} limit={suiteLimit} color="#7c3aed"/>
               )}
             </div>
           </div>

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Film, Upload, X, Sparkles, AlertCircle, ArrowLeft, CheckCircle2, Loader2 } from 'lucide-react';
+import { Film, Upload, X, Sparkles, AlertCircle, ArrowLeft, CheckCircle2, Loader2, Images } from 'lucide-react';
 import { db, MAX_IMAGE_BYTES } from '../../lib/config';
 import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../hooks/useToast';
@@ -12,6 +12,7 @@ import {
   fetchReelMusic,
 } from '../../lib/reels';
 import { SuiteFeatureHeader } from '../StudioSuite';
+import StudioLibraryPicker from '../../components/StudioLibraryPicker';
 import hub from '../StudioSuite.module.css';
 import styles from './ReelStudio.module.css';
 
@@ -33,6 +34,7 @@ export default function ReelStudio({ onBack }) {
   const [error, setError] = useState(null);
 
   const [job, setJob] = useState(null);          // active reel_jobs row
+  const [libOpen, setLibOpen] = useState(false);
   const chargedRef = useRef(false);              // guard: charge once per job
   const fileRef = useRef(null);
 
@@ -60,13 +62,21 @@ export default function ReelStudio({ onBack }) {
     }
     if (next.length) { setError(null); setImages((prev) => [...prev, ...next].slice(0, MAX_REEL_IMAGES)); }
   };
+  // Add already-hosted images picked from the Studio Library (no upload needed).
+  const addFromLibrary = (urls) => {
+    setLibOpen(false);
+    const room = MAX_REEL_IMAGES - images.length;
+    const next = urls.slice(0, room).map((url) => ({ url, preview: url }));
+    if (next.length) { setError(null); setImages((prev) => [...prev, ...next].slice(0, MAX_REEL_IMAGES)); }
+  };
   const removeImage = (i) => setImages((prev) => {
     const copy = [...prev];
     const [gone] = copy.splice(i, 1);
-    if (gone?.preview) URL.revokeObjectURL(gone.preview);
+    // Only blob previews (device files) need revoking; library previews are URLs.
+    if (gone?.file && gone?.preview) URL.revokeObjectURL(gone.preview);
     return copy;
   });
-  useEffect(() => () => { images.forEach((im) => im.preview && URL.revokeObjectURL(im.preview)); }, []); // eslint-disable-line
+  useEffect(() => () => { images.forEach((im) => im.file && im.preview && URL.revokeObjectURL(im.preview)); }, []); // eslint-disable-line
 
   // Charge on completion: when the watched job flips to 'completed', add the
   // reel's cost to the shared meter once. Failed reels cost nothing.
@@ -86,10 +96,11 @@ export default function ReelStudio({ onBack }) {
     setError(null);
     chargedRef.current = false;
     try {
-      // Upload every image to Cloudinary in scene order.
+      // Resolve every image to a public URL in scene order. Library picks are
+      // already hosted; device files are uploaded to Cloudinary.
       const urls = [];
       for (const im of images) {
-        urls.push(await uploadReelImage(im.file, `reel_${store.owner_id}_${Date.now()}.jpg`));
+        urls.push(im.url || await uploadReelImage(im.file, `reel_${store.owner_id}_${Date.now()}.jpg`));
       }
       const jobId = await submitReel({
         userId: store.owner_id,
@@ -171,7 +182,7 @@ export default function ReelStudio({ onBack }) {
       <SuiteFeatureHeader
         onBack={onBack} icon={Film} title="Generate Reels"
         sub="Turn your photos into a short, shareable video — with AI motion and music."
-        right={unitsLeft !== Infinity ? <span className={styles.usage}>{unitsLeft} units left</span> : null}
+        right={unitsLeft !== Infinity ? <span className={styles.usage}>{unitsLeft} Studio credits left</span> : null}
       />
 
       {!featureOn ? (
@@ -194,14 +205,19 @@ export default function ReelStudio({ onBack }) {
                 </div>
               ))}
               {images.length < MAX_REEL_IMAGES && (
-                <button className={styles.addSlot} onClick={() => fileRef.current?.click()}>
-                  <Upload size={18} /><small>Add</small>
-                </button>
+                <>
+                  <button className={styles.addSlot} onClick={() => fileRef.current?.click()}>
+                    <Upload size={18} /><small>Upload</small>
+                  </button>
+                  <button className={styles.addSlot} onClick={() => setLibOpen(true)}>
+                    <Images size={18} /><small>Library</small>
+                  </button>
+                </>
               )}
               <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: 'none' }}
                 onChange={(e) => addFiles(e.target.files)} />
             </div>
-            {images.length === 0 && <p className={styles.hint}>Add at least one image — the reel flows through them in order.</p>}
+            {images.length === 0 && <p className={styles.hint}>Add at least one image — from your device or Studio Library. The reel flows through them in order.</p>}
           </div>
 
           {/* Format */}
@@ -286,20 +302,24 @@ export default function ReelStudio({ onBack }) {
 
           {/* Cost + generate */}
           <div className={styles.costRow}>
-            <span>Cost: <b className={styles.costVal}>{cost} unit{cost === 1 ? '' : 's'}</b></span>
+            <span>Cost: <b className={styles.costVal}>{cost} Studio credit{cost === 1 ? '' : 's'}</b></span>
             {unitsLeft !== Infinity && (
               <span className={enough ? styles.muted : styles.danger}>{unitsLeft} left</span>
             )}
           </div>
           <button className={styles.generateBtn} onClick={generate} disabled={!canGenerate}>
-            {submitting ? (<><div className="spinner spinner-sm" /> Submitting…</>) : (<><Film size={15} /> Generate Reel · {cost} unit{cost === 1 ? '' : 's'}</>)}
+            {submitting ? (<><div className="spinner spinner-sm" /> Submitting…</>) : (<><Film size={15} /> Generate Reel · {cost} Studio credit{cost === 1 ? '' : 's'}</>)}
           </button>
           {images.length > 0 && !enough && (
             <p className={styles.danger} style={{ textAlign: 'center', marginTop: 8 }}>
-              Not enough units for this reel — reduce length or quality.
+              Not enough Studio credits left for this reel — reduce length or quality.
             </p>
           )}
         </div>
+      )}
+
+      {libOpen && (
+        <StudioLibraryPicker multi onClose={() => setLibOpen(false)} onPickMany={addFromLibrary} />
       )}
     </div>
   );

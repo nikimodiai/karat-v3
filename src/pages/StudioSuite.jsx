@@ -101,7 +101,7 @@ export default function StudioSuite({ onNavigate }) {
         </div>
         {usageText && (
           <div className={styles.meter} title="Shared across every Studio Suite feature this month">
-            <span className={styles.meterLabel}>AI Studio Suite</span>
+            <span className={styles.meterLabel}>Studio Credits</span>
             <span className={styles.meterValue}>{usageText}</span>
             <div className={styles.meterBar}>
               <div

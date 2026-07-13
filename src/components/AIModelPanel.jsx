@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { effectiveLimit, hasFeature } from '../lib/plans';
 import { canUseSuite, suiteUnitsLeft, chargeSuite } from '../lib/studioSuite';
 import { compressImage, shareImageFile } from '../lib/imageUtils';
+import StudioLibraryPicker from './StudioLibraryPicker';
 import styles from './AIModelPanel.module.css';
 
 // Map jewelry category → jewelry type label sent to the n8n workflow
@@ -153,6 +154,7 @@ export default function AIModelPanel({ category, onAddImage, addLabel = 'Add to 
   const [shareOpen, setShareOpen]   = useState(false);
   const [showAdvanced, setAdvanced] = useState(false);
   const [sel, setSel]               = useState(DEFAULT_SEL);
+  const [libOpen, setLibOpen]       = useState(false);
 
   // ── Tooltip (hover on laptop, tap on touch) ──
   const isTouch = useRef(typeof window !== 'undefined' && window.matchMedia?.('(hover:none)').matches).current;
@@ -205,6 +207,23 @@ export default function AIModelPanel({ category, onAddImage, addLabel = 'Add to 
     const file = e.dataTransfer.files?.[0];
     if (file) handleFile(file);
   }, []);
+
+  // Pick a previously generated image from the Studio Library. The AI-model
+  // webhook takes a file part, so fetch the hosted URL into a File first.
+  const pickFromLibrary = async (url) => {
+    setLibOpen(false);
+    setError(null);
+    setResults([]);
+    try {
+      const resp = await fetch(url, { mode: 'cors' });
+      const blob = await resp.blob();
+      const file = new File([blob], `library_${Date.now()}.jpg`, { type: blob.type || 'image/jpeg' });
+      setSrcFile(file);
+      setSrcPrev(url);
+    } catch {
+      setError('Could not load that image from your library. Try another or upload a file.');
+    }
+  };
 
   // Build the multipart body for one generation request
   const buildFormData = () => {
@@ -414,7 +433,7 @@ export default function AIModelPanel({ category, onAddImage, addLabel = 'Add to 
         <Sparkles size={13} className={styles.sparkIcon} />
         <span className={styles.headerText}>Generate AI Model</span>
         {aiLimit !== Infinity && (
-          <span className={styles.usageBadge}>{aiUsed}/{aiLimit} used</span>
+          <span className={styles.usageBadge}>{aiUsed}/{aiLimit} Studio credits</span>
         )}
       </div>
 
@@ -455,6 +474,14 @@ export default function AIModelPanel({ category, onAddImage, addLabel = 'Add to 
                 title="Take photo with camera"
               >
                 <Camera size={15} strokeWidth={1.5} /> Camera
+              </button>
+              <button
+                type="button"
+                className={styles.camBtn}
+                onClick={() => setLibOpen(true)}
+                title="Pick from your Studio Library"
+              >
+                <Sparkles size={15} strokeWidth={1.5} /> Library
               </button>
               <input
                 ref={camRef}
@@ -650,7 +677,7 @@ export default function AIModelPanel({ category, onAddImage, addLabel = 'Add to 
 
               {!canUse && (
                 <div className={styles.upgradeNote}>
-                  Monthly AI model limit reached ({aiUsed}/{aiLimit}). Upgrade your plan for more.
+                  Monthly Studio credits used up ({aiUsed}/{aiLimit}). Upgrade your plan for more.
                 </div>
               )}
             </>
@@ -709,6 +736,10 @@ export default function AIModelPanel({ category, onAddImage, addLabel = 'Add to 
             </div>
           </div>
         </div>
+      )}
+
+      {libOpen && (
+        <StudioLibraryPicker onClose={() => setLibOpen(false)} onPick={pickFromLibrary} />
       )}
     </div>
   );

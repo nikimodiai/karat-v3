@@ -44,7 +44,7 @@ function Step({ n, title, hint, open, onToggle, children }) {
 export default function DesignForm({
   params, setParams,
   mode, setMode,
-  referencePreview, onPickReference, onClearReference,
+  referencePreview, onPickReference, onClearReference, onPickReferenceFromLibrary,
   onGenerate, generating, generateDisabled, usageText,
 }) {
   // Steps 1–3 open by default so the essentials are visible; the rest stay
@@ -128,9 +128,16 @@ export default function DesignForm({
                 <span>Upload a reference photo</span>
                 <small>A sketch, an inspiration photo, or an old piece · up to 5 MB</small>
               </div>
-              <button type="button" className={styles.refCam} onClick={() => camRef.current?.click()}>
-                <Camera size={14} /> Camera
-              </button>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button type="button" className={styles.refCam} onClick={() => camRef.current?.click()}>
+                  <Camera size={14} /> Camera
+                </button>
+                {onPickReferenceFromLibrary && (
+                  <button type="button" className={styles.refCam} onClick={onPickReferenceFromLibrary}>
+                    <ImageIcon size={14} /> Library
+                  </button>
+                )}
+              </div>
             </>
           )}
           <input ref={fileRef} type="file" accept="image/jpeg,image/png,image/webp,image/*"
