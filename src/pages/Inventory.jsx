@@ -247,7 +247,7 @@ export default function Inventory() {
   const { user, store } = useAuth();
   const { canWrite } = usePermissions();
   const { showToast } = useToast();
-  const { products, setProducts, reload } = useStoreData();
+  const { products, setProducts, reload, inventoryPrefill, setInventoryPrefill } = useStoreData();
 
   const [activeCat, setActiveCat]       = useState('All');
   const [search, setSearch]             = useState('');
@@ -269,6 +269,8 @@ export default function Inventory() {
 
   const [modalOpen, setModalOpen]       = useState(false);
   const [editProduct, setEditProduct]   = useState(null);
+  // Prefill handed over from Studio Suite → AI Model "Add to Inventory".
+  const [prefillData, setPrefillData]   = useState(null);
   const [confirmOpen, setConfirmOpen]   = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [variantMap, setVariantMap]     = useState({});
@@ -653,6 +655,17 @@ export default function Inventory() {
   const openEdit  = (p)   => { setEditProduct(p); setModalOpen(true); };
   const openDelete = (id) => { setDeleteTarget(id); setConfirmOpen(true); };
 
+  // When Studio Suite hands over an AI-model photo, open the Add Product modal
+  // pre-populated. Consume-and-clear so it only fires once per hand-off.
+  useEffect(() => {
+    if (inventoryPrefill) {
+      setEditProduct(null);
+      setPrefillData(inventoryPrefill);
+      setModalOpen(true);
+      setInventoryPrefill(null);
+    }
+  }, [inventoryPrefill, setInventoryPrefill]);
+
   // ── Derived view state ─────────────────────────────────────────
   const filtered = useMemo(() => {
     let arr = products;
@@ -969,8 +982,9 @@ export default function Inventory() {
         <ProductModal
           product={editProduct}
           store={store}
+          prefill={prefillData}
           onSave={handleSave}
-          onClose={() => { setModalOpen(false); setEditProduct(null); }}
+          onClose={() => { setModalOpen(false); setEditProduct(null); setPrefillData(null); }}
           checkSKU={checkSKU}
         />
       )}

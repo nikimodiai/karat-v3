@@ -3,6 +3,7 @@ import { Upload, Sparkles, RefreshCw, PlusCircle, X, AlertCircle, Camera, Maximi
 import { N8N_AI_MODEL, db, CLOUDINARY_CLOUD, CLOUDINARY_PRESET, MAX_IMAGE_BYTES } from '../lib/config';
 import { useAuth } from '../hooks/useAuth';
 import { effectiveLimit, hasFeature } from '../lib/plans';
+import { canUseSuite, suiteUnitsLeft, chargeSuite } from '../lib/studioSuite';
 import { compressImage, shareImageFile } from '../lib/imageUtils';
 import styles from './AIModelPanel.module.css';
 
@@ -137,7 +138,7 @@ async function uploadBlobToCloudinary(blob, filename) {
   return json.secure_url;
 }
 
-export default function AIModelPanel({ category, onAddImage }) {
+export default function AIModelPanel({ category, onAddImage, addLabel = 'Add to Images' }) {
   const { store, refreshStore } = useAuth();
   const fileRef = useRef(null);
   const camRef  = useRef(null);
@@ -175,10 +176,13 @@ export default function AIModelPanel({ category, onAddImage }) {
     return () => { window.removeEventListener('scroll', h, true); window.removeEventListener('resize', h); };
   }, []);
 
-  const aiUsed  = store?._ai_used || 0;
-  const aiLimit = effectiveLimit(store, 'ai_models');
-  const remaining = aiLimit === Infinity ? Infinity : Math.max(0, aiLimit - aiUsed);
-  const canUse  = hasFeature(store, 'ai_models') && remaining > 0;
+  // Unified AI Studio Suite meter (shared with Jewellery Design, Studio Photo,
+  // Metal Swap and Reels). aiUsed/aiLimit keep their names so the UI below is
+  // unchanged, but they now reflect the single suite counter.
+  const aiUsed  = Math.floor(store?._ai_studio_suite_used || 0);
+  const aiLimit = effectiveLimit(store, 'ai_studio_suite');
+  const remaining = suiteUnitsLeft(store);
+  const canUse  = canUseSuite(store, 1);
 
   const handleFile = (file) => {
     if (!file) return;
@@ -275,11 +279,21 @@ export default function AIModelPanel({ category, onAddImage }) {
 
       setResults(urls.map(url => ({ url, added: false })));
 
-      // Charge the quota by the number of photos actually produced
-      await db
-        .from('stores')
-        .update({ _ai_used: Math.floor(aiUsed || 0) + urls.length })
-        .eq('owner_id', store.owner_id);
+      // Charge the shared Studio Suite meter by the number of photos produced.
+      await chargeSuite(store.owner_id, urls.length);
+      // Persist each generated image to the shared Studio Suite library
+      // (app_gallery, kind='ai_model') so it shows up in Library across the
+      // web app and the mobile studio. owner_id === user.id, so user_id maps
+      // to the store owner and RLS (auth.uid() = user_id) is satisfied.
+      try {
+        const rows = urls.map(url => ({
+          user_id: store.owner_id,
+          image_url: url,
+          title: 'AI model',
+          kind: 'ai_model',
+        }));
+        await db.from('app_gallery').insert(rows);
+      } catch { /* non-fatal: the image is still shown and addable */ }
       await refreshStore();
 
       if (urls.length < n) {
@@ -404,9 +418,9 @@ export default function AIModelPanel({ category, onAddImage }) {
         )}
       </div>
 
-      {!hasFeature(store, 'ai_models') ? (
+      {!hasFeature(store, 'ai_studio_suite') ? (
         <div className={styles.upgradeNote}>
-          AI model generation is available on Pro and higher plans. Upgrade to generate campaign-quality model photos.
+          AI model generation is part of Studio Suite. Upgrade your plan to generate campaign-quality model photos.
         </div>
       ) : (
         <>
@@ -586,7 +600,7 @@ export default function AIModelPanel({ category, onAddImage }) {
                               <span className={styles.addedBadge}>✓ Added</span>
                             ) : (
                               <button className={styles.addBtnSm} onClick={() => handleAddToProduct(url)}>
-                                <PlusCircle size={13} /> Add to Images
+                                <PlusCircle size={13} /> {addLabel}
                               </button>
                             )}
                           </div>
@@ -660,7 +674,7 @@ export default function AIModelPanel({ category, onAddImage }) {
             <div className={styles.lightboxActions}>
               {!results.find(r => r.url === lightboxUrl)?.added ? (
                 <button className={styles.addBtn} onClick={() => { handleAddToProduct(lightboxUrl); }}>
-                  <PlusCircle size={13} /> Add to Images
+                  <PlusCircle size={13} /> {addLabel}
                 </button>
               ) : (
                 <span className={styles.addedBadge}>✓ Added to images</span>

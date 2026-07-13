@@ -76,7 +76,11 @@ const EMPTY_FORM = {
   flat_stone_cost: '',
 };
 
-export default function ProductModal({ product, store, onSave, onClose, checkSKU, planLimits }) {
+// `prefill` (new-product only) seeds the form when opening the Add Product
+// screen from Studio Suite → AI Model "Add to Inventory": { imageUrl, category,
+// sub_category?, name?, gold_carat?, material?, ... }. It never triggers
+// edit-mode — `product` stays null, so this is a fresh product with a head start.
+export default function ProductModal({ product, store, onSave, onClose, checkSKU, planLimits, prefill }) {
   const [form, setForm]             = useState(EMPTY_FORM);
   const [slotFiles, setSlotFiles]   = useState([null,null,null,null,null]);
   const [slotBlobUrls, setSlotBlobUrls] = useState([null,null,null,null,null]);
@@ -216,19 +220,35 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
       setCertStates({ hallmark: hEntry?.url || '', diamond: dEntry?.url || '' });
       setCertFiles({ hallmark: null, diamond: null });
     } else {
-      setForm(EMPTY_FORM);
+      // New product — optionally seeded from Studio Suite (prefill).
+      const p = prefill || {};
+      setForm({
+        ...EMPTY_FORM,
+        category:       p.category       || '',
+        sub_category:   p.sub_category   || '',
+        name:           p.name           || '',
+        gold_carat:     p.gold_carat     || '',
+        material:       p.material        || '',
+        occasion:       p.occasion       || '',
+      });
       setSlotFiles([null,null,null,null,null]);
       setSlotBlobUrls(prev => { prev.forEach(u => u && URL.revokeObjectURL(u)); return [null,null,null,null,null]; });
-      setExisting([null,null,null,null,null]);
-      setSubcats([]);
+      // Drop the generated image(s) into the first slot(s) as existing URLs.
+      const seedUrls = [p.imageUrl, ...(p.extraImages || [])].filter(Boolean).slice(0, 5);
+      const seededExisting = [null,null,null,null,null];
+      seedUrls.forEach((u, i) => { seededExisting[i] = u; });
+      setExisting(seededExisting);
+      setSubcats(p.category ? (SUBCATEGORY_MAP[p.category] || []) : []);
       setVariants([]);
-      setCustomCatMode(false); setCustomSubcatMode(false);
-      setCustomMetalMode(false); setCustomDiamondMode(false);
+      setCustomCatMode(!!p.category && !CATEGORIES.some(c => c.value === p.category));
+      setCustomSubcatMode(false);
+      setCustomMetalMode(!!p.gold_carat && !ALL_METAL_OPTIONS.includes(p.gold_carat));
+      setCustomDiamondMode(false);
       setCertFiles({ hallmark: null, diamond: null });
       setCertStates({ hallmark: '', diamond: '' });
     }
     setSkuError('');
-  }, [product]);
+  }, [product, prefill]);
 
   const set = useCallback((key, val) => {
     setForm(f => ({ ...f, [key]: val }));

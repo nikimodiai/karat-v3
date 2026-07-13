@@ -7,6 +7,7 @@ import {
 import { useAuth } from '../hooks/useAuth';
 import { useToast } from '../hooks/useToast';
 import { effectiveLimit, hasFeature, fmtLimit } from '../lib/plans';
+import { suiteUnitsLeft, suiteUsageText, canUseSuite, chargeSuite } from '../lib/studioSuite';
 import { compressImage } from '../lib/imageUtils';
 import { composeDesignPrompt } from '../lib/designPrompt';
 import { toGoldCaratLabel, isDiamondStone, pieceTypeToCategory } from '../lib/designTaxonomy';
@@ -87,7 +88,7 @@ function buildDescription(spec) {
   return lines.join(' ');
 }
 
-export default function DesignStudio() {
+export default function DesignStudio({ onBack }) {
   const { store, refreshStore } = useAuth();
   const { showToast } = useToast();
 
@@ -116,12 +117,10 @@ export default function DesignStudio() {
 
   const objectUrlRef = useRef(null);
 
-  // ── Plan gating (separate Design Studio quota) ──────────────────────
-  const designUsed = store?._design_used || 0;
-  const designLimit = effectiveLimit(store, 'design_studio');
-  const featureOn = hasFeature(store, 'design_studio');
-  const canUse = featureOn && (designLimit === Infinity || designUsed < designLimit);
-  const usageText = designLimit === Infinity ? null : `${designUsed}/${fmtLimit(designLimit)} generations this month`;
+  // ── Plan gating (shared AI Studio Suite meter) ──────────────────────
+  const featureOn = hasFeature(store, 'ai_studio_suite');
+  const canUse = canUseSuite(store, 1);
+  const usageText = suiteUsageText(store);
 
   // ── Reference image handlers ────────────────────────────────────────
   const pickReference = (file) => {
@@ -184,15 +183,15 @@ export default function DesignStudio() {
       setRenders(urls);
       setStatus('draft');
 
-      // Count the generation against the monthly quota.
-      await db.from('stores').update({ _design_used: Math.floor(designUsed || 0) + 1 }).eq('owner_id', store.owner_id);
+      // Charge the shared Studio Suite meter: one unit per render produced.
+      await chargeSuite(store.owner_id, urls.length);
       await refreshStore();
     } catch (e) {
       setError(e.message || 'Generation failed. Please try again.');
     } finally {
       setGenerating(false);
     }
-  }, [params, mode, referenceFile, referenceUrl, canUse, store, designUsed, refreshStore]);
+  }, [params, mode, referenceFile, referenceUrl, canUse, store, refreshStore]);
 
   // ── Library ─────────────────────────────────────────────────────────
   const loadLibrary = useCallback(async () => {
@@ -375,9 +374,14 @@ export default function DesignStudio() {
   if (!featureOn) {
     return (
       <div className={styles.page}>
+        {onBack && (
+          <button className={styles.tabBtn} onClick={onBack} style={{ marginBottom: 14 }}>
+            <ArrowLeft size={15} /> Studio Suite
+          </button>
+        )}
         <div className={styles.lock}>
           <Lock size={30} strokeWidth={1.4} />
-          <h2>Design Studio is a Professional feature</h2>
+          <h2>Jewellery Design isn’t available on your plan</h2>
           <p>Generate photorealistic jewellery designs, price estimates and maker's spec sheets. Upgrade your plan to use it.</p>
         </div>
       </div>
@@ -388,10 +392,15 @@ export default function DesignStudio() {
 
   return (
     <div className={styles.page}>
+      {onBack && (
+        <button className={styles.tabBtn} onClick={onBack} style={{ marginBottom: 14 }}>
+          <ArrowLeft size={15} /> Studio Suite
+        </button>
+      )}
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.headLeft}>
-          <h1 className={styles.title}><Gem size={20} /> Design Studio</h1>
+          <h1 className={styles.title}><Gem size={20} /> Jewellery Design</h1>
           <p className={styles.sub}>{view === 'library' ? 'Your private design library.' : headerSub}</p>
         </div>
         <div className={styles.headActions}>
@@ -408,7 +417,7 @@ export default function DesignStudio() {
 
       {!canUse && (
         <div className={styles.limitNote}>
-          You've used all {fmtLimit(designLimit)} Design Studio generations this month. Saved designs still publish; new renders resume next cycle or after an upgrade.
+          You've used all {fmtLimit(effectiveLimit(store, 'ai_studio_suite'))} AI Studio Suite generations this month. Saved designs still publish; new renders resume next cycle or after an upgrade.
         </div>
       )}
 

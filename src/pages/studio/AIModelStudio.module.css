@@ -1,0 +1,27 @@
+.catBlock {
+  background: #fff;
+  border: 1.5px solid var(--border-card);
+  border-radius: var(--r-md, 14px);
+  padding: 16px;
+  margin-bottom: 18px;
+  max-width: 520px;
+}
+.catLabel {
+  display: block;
+  font-size: 12px; font-weight: 700; color: var(--navy);
+  margin-bottom: 7px;
+}
+.catSelect {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border-card); border-radius: var(--r-sm);
+  background: #fff; color: var(--ink);
+  font-size: 14px; font-family: var(--font-body);
+  cursor: pointer;
+}
+.catSelect:focus { outline: none; border-color: var(--gold); }
+.catHint {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; color: var(--ink-soft); margin: 10px 0 0;
+}
+.catHint svg { color: var(--gold); flex-shrink: 0; }

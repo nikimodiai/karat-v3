@@ -67,6 +67,12 @@ export function StoreDataProvider({ children }) {
   const [error,     setError]     = useState(null);
   const loadedForUid = useRef(null);
 
+  // Studio Suite → Inventory hand-off. When AI Model's "Add to Inventory" runs,
+  // it stashes a prefill here and switches to the Inventory tab; Inventory reads
+  // and clears it, opening its Add Product modal pre-populated. Lives here so we
+  // reuse Inventory's full save/vectorize/variant logic instead of duplicating it.
+  const [inventoryPrefill, setInventoryPrefill] = useState(null);
+
   const loadAll = useCallback(async () => {
     // Staff sessions have no Supabase Auth uid — use store.owner_id instead.
     // The RLS migration adds a staff_read policy that allows anon to read
@@ -203,6 +209,7 @@ export function StoreDataProvider({ children }) {
     setProducts: setProductsAndSync,
     setCustomers: setCustomersAndSync,
     setReviews: setReviewsAndSync,
+    inventoryPrefill, setInventoryPrefill,
   };
 
   return <StoreDataContext.Provider value={ctx}>{children}</StoreDataContext.Provider>;

@@ -46,6 +46,26 @@ export const N8N_DESIGN_GENERATE = N8N_BASE + '/swarnix-design-generate';
 // Cloudinary, returns { secure_url, public_id }. Cost ₹0 (VPS compute).
 export const N8N_BG_REMOVE = N8N_BASE + '/swarnix-bg-remove';
 
+// ── AI Studio Suite webhooks (shared with the mobile studio) ────────
+// The web app's Studio Suite reuses the SAME proven n8n workflows the mobile
+// swarnix-studio app calls — no separate app-* endpoints. All take the
+// jeweller's Supabase user id (owner_id === user.id) for the usage log; the
+// monthly cap is enforced client-side against stores._ai_studio_suite_limit.
+//
+// Studio Photo (retouch) + Metal Swap (variant): one workflow, two modes
+// (`mode: 'retouch' | 'variant'`). The app first turns a device photo into a
+// Cloudinary URL via reel-image-upload (n8n holds the Cloudinary creds), then
+// POSTs JSON here → { success, retouched_url }.
+export const N8N_RETOUCH = N8N_BASE + '/retouch';
+// Reel Generation (image-to-video), three webhooks:
+//  - reel-image-upload: multipart { file, user_id? } → { url } (Cloudinary).
+//  - reel-generate: JSON submit → { job_id, status:'processing' }; n8n renders
+//    in the background and updates the reel_jobs row (service role).
+//  - reel-status: optional fallback poll; the app prefers Supabase Realtime.
+export const N8N_REEL_IMAGE_UPLOAD = N8N_BASE + '/reel-image-upload';
+export const N8N_REEL_GENERATE     = N8N_BASE + '/reel-generate';
+export const N8N_REEL_STATUS       = N8N_BASE + '/reel-status';
+
 export const db = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
     persistSession: true,

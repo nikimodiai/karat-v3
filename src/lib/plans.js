@@ -29,7 +29,11 @@ export const PLAN_LIMITS = {
     image_storage:  1,        // GB
     ai_models:      20,       // AI Models Try-On / month
     selfie_tryon:   10,       // Selfie Try-On for Customers / month
-    design_studio:  15,       // Design Studio generations / month
+    design_studio:  15,       // Design Studio generations / month  (legacy)
+    // AI Studio Suite / month — FALLBACK only. Source of truth is
+    // subscription_plans.ai_studio_suite_limit → copied to stores._ai_studio_suite_limit
+    // at signup; this value is used only when the store column is null/0.
+    ai_studio_suite: 20,
     monthly_inr:    0,
     features: {
       whatsapp:        true,
@@ -41,6 +45,7 @@ export const PLAN_LIMITS = {
       ai_models:       true,
       virtual_tryon:   true,
       design_studio:   true,
+      ai_studio_suite: true,
       marketing_messages: false,
       analytics:       'PROFESSIONAL',
     },
@@ -51,7 +56,8 @@ export const PLAN_LIMITS = {
     image_storage:  5,
     ai_models:      50,
     selfie_tryon:   30,
-    design_studio:  0,        // off on Starter (feature gated below)
+    design_studio:  0,        // off on Starter (legacy Design Studio meter)
+    ai_studio_suite: 150,     // AI Studio Suite is unlocked on every plan
     monthly_inr:    3999,
     features: {
       whatsapp:        true,
@@ -63,6 +69,7 @@ export const PLAN_LIMITS = {
       ai_models:       true,
       virtual_tryon:   true,
       design_studio:   false,
+      ai_studio_suite: true,
       marketing_messages: false,
       analytics:       'STARTER',
     },
@@ -74,6 +81,7 @@ export const PLAN_LIMITS = {
     ai_models:      200,
     selfie_tryon:   100,
     design_studio:  100,
+    ai_studio_suite: 400,     // AI Studio Suite / month
     monthly_inr:    8999,
     features: {
       whatsapp:        true,
@@ -85,6 +93,7 @@ export const PLAN_LIMITS = {
       ai_models:       true,
       virtual_tryon:   true,
       design_studio:   true,
+      ai_studio_suite: true,
       marketing_messages: true,
       analytics:       'PROFESSIONAL',
     },
@@ -96,6 +105,7 @@ export const PLAN_LIMITS = {
     ai_models:      500,
     selfie_tryon:   300,
     design_studio:  300,
+    ai_studio_suite: 1000,    // AI Studio Suite / month
     monthly_inr:    17999,
     features: {
       whatsapp:        true,
@@ -107,6 +117,7 @@ export const PLAN_LIMITS = {
       ai_models:       true,
       virtual_tryon:   true,
       design_studio:   true,
+      ai_studio_suite: true,
       marketing_messages: true,
       analytics:       'ENTERPRISE',
     },
@@ -125,7 +136,7 @@ export function planLimits(store) {
 
 // Returns the *effective* limit for a resource: the store's per-tenant
 // override (if set in the DB) or the plan default.
-// resource ∈ 'conversations' | 'products' | 'image_storage' | 'ai_models' | 'selfie_tryon' | 'design_studio'
+// resource ∈ 'conversations' | 'products' | 'image_storage' | 'ai_models' | 'selfie_tryon' | 'design_studio' | 'ai_studio_suite'
 export function effectiveLimit(store, resource) {
   const plan = planLimits(store);
   const ov = store && {
@@ -135,6 +146,7 @@ export function effectiveLimit(store, resource) {
     ai_models:      store.ai_models_limit,
     selfie_tryon:   store.virtual_tryon,   // virtual_tryon column = Selfie Try-On limit
     design_studio:  store.design_studio_limit,
+    ai_studio_suite: store._ai_studio_suite_limit,  // unified Studio Suite meter
   }[resource];
   // Treat 0 as "use plan default"; treat null/undefined the same.
   if (ov === null || ov === undefined || ov === 0) return plan[resource];
@@ -152,9 +164,28 @@ export function hasFeature(store, featureKey) {
     ai_models:      store.ai_models,
     virtual_tryon:  store.virtual_tryon,
     design_studio:  store.design_studio,
+    ai_studio_suite: store.ai_studio_suite,  // optional per-store override; on for every plan by default
   }[featureKey];
   if (typeof dbToggle === 'boolean') return dbToggle;
   return !!planLimits(store).features[featureKey];
+}
+
+// ── AI Studio Suite reel pricing ────────────────────────────────────
+// Ported verbatim from the mobile studio (swarnix-studio/src/lib/reelCredits.ts).
+// BytePlus Seedance cost scales with duration AND quality; our reels are silent
+// (the render service adds music) so we price on the cheaper no-audio tier.
+// A reel subtracts this many units from the shared _ai_studio_suite meter,
+// charged on completion. Keep in sync with the mobile rates.
+const REEL_UNITS_PER_SECOND = {
+  '480p': 0.35, // SD
+  '720p': 0.75, // HD
+  '1080p': 1.6, // Full HD
+};
+
+// Units required for a reel of `lengthSeconds` at `resolution`. Whole number ≥ 1.
+export function reelSuiteCost(lengthSeconds, resolution) {
+  const rate = REEL_UNITS_PER_SECOND[resolution] ?? REEL_UNITS_PER_SECOND['720p'];
+  return Math.max(1, Math.ceil(lengthSeconds * rate));
 }
 
 // Trial is *treated as Professional* per Nikhil's spec for analytics gating.

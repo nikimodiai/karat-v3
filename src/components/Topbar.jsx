@@ -8,7 +8,7 @@ const ROLE_LABELS = { owner: 'Owner', admin: 'Admin', read_write: 'Read & Write'
 const NAV_ITEMS = [
   { id: 'dashboard',  label: 'Dashboard',         icon: Home },
   { id: 'inventory',  label: 'Inventory',          icon: LayoutGrid },
-  { id: 'design',     label: 'Design Studio',      icon: Wand2, isNew: true },
+  { id: 'design',     label: 'Studio Suite',       icon: Wand2, isNew: true },
   { id: 'customers',  label: 'Customers',          icon: Users },
   { id: 'analytics',  label: 'Analytics',          icon: BarChart2 },
   { id: 'offers',     label: 'Offers',             icon: Tag },

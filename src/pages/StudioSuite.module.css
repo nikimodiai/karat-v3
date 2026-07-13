@@ -1,0 +1,95 @@
+.page {
+  flex: 1;
+  overflow-y: auto;
+  padding: clamp(16px, 4vw, 32px) clamp(16px, 4vw, 24px);
+  max-width: 1180px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 26px;
+  flex-wrap: wrap;
+}
+.title {
+  display: flex; align-items: center; gap: 9px;
+  font-size: 22px; font-weight: 700; color: var(--navy); margin: 0 0 5px;
+}
+.title svg { color: var(--gold); }
+.sub { font-size: 14px; color: var(--ink-soft); margin: 0; max-width: 60ch; }
+
+/* ── Shared monthly meter ── */
+.meter {
+  min-width: 200px;
+  background: #fff;
+  border: 1.5px solid var(--border-card);
+  border-radius: var(--r-sm);
+  padding: 10px 14px;
+}
+.meterLabel {
+  display: block;
+  font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.meterValue { display: block; font-size: 15px; font-weight: 700; color: var(--navy); margin: 2px 0 6px; }
+.meterBar { height: 5px; border-radius: 99px; background: rgba(11,24,41,.08); overflow: hidden; }
+.meterFill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #C9A84C, #e8b84b); transition: width .3s; }
+
+/* ── Feature tiles ── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+.tile {
+  display: flex; align-items: flex-start; gap: 14px; text-align: left;
+  padding: 18px;
+  border: 1.5px solid var(--border-card); border-radius: var(--r-md, 14px);
+  background: #fff; cursor: pointer;
+  font-family: var(--font-body);
+  transition: border-color .15s, transform .15s, box-shadow .15s;
+}
+.tile:hover {
+  border-color: var(--gold);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(11,24,41,.07);
+}
+.tileIcon {
+  flex-shrink: 0;
+  width: 46px; height: 46px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(200,149,108,.1); color: var(--gold);
+}
+.tileBody { min-width: 0; }
+.tileTitle { font-size: 15px; font-weight: 700; color: var(--navy); margin: 2px 0 4px; }
+.tileDesc { font-size: 13px; color: var(--ink-soft); margin: 0; line-height: 1.5; }
+
+/* ── Sub-feature header (back to hub) ── */
+.featHeader { margin-bottom: 20px; }
+.backBtn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px 6px 8px;
+  border: 1.5px solid var(--border-card); border-radius: 99px;
+  background: #fff; color: var(--ink-soft);
+  font-size: 12px; font-weight: 600; font-family: var(--font-body); cursor: pointer;
+  margin-bottom: 14px;
+  transition: all .15s;
+}
+.backBtn:hover { border-color: var(--gold); color: var(--navy); }
+.featTitleRow {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 16px; flex-wrap: wrap;
+}
+.featTitleLeft { min-width: 0; }
+
+/* ── Feature lock ── */
+.lock {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: 10px; max-width: 420px; margin: 8vh auto 0; color: var(--ink-soft);
+}
+.lock svg { color: var(--gold); }
+.lock h2 { font-size: 18px; color: var(--navy); margin: 0; }
