@@ -27,7 +27,7 @@ function OffersTab() {
     <div style={{ flex: 1, overflowY: 'auto', padding: 'clamp(16px, 4vw, 32px) clamp(16px, 4vw, 24px)', maxWidth: 760, margin: '0 auto', width: '100%' }}>
       <div style={{ marginBottom: 28 }}>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--navy)', margin: '0 0 6px' }}>Offers</h1>
-        <p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>
+        <p style={{ fontSize: 15.5, color: 'var(--ink-soft)', margin: 0 }}>
           Post seasonal deals and promotions — upload an image or video, add details, and set a validity date.
         </p>
       </div>
@@ -46,7 +46,7 @@ function VoiceTab() {
           <span style={{
             background: 'linear-gradient(135deg, #C9A84C, #e8b84b)',
             color: '#0B1829',
-            fontSize: 10,
+            fontSize: 11,
             fontWeight: 800,
             padding: '2px 8px',
             borderRadius: 99,
@@ -54,7 +54,7 @@ function VoiceTab() {
             textTransform: 'uppercase',
           }}>New</span>
         </div>
-        <p style={{ fontSize: 14, color: 'var(--ink-soft)', margin: 0 }}>
+        <p style={{ fontSize: 15.5, color: 'var(--ink-soft)', margin: 0 }}>
           Upload voice samples so AI responds exactly the way you would — in your tone, your words, your style.
         </p>
       </div>
@@ -76,7 +76,7 @@ function AppShell() {
         <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
           <img src="/swarnix-logo.png" alt="Swarnix" style={{ width: 90, height: 90, objectFit: 'contain', filter: 'drop-shadow(0 0 20px rgba(200,149,108,.5))' }} />
           <div className="spinner" />
-          <div style={{ fontSize: 12, color: 'rgba(200,149,108,.65)', letterSpacing: '.12em', fontFamily: 'DM Sans,sans-serif' }}>
+          <div style={{ fontSize: 13.5, color: 'rgba(200,149,108,.65)', letterSpacing: '.12em', fontFamily: 'DM Sans,sans-serif' }}>
             LOADING SWARNIX
           </div>
         </div>

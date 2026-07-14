@@ -3,7 +3,7 @@
 }
 
 .empty {
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--ink-soft);
   padding: 10px 12px;
   background: rgba(11,24,41,.03);
@@ -38,7 +38,7 @@
 .summary:hover { background: rgba(201,168,76,.05); }
 
 .varIdx {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--ink-soft);
   min-width: 18px;
@@ -59,7 +59,7 @@
 }
 
 .varName {
-  font-size: 12.5px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--navy);
   flex: 1;
@@ -74,13 +74,13 @@
 }
 
 .varMeta {
-  font-size: 11px;
+  font-size: 12.5px;
   color: var(--ink-soft);
   white-space: nowrap;
 }
 
 .varPrice {
-  font-size: 12.5px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--navy);
   white-space: nowrap;
@@ -123,19 +123,19 @@
 @media (max-width: 600px) {
   .dRow, .dRow3 { grid-template-columns: 1fr; }
   /* Prevent iOS Safari zoom on input focus */
-  .dField input, .dField select { font-size: 16px; padding: 10px 12px; }
+  .dField input, .dField select { font-size: 17.5px; padding: 10px 12px; }
 }
 
 .dField { display: flex; flex-direction: column; gap: 4px; }
 .dField label {
-  font-size: 10px; font-weight: 700;
+  font-size: 11px; font-weight: 700;
   letter-spacing: .08em; text-transform: uppercase;
   color: var(--navy);
 }
 .dField input, .dField select {
   border: 1.5px solid rgba(201,168,76,.22);
   border-radius: 6px; padding: 7px 10px;
-  font-size: 13px; font-family: var(--font-body);
+  font-size: 14.5px; font-family: var(--font-body);
   background: #fff; outline: none;
   transition: border-color .15s;
 }
@@ -156,7 +156,7 @@
   gap: 3px;
   background: none; border: 1.5px solid rgba(201,168,76,.2);
   border-radius: 7px; padding: 5px 8px;
-  cursor: pointer; font-size: 10px; font-weight: 600;
+  cursor: pointer; font-size: 11px; font-weight: 600;
   color: var(--ink-mid); font-family: var(--font-body);
   transition: all .14s;
 }
@@ -184,14 +184,14 @@
   border-radius: 50%;
   border: 1.5px dashed var(--ink-soft);
   display: flex; align-items: center; justify-content: center;
-  font-size: 13px; color: var(--ink-soft); font-weight: 400;
+  font-size: 14.5px; color: var(--ink-soft); font-weight: 400;
 }
 .customColorInput {
   margin-top: 6px;
   width: 100%;
   border: 1.5px solid rgba(201,168,76,.35);
   border-radius: 6px; padding: 7px 10px;
-  font-size: 13px; font-family: var(--font-body);
+  font-size: 14.5px; font-family: var(--font-body);
   background: #fff; outline: none;
 }
 .customColorInput:focus { border-color: var(--gold); }
@@ -205,7 +205,7 @@
   padding: 7px 12px; border-radius: 7px;
   border: 1.5px solid rgba(201,168,76,.25);
   background: #fff; cursor: pointer;
-  font-size: 12px; font-weight: 600;
+  font-size: 13.5px; font-weight: 600;
   font-family: var(--font-body); color: var(--ink-mid);
   transition: all .15s;
 }
@@ -226,20 +226,20 @@
 }
 .dynRow {
   display: flex; justify-content: space-between;
-  font-size: 12px; color: var(--ink-mid); padding: 3px 0;
+  font-size: 13.5px; color: var(--ink-mid); padding: 3px 0;
 }
 .dynTotal {
   font-weight: 700; color: var(--navy);
   padding-top: 6px; margin-top: 2px;
   border-top: 1px solid rgba(201,168,76,.2);
-  font-size: 14px;
+  font-size: 15.5px;
 }
-.dynTotal strong { font-size: 16px; }
+.dynTotal strong { font-size: 17.5px; }
 
 /* ── Stock toggle ───────────────────────────────────────────────── */
 .stockToggle {
   display: flex; align-items: center; gap: 7px;
-  font-size: 12.5px; color: var(--ink-mid); cursor: pointer;
+  font-size: 14px; color: var(--ink-mid); cursor: pointer;
   margin-top: 4px;
 }
 
@@ -251,7 +251,7 @@
   border: 1.5px dashed rgba(201,168,76,.4);
   border-radius: 9px;
   background: rgba(201,168,76,.04);
-  color: var(--navy); font-size: 12.5px; font-weight: 600;
+  color: var(--navy); font-size: 14px; font-weight: 600;
   font-family: var(--font-body); cursor: pointer;
   transition: all .15s;
 }

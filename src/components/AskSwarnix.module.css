@@ -71,13 +71,13 @@
 }
 
 .headerTitle {
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 700;
   color: #fff;
 }
 
 .headerSub {
-  font-size: 11px;
+  font-size: 12.5px;
   color: rgba(255,255,255,.65);
   margin-top: 1px;
 }
@@ -116,7 +116,7 @@
   color: var(--navy);
   padding: 9px 12px;
   border-radius: 12px 12px 12px 4px;
-  font-size: 13px;
+  font-size: 14.5px;
   line-height: 1.5;
   white-space: pre-wrap;
 }
@@ -128,7 +128,7 @@
   color: #fff;
   padding: 9px 12px;
   border-radius: 12px 12px 4px 12px;
-  font-size: 13px;
+  font-size: 14.5px;
   line-height: 1.5;
   white-space: pre-wrap;
 }
@@ -155,7 +155,7 @@
 }
 
 .errorRow {
-  font-size: 11.5px;
+  font-size: 13px;
   color: var(--err, #C0392B);
   padding: 6px 14px 0;
   flex-shrink: 0;
@@ -177,7 +177,7 @@
   border: 1.5px solid rgba(11,24,41,.12);
   border-radius: 10px;
   padding: 8px 10px;
-  font-size: 13px;
+  font-size: 14.5px;
   font-family: var(--font-body);
   line-height: 1.4;
   max-height: 80px;

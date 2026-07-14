@@ -8,7 +8,7 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   color: var(--ink);
   margin-bottom: 10px;
@@ -26,10 +26,10 @@
   border: 1.5px dashed var(--border-card);
   border-radius: var(--r);
   background: rgba(200,149,108,.04);
-  font-size: 13px;
+  font-size: 14.5px;
   color: var(--ink-mid);
 }
-.generating small { font-size: 11px; color: var(--ink-soft); }
+.generating small { font-size: 12.5px; color: var(--ink-soft); }
 
 .placeholder {
   display: flex;
@@ -42,7 +42,7 @@
   border-radius: var(--r);
   background: #fff;
   color: var(--ink-soft);
-  font-size: 13px;
+  font-size: 14.5px;
   text-align: center;
   padding: 20px;
 }
@@ -76,7 +76,7 @@
   padding: 8px 14px;
   border: 1.5px solid var(--border-card); border-radius: var(--r-sm);
   background: #fff; color: var(--ink);
-  font-size: 13px; font-weight: 600; font-family: var(--font-body); cursor: pointer;
+  font-size: 14.5px; font-weight: 600; font-family: var(--font-body); cursor: pointer;
   transition: all .15s;
 }
 .secondaryBtn:hover { border-color: var(--gold); background: rgba(200,149,108,.06); }
@@ -84,7 +84,7 @@
 
 .error {
   display: flex; align-items: center; gap: 7px;
-  margin-top: 10px; font-size: 12px; line-height: 1.4;
+  margin-top: 10px; font-size: 13.5px; line-height: 1.4;
   color: var(--danger); background: var(--danger-bg);
   border-radius: var(--r-sm); padding: 9px 11px;
 }
@@ -101,7 +101,7 @@
   padding: 9px 18px;
   border: 1.5px solid var(--danger-bg); border-radius: var(--r-sm);
   background: var(--danger-bg); color: var(--danger);
-  font-size: 13px; font-weight: 600; font-family: var(--font-body); cursor: pointer;
+  font-size: 14.5px; font-weight: 600; font-family: var(--font-body); cursor: pointer;
   margin-right: auto;
 }
 .discardBtn:hover { background: rgba(190,18,60,.16); }
@@ -109,11 +109,11 @@
 
 .publishedNote {
   display: flex; align-items: center; gap: 7px;
-  font-size: 13px; color: var(--success);
+  font-size: 14.5px; color: var(--success);
   background: var(--success-bg); border-radius: var(--r-sm);
   padding: 9px 12px; margin-bottom: 12px;
 }
-.decisionHint { font-size: 11px; color: var(--ink-soft); margin-top: 8px; text-align: right; }
+.decisionHint { font-size: 12.5px; color: var(--ink-soft); margin-top: 8px; text-align: right; }
 
 /* ── Zoom overlay ── */
 .zoomOverlay {

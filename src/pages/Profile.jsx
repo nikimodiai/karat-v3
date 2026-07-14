@@ -249,7 +249,7 @@ export default function Profile() {
                         </button>
                       )}
                     </div>
-                    <span style={{ fontSize: 10, color: 'rgba(13,27,42,.5)' }}>Logo</span>
+                    <span style={{ fontSize: 11, color: 'rgba(13,27,42,.5)' }}>Logo</span>
                     <input
                       ref={logoInputRef}
                       type="file"
@@ -291,7 +291,7 @@ export default function Profile() {
                         </button>
                       )}
                     </div>
-                    <span style={{ fontSize: 10, color: 'rgba(13,27,42,.5)' }}>Name Style</span>
+                    <span style={{ fontSize: 11, color: 'rgba(13,27,42,.5)' }}>Name Style</span>
                     <input
                       ref={nameStyleInputRef}
                       type="file"
@@ -445,7 +445,7 @@ export default function Profile() {
             <div className={styles.card}>
               <div className={styles.cardTitle}>
                 <Lock size={14} color="#C9A84C" /> Account & Contact
-                <span style={{ fontSize: 11, color: 'rgba(201,168,76,.5)', fontFamily: 'DM Sans', fontWeight: 400, marginLeft: 8 }}>(managed by admin)</span>
+                <span style={{ fontSize: 12.5, color: 'rgba(201,168,76,.5)', fontFamily: 'DM Sans', fontWeight: 400, marginLeft: 8 }}>(managed by admin)</span>
               </div>
 
               <div className={styles.field}>
@@ -488,7 +488,7 @@ export default function Profile() {
                 <a
                   href="mailto:support@nelishkaai.in?subject=SWARNIX Plan Upgrade"
                   className="btn-gold"
-                  style={{ marginTop: 16, width: '100%', justifyContent: 'center', fontSize: 12, textDecoration: 'none' }}
+                  style={{ marginTop: 16, width: '100%', justifyContent: 'center', fontSize: 13.5, textDecoration: 'none' }}
                 >
                   <Crown size={13} /> Upgrade Plan
                 </a>

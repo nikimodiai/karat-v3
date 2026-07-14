@@ -28,7 +28,7 @@ const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload?.length) return null;
   return (
     <div style={{background:'#fff',border:'1px solid rgba(201,168,76,.18)',borderRadius:8,
-      padding:'10px 14px',boxShadow:'0 4px 16px rgba(11,24,41,.1)',fontSize:12}}>
+      padding:'10px 14px',boxShadow:'0 4px 16px rgba(11,24,41,.1)',fontSize:13.5}}>
       {label && <div style={{fontWeight:600,color:'#0B1829',marginBottom:4}}>{label}</div>}
       {payload.map((p,i)=>(
         <div key={i} style={{color:p.color||'#C9A84C',fontWeight:500,display:'flex',gap:6,alignItems:'center'}}>
@@ -88,7 +88,7 @@ function ChartBox({ title, height=220, children }) {
 function EmptyChart({ icon: Icon, text }) {
   return (
     <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',
-      height:'100%',gap:8,color:'rgba(11,24,41,.35)',fontSize:12,padding:'12px 0'}}>
+      height:'100%',gap:8,color:'rgba(11,24,41,.35)',fontSize:13.5,padding:'12px 0'}}>
       <Icon size={30} strokeWidth={1}/>
       <span style={{textAlign:'center'}}>{text}</span>
     </div>
@@ -226,7 +226,7 @@ export default function Analytics() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={catData} margin={{top:4,right:4,left:-20,bottom:0}} barSize={22}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(11,24,41,.05)" vertical={false}/>
-                  <XAxis dataKey="name" tick={{fontSize:10,fontFamily:'DM Sans',fill:'rgba(11,24,41,.45)'}} axisLine={false} tickLine={false}/>
+                  <XAxis dataKey="name" tick={{fontSize:11,fontFamily:'DM Sans',fill:'rgba(11,24,41,.45)'}} axisLine={false} tickLine={false}/>
                   <YAxis tick={{fontSize:9,fontFamily:'DM Sans',fill:'rgba(11,24,41,.35)'}} axisLine={false} tickLine={false} allowDecimals={false}/>
                   <Tooltip content={<CustomTooltip/>}/>
                   <Bar dataKey="value" name="Products" radius={[5,5,0,0]}>
@@ -248,7 +248,7 @@ export default function Analytics() {
                   </Pie>
                   <Tooltip content={<CustomTooltip/>}/>
                   <Legend iconType="circle" iconSize={9}
-                    formatter={(v)=><span style={{fontSize:12,color:'rgba(11,24,41,.6)'}}>{v}</span>}/>
+                    formatter={(v)=><span style={{fontSize:13.5,color:'rgba(11,24,41,.6)'}}>{v}</span>}/>
                 </PieChart>
               </ResponsiveContainer>
             ) : <EmptyChart icon={Gem} text="No inventory data yet"/>}
@@ -264,7 +264,7 @@ export default function Analytics() {
                   </Pie>
                   <Tooltip content={<CustomTooltip/>}/>
                   <Legend iconType="circle" iconSize={9}
-                    formatter={(v)=><span style={{fontSize:11,color:'rgba(11,24,41,.55)'}}>{v}</span>}/>
+                    formatter={(v)=><span style={{fontSize:12.5,color:'rgba(11,24,41,.55)'}}>{v}</span>}/>
                 </PieChart>
               </ResponsiveContainer>
             ) : <EmptyChart icon={Gem} text="No material data yet"/>}
@@ -277,7 +277,7 @@ export default function Analytics() {
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={priceBuckets} margin={{top:4,right:4,left:-20,bottom:0}} barSize={28}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(11,24,41,.05)" vertical={false}/>
-                  <XAxis dataKey="name" tick={{fontSize:10,fontFamily:'DM Sans',fill:'rgba(11,24,41,.45)'}} axisLine={false} tickLine={false}/>
+                  <XAxis dataKey="name" tick={{fontSize:11,fontFamily:'DM Sans',fill:'rgba(11,24,41,.45)'}} axisLine={false} tickLine={false}/>
                   <YAxis tick={{fontSize:9,fontFamily:'DM Sans',fill:'rgba(11,24,41,.35)'}} axisLine={false} tickLine={false} allowDecimals={false}/>
                   <Tooltip content={<CustomTooltip/>}/>
                   <Bar dataKey="value" name="Products" fill={NAVY} radius={[5,5,0,0]}>
@@ -297,7 +297,7 @@ export default function Analytics() {
                   </Pie>
                   <Tooltip content={<CustomTooltip/>}/>
                   <Legend iconType="square" iconSize={9}
-                    formatter={(v)=><span style={{fontSize:11,color:'rgba(11,24,41,.55)'}}>{v}</span>}/>
+                    formatter={(v)=><span style={{fontSize:12.5,color:'rgba(11,24,41,.55)'}}>{v}</span>}/>
                 </PieChart>
               </ResponsiveContainer>
             ) : <EmptyChart icon={Gem} text="Add products with metal info to see breakdown"/>}
@@ -314,7 +314,7 @@ export default function Analytics() {
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={tierData} margin={{top:4,right:4,left:-20,bottom:0}} barSize={36}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(11,24,41,.05)" vertical={false}/>
-                      <XAxis dataKey="name" tick={{fontSize:11,fontFamily:'DM Sans',fill:'rgba(11,24,41,.5)'}} axisLine={false} tickLine={false}/>
+                      <XAxis dataKey="name" tick={{fontSize:12.5,fontFamily:'DM Sans',fill:'rgba(11,24,41,.5)'}} axisLine={false} tickLine={false}/>
                       <YAxis tick={{fontSize:9,fontFamily:'DM Sans',fill:'rgba(11,24,41,.35)'}} axisLine={false} tickLine={false} allowDecimals={false}/>
                       <Tooltip content={<CustomTooltip/>}/>
                       <Bar dataKey="value" name="Customers" radius={[6,6,0,0]}>
@@ -337,7 +337,7 @@ export default function Analytics() {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="rgba(11,24,41,.05)" vertical={false}/>
-                    <XAxis dataKey="month" tick={{fontSize:11,fontFamily:'DM Sans',fill:'rgba(11,24,41,.45)'}} axisLine={false} tickLine={false}/>
+                    <XAxis dataKey="month" tick={{fontSize:12.5,fontFamily:'DM Sans',fill:'rgba(11,24,41,.45)'}} axisLine={false} tickLine={false}/>
                     <YAxis tick={{fontSize:9,fontFamily:'DM Sans',fill:'rgba(11,24,41,.35)'}} axisLine={false} tickLine={false} allowDecimals={false}/>
                     <Tooltip content={<CustomTooltip/>}/>
                     <Area type="monotone" dataKey="credits" name="Conversations"
@@ -384,7 +384,7 @@ export default function Analytics() {
                           <Tooltip content={<CustomTooltip/>}/>
                           <Legend iconSize={10} iconType="circle"
                             formatter={(v,e)=>(
-                              <span style={{fontSize:12,color:'rgba(11,24,41,.65)'}}>
+                              <span style={{fontSize:13.5,color:'rgba(11,24,41,.65)'}}>
                                 {e.payload?.name} ({e.payload?.pct}%)
                               </span>
                             )}/>

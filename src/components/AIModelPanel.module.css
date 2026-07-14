@@ -19,14 +19,14 @@
 }
 
 .headerText {
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   color: var(--navy);
 }
 
 .usageBadge {
   margin-left: auto;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   background: rgba(201,168,76,.12);
   color: var(--navy);
@@ -36,14 +36,14 @@
 }
 
 .hint {
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--ink-soft);
   line-height: 1.5;
   margin: 0 0 12px;
 }
 
 .upgradeNote {
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--ink-soft);
   line-height: 1.5;
   padding: 10px 0 2px;
@@ -56,7 +56,7 @@
   width: 100%; padding: 8px 0;
   border: 1px dashed rgba(201,168,76,.35); border-radius: 10px;
   background: rgba(201,168,76,.04); color: #8B6914;
-  font-size: 12px; font-weight: 600; cursor: pointer; transition: all .15s;
+  font-size: 13.5px; font-weight: 600; cursor: pointer; transition: all .15s;
 }
 .camBtn:hover { background: rgba(201,168,76,.1); border-color: var(--gold); }
 
@@ -73,7 +73,7 @@
   cursor: pointer;
   text-align: center;
   color: var(--ink-soft);
-  font-size: 12px;
+  font-size: 13.5px;
   transition: all .15s;
 }
 .dropZone:hover {
@@ -82,7 +82,7 @@
   color: var(--navy);
 }
 .dropZone small {
-  font-size: 10px;
+  font-size: 11px;
   opacity: .7;
 }
 .dropIcon {
@@ -106,7 +106,7 @@
 }
 
 .previewLabel {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--ink-soft);
   text-transform: uppercase;
@@ -156,12 +156,12 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--ink-mid);
   padding: 24px 0;
 }
 .generatingBox small {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--ink-soft);
 }
 
@@ -173,7 +173,7 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  font-size: 11px;
+  font-size: 12.5px;
   color: var(--ink-soft);
   text-align: center;
   padding: 24px 12px;
@@ -196,7 +196,7 @@
   align-items: flex-start;
   gap: 6px;
   margin-top: 10px;
-  font-size: 11px;
+  font-size: 12.5px;
   color: var(--err, #C0392B);
   line-height: 1.4;
 }
@@ -220,7 +220,7 @@
   color: #fff;
   border: none;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   font-family: var(--font-body);
   cursor: pointer;
@@ -238,7 +238,7 @@
   color: var(--navy);
   border: 1.5px solid rgba(201,168,76,.4);
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   font-family: var(--font-body);
   cursor: pointer;
@@ -250,7 +250,7 @@
 }
 
 .addedBadge {
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 600;
   color: #166534;
   background: rgba(22,101,52,.08);
@@ -288,7 +288,7 @@
   color: #0d5c2f;
   border: 1.5px solid rgba(37,211,102,.35);
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   font-family: var(--font-body);
   cursor: pointer;
@@ -331,7 +331,7 @@
   padding: 10px 14px;
   background: none;
   border: none;
-  font-size: 13px;
+  font-size: 14.5px;
   font-family: var(--font-body);
   font-weight: 500;
   color: var(--navy);
@@ -350,7 +350,7 @@
   height: 24px;
   border-radius: 6px;
   color: #fff;
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 700;
   flex-shrink: 0;
 }
@@ -377,7 +377,7 @@
   border: 1.5px solid var(--gold);
   color: #f5d878;
   border-radius: 8px;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   font-family: var(--font-body);
   cursor: pointer;
@@ -481,17 +481,17 @@
   border: 1.5px solid rgba(201,168,76,.25);
 }
 .upThumb { width: 100%; height: 100%; object-fit: cover; display: block; }
-.upMeta { display: flex; flex-direction: column; gap: 2px; font-size: 11px; color: var(--ink-soft); }
-.upMeta b { color: var(--navy); font-weight: 600; font-size: 12px; }
+.upMeta { display: flex; flex-direction: column; gap: 2px; font-size: 12.5px; color: var(--ink-soft); }
+.upMeta b { color: var(--navy); font-weight: 600; font-size: 13.5px; }
 
 /* Control group */
 .group { margin-bottom: 15px; }
 .groupHead { display: flex; align-items: center; gap: 6px; margin-bottom: 7px; flex-wrap: wrap; }
 .groupLabel {
-  font-size: 10px; font-weight: 700; color: var(--navy);
+  font-size: 11px; font-weight: 700; color: var(--navy);
   text-transform: uppercase; letter-spacing: .07em;
 }
-.groupHint { font-size: 10px; color: var(--ink-soft); }
+.groupHint { font-size: 11px; color: var(--ink-soft); }
 .infoDot {
   font-size: 9px; font-weight: 700; color: #fff; background: var(--gold);
   width: 14px; height: 14px; border-radius: 50%; display: inline-flex;
@@ -510,7 +510,7 @@
 /* Chips */
 .chips { display: flex; flex-wrap: wrap; gap: 7px; }
 .chip {
-  font-family: var(--font-body); font-size: 12px; font-weight: 500;
+  font-family: var(--font-body); font-size: 13.5px; font-weight: 500;
   padding: 6px 12px; border-radius: 99px; cursor: pointer;
   background: #fff; color: var(--ink-mid);
   border: 1.5px solid rgba(11,24,41,.12);
@@ -526,8 +526,8 @@
 .dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; border: 1px solid rgba(0,0,0,.12); }
 
 /* Brand-colour swatch row */
-.brandColorRow { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 11px; color: var(--ink-soft); }
-.brandColorRow code { font-size: 11px; color: var(--navy); }
+.brandColorRow { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 12.5px; color: var(--ink-soft); }
+.brandColorRow code { font-size: 12.5px; color: var(--navy); }
 .swatchInput {
   width: 26px; height: 26px; border-radius: 6px; padding: 0; cursor: pointer;
   background: none; border: 1.5px solid rgba(11,24,41,.12);
@@ -536,7 +536,7 @@
 /* Advanced expander */
 .advToggle {
   display: flex; align-items: center; gap: 6px;
-  font-size: 12px; font-weight: 600; color: var(--navy);
+  font-size: 13.5px; font-weight: 600; color: var(--navy);
   cursor: pointer; padding: 9px 0; width: 100%;
   background: none; border: none; border-top: 1px solid rgba(11,24,41,.07);
   font-family: var(--font-body); text-align: left;
@@ -547,7 +547,7 @@
 
 /* Custom note */
 .note {
-  width: 100%; font-family: var(--font-body); font-size: 12px;
+  width: 100%; font-family: var(--font-body); font-size: 13.5px;
   padding: 9px 11px; border-radius: 8px; resize: vertical; min-height: 42px;
   border: 1.5px solid rgba(201,168,76,.25); background: #fff; color: var(--navy);
   box-sizing: border-box;
@@ -558,7 +558,7 @@
 /* Results */
 .resultsBlock { margin-top: 4px; margin-bottom: 4px; }
 .resultsHead {
-  font-size: 11px; font-weight: 600; color: var(--navy);
+  font-size: 12.5px; font-weight: 600; color: var(--navy);
   margin-bottom: 8px;
 }
 .resultsGrid { display: grid; grid-template-columns: 1fr; gap: 12px; }
@@ -570,17 +570,17 @@
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   padding: 7px 12px; background: rgba(201,168,76,.12); color: var(--navy);
   border: 1.5px solid rgba(201,168,76,.4); border-radius: 8px;
-  font-size: 12px; font-weight: 600; font-family: var(--font-body);
+  font-size: 13.5px; font-weight: 600; font-family: var(--font-body);
   cursor: pointer; transition: all .15s;
 }
 .addBtnSm:hover { background: rgba(201,168,76,.22); border-color: var(--gold); }
 
 /* Photos count toggle */
 .photosWrap { display: inline-flex; align-items: center; gap: 6px; margin-left: auto; }
-.photosLabel { font-size: 10px; color: var(--ink-soft); font-weight: 600; }
+.photosLabel { font-size: 11px; color: var(--ink-soft); font-weight: 600; }
 .photoToggle { display: inline-flex; gap: 4px; background: rgba(201,168,76,.1); border-radius: 99px; padding: 3px; }
 .photoBtn {
-  font-family: var(--font-body); font-size: 12px; font-weight: 600;
+  font-family: var(--font-body); font-size: 13.5px; font-weight: 600;
   padding: 4px 12px; border-radius: 99px; border: none; cursor: pointer;
   background: none; color: var(--ink-soft); transition: all .15s;
 }
@@ -592,7 +592,7 @@
   position: fixed; z-index: 10000; pointer-events: none;
   background: var(--navy); color: #fff;
   border-radius: 8px; box-shadow: 0 8px 26px rgba(11,24,41,.3);
-  padding: 8px 11px; font-size: 11.5px; line-height: 1.45;
+  padding: 8px 11px; font-size: 13px; line-height: 1.45;
   animation: tipIn .12s ease;
 }
 @keyframes tipIn { from { opacity: 0; } to { opacity: 1; } }

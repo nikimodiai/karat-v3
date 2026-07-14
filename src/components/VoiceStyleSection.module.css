@@ -22,7 +22,7 @@
   color: var(--navy);
   margin-bottom: 3px;
 }
-.sectionSub { font-size: 13px; color: var(--ink-mid); line-height: 1.5; }
+.sectionSub { font-size: 14.5px; color: var(--ink-mid); line-height: 1.5; }
 
 /* ── Benefit card ────────────────────────────────────────────────── */
 .benefitCard {
@@ -33,12 +33,12 @@
   margin-bottom: 20px;
 }
 .benefitTitle {
-  font-size: 12px; font-weight: 700;
+  font-size: 13.5px; font-weight: 700;
   letter-spacing: .1em; text-transform: uppercase;
   color: #8B6914; margin-bottom: 8px;
 }
 .benefitText {
-  font-size: 13.5px; color: var(--navy);
+  font-size: 15px; color: var(--navy);
   line-height: 1.7; margin: 0;
 }
 
@@ -52,17 +52,17 @@
   display: flex; flex-direction: column; gap: 6px;
 }
 .cpHeader { display: flex; align-items: center; gap: 7px; }
-.cpTitle { font-size: 13px; font-weight: 700; color: #15803d; }
-.cpMeta { font-size: 12px; color: var(--ink-mid); }
+.cpTitle { font-size: 14.5px; font-weight: 700; color: #15803d; }
+.cpMeta { font-size: 13.5px; color: var(--ink-mid); }
 .cpMeta strong { color: var(--navy); }
 .cpSnippet {
-  font-size: 13px; color: var(--ink-mid);
+  font-size: 14.5px; color: var(--ink-mid);
   font-style: normal; line-height: 1.7;
   border-left: 3px solid rgba(201,168,76,.3);
   padding-left: 10px;
   white-space: pre-wrap;
 }
-.cpHint { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--ink-soft); }
+.cpHint { display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--ink-soft); }
 
 /* ── Steps accordion ─────────────────────────────────────────────── */
 .steps { display: flex; flex-direction: column; gap: 1px; margin-bottom: 20px; }
@@ -88,22 +88,22 @@
 .stepNum {
   width: 26px; height: 26px; border-radius: 50%;
   background: var(--navy); color: #fff;
-  font-size: 12px; font-weight: 700;
+  font-size: 13.5px; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
-.stepTitle { flex: 1; font-size: 14px; font-weight: 600; color: var(--navy); }
+.stepTitle { flex: 1; font-size: 15.5px; font-weight: 600; color: var(--navy); }
 
 .stepBody {
   padding: 14px 18px 16px;
-  font-size: 13.5px; color: var(--ink-mid); line-height: 1.7;
+  font-size: 15px; color: var(--ink-mid); line-height: 1.7;
   border-top: 1px solid rgba(201,168,76,.15);
 }
 .stepBody p { margin: 0 0 8px; }
 .stepBody p:last-child { margin-bottom: 0; }
 .stepBody code {
   background: rgba(11,24,41,.06); border-radius: 4px;
-  padding: 1px 5px; font-size: 12px; color: var(--navy);
+  padding: 1px 5px; font-size: 13.5px; color: var(--navy);
 }
 
 .tip {
@@ -111,7 +111,7 @@
   border-left: 3px solid var(--gold);
   border-radius: 0 6px 6px 0;
   padding: 8px 12px;
-  font-size: 13px; color: var(--navy);
+  font-size: 14.5px; color: var(--navy);
   margin-top: 6px;
 }
 
@@ -125,7 +125,7 @@
   padding: 6px 14px; border-radius: 7px;
   border: 1.5px solid rgba(201,168,76,.22);
   background: #fff; cursor: pointer;
-  font-size: 12px; font-weight: 600;
+  font-size: 13.5px; font-weight: 600;
   font-family: var(--font-body); color: var(--ink-mid);
   transition: all .14s;
 }
@@ -135,11 +135,11 @@
 .instrList {
   margin: 0; padding-left: 20px;
   display: flex; flex-direction: column; gap: 8px;
-  font-size: 13.5px; color: var(--ink-mid);
+  font-size: 15px; color: var(--ink-mid);
 }
 .instrList strong { color: var(--navy); }
 
-.smallNote { font-size: 12px; color: var(--ink-soft); }
+.smallNote { font-size: 13.5px; color: var(--ink-soft); }
 
 /* ── Drop zone ───────────────────────────────────────────────────── */
 .dropZone {
@@ -154,11 +154,11 @@
 .dropZone:hover, .dropActive {
   border-color: var(--gold); background: rgba(201,168,76,.07);
 }
-.dropLabel { font-size: 13.5px; color: var(--ink-mid); }
+.dropLabel { font-size: 15px; color: var(--ink-mid); }
 .browse { color: var(--gold); font-weight: 600; text-decoration: underline; }
-.fileNames { font-size: 12px; color: var(--ink-soft); max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+.fileNames { font-size: 13.5px; color: var(--ink-soft); max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
 
-.uploadHint { font-size: 12px; color: var(--ink-soft); margin: 6px 0 14px; }
+.uploadHint { font-size: 13.5px; color: var(--ink-soft); margin: 6px 0 14px; }
 
 /* ── Upload button ───────────────────────────────────────────────── */
 .uploadBtn {
@@ -166,7 +166,7 @@
   width: 100%; padding: 12px;
   background: var(--navy); color: #fff;
   border: none; border-radius: 10px; cursor: pointer;
-  font-size: 14px; font-weight: 600; font-family: var(--font-body);
+  font-size: 15.5px; font-weight: 600; font-family: var(--font-body);
   transition: background .15s;
 }
 .uploadBtn:hover:not(:disabled) { background: #162840; }
@@ -181,15 +181,15 @@
 
 .resultCard {
   border-radius: 10px; padding: 14px 16px;
-  font-size: 13.5px; line-height: 1.6;
+  font-size: 15px; line-height: 1.6;
   display: flex; flex-direction: column; gap: 6px;
 }
 .resultCard p { margin: 0; color: var(--ink-mid); }
 .resultHead {
   display: flex; align-items: center; gap: 8px;
-  font-size: 14px; font-weight: 700; color: var(--navy);
+  font-size: 15.5px; font-weight: 700; color: var(--navy);
 }
-.resultNote { font-size: 12.5px; color: var(--ink-soft); }
+.resultNote { font-size: 14px; color: var(--ink-soft); }
 
 .resultSuccess {
   background: rgba(21,128,61,.06);
@@ -209,20 +209,20 @@
   margin-top: 8px;
   display: flex; flex-direction: column; gap: 8px;
 }
-.authorPicker label { font-size: 13px; color: var(--navy); }
+.authorPicker label { font-size: 14.5px; color: var(--navy); }
 .authorRow { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .authorSelect {
   flex: 1; min-width: 160px;
   border: 1.5px solid rgba(201,168,76,.3);
   border-radius: 7px; padding: 7px 10px;
-  font-size: 13px; font-family: var(--font-body);
+  font-size: 14.5px; font-family: var(--font-body);
   background: #fff; outline: none;
 }
 .authorSelect:focus { border-color: var(--gold); }
 .retryBtn {
   padding: 7px 16px; border-radius: 7px;
   background: var(--navy); color: #fff; border: none;
-  font-size: 13px; font-weight: 600; font-family: var(--font-body);
+  font-size: 14.5px; font-weight: 600; font-family: var(--font-body);
   cursor: pointer; transition: background .14s;
 }
 .retryBtn:disabled { opacity: .5; cursor: not-allowed; }
@@ -233,7 +233,7 @@
   border-radius: 99px;
   border: 1.5px solid rgba(13,27,42,.2);
   background: #fafafa;
-  font-size: 13px;
+  font-size: 14.5px;
   font-family: var(--font-body, inherit);
   color: var(--navy, #0D1B2A);
   cursor: pointer;
@@ -250,7 +250,7 @@
 /* ── Privacy note ────────────────────────────────────────────────── */
 .privacy {
   display: flex; align-items: flex-start; gap: 6px;
-  font-size: 12px; color: var(--ink-soft); line-height: 1.6;
+  font-size: 13.5px; color: var(--ink-soft); line-height: 1.6;
   margin-top: 14px;
   padding: 10px 14px;
   background: rgba(11,24,41,.03);

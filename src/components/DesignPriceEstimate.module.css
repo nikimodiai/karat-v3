@@ -9,7 +9,7 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   color: var(--ink);
   margin-bottom: 10px;
@@ -29,7 +29,7 @@
 }
 
 .rateOk {
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--ink-mid);
   background: var(--success-bg);
   border-radius: var(--r-sm);
@@ -44,7 +44,7 @@
   display: flex;
   align-items: flex-start;
   gap: 7px;
-  font-size: 12px;
+  font-size: 13.5px;
   line-height: 1.45;
   color: var(--warn);
   background: var(--warn-bg);
@@ -60,7 +60,7 @@
 
 .field { display: flex; flex-direction: column; gap: 4px; }
 .field label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: .04em;
   text-transform: uppercase;
@@ -71,7 +71,7 @@
   border: 1.5px solid var(--border);
   border-radius: var(--r-sm);
   padding: 8px 10px;
-  font-size: 13px;
+  font-size: 14.5px;
   font-family: var(--font-body);
   color: var(--ink);
   background: #fff;
@@ -94,13 +94,13 @@
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  font-size: 13px;
+  font-size: 14.5px;
   color: var(--ink-mid);
   padding: 3px 0;
 }
 .brkRow span:last-child { color: var(--ink); font-variant-numeric: tabular-nums; }
 .brkBig {
-  font-size: 16px;
+  font-size: 17.5px;
   font-weight: 700;
   color: var(--ink);
 }
@@ -116,7 +116,7 @@
   align-items: flex-start;
   gap: 6px;
   margin-top: 10px;
-  font-size: 11px;
+  font-size: 12.5px;
   line-height: 1.4;
   color: var(--ink-soft);
 }
@@ -124,5 +124,5 @@
 
 @media (max-width: 640px) {
   .row2, .row3 { grid-template-columns: 1fr 1fr; }
-  .field input, .field select { font-size: 16px; }  /* avoid iOS zoom */
+  .field input, .field select { font-size: 17.5px; }  /* avoid iOS zoom */
 }

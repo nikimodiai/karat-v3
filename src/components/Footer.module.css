@@ -17,7 +17,7 @@
 .brandLogo { width:20px; height:20px; object-fit:contain; }
 .brandWordmark { height:13px; width:auto; object-fit:contain; }
 .sep { color:rgba(201,168,76,.3); }
-.copy { font-size:11px; color:rgba(255,255,255,.3); }
+.copy { font-size:12.5px; color:rgba(255,255,255,.3); }
 .links { display:flex; align-items:center; gap:7px; flex-wrap:wrap; }
 .pill {
   display:inline-flex; align-items:center; gap:4px;
@@ -26,13 +26,13 @@
   color:rgba(232,204,122,.65);
   border-radius:99px;
   padding:3px 9px;
-  font-size:10px;
+  font-size:11px;
   font-weight:500;
   letter-spacing:.04em;
 }
 .contact {}
 .email {
-  font-size:11px;
+  font-size:12.5px;
   color:rgba(201,168,76,.45);
   text-decoration:none;
   transition:color .15s;

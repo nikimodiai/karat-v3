@@ -25,7 +25,7 @@
 }
 
 .title {
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   color: var(--navy);
   font-family: var(--font-display);
@@ -35,7 +35,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 500;
   color: var(--ink-soft);
   background: rgba(201, 168, 76, 0.07);
@@ -52,13 +52,13 @@
   gap: 8px;
   padding: 6px 0 2px;
   color: var(--ink-soft);
-  font-size: 13px;
+  font-size: 14.5px;
 }
 
 .emptyState {
   padding: 8px 0 2px;
   color: var(--ink-mid);
-  font-size: 12px;
+  font-size: 13.5px;
 }
 
 /* ── Rate strip (desktop / tablet) ──────────────────────────── */
@@ -82,7 +82,7 @@
 .group:last-child { border-right: none; }
 
 .groupLabel {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -113,7 +113,7 @@
 .chip:hover { background: var(--cream); }
 
 .chipPurity {
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--ink-mid);
   letter-spacing: 0.02em;
@@ -127,7 +127,7 @@
 }
 
 .chipSym {
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   color: var(--navy);
 }
@@ -141,7 +141,7 @@
 }
 
 .chipUnit {
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 700;
   letter-spacing: 0.03em;
   padding: 2px 8px;
@@ -154,7 +154,7 @@
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 600;
   color: #8B6914;
   background: rgba(201, 168, 76, 0.09);
@@ -247,13 +247,13 @@
   }
 
   .tickerPurity {
-    font-size: 11px;
+    font-size: 12.5px;
     font-weight: 500;
     color: var(--ink-mid);
   }
 
   .tickerRate {
-    font-size: 16px;
+    font-size: 17.5px;
     font-weight: 700;
     color: var(--navy);
     font-family: 'DM Sans', system-ui, sans-serif;
@@ -261,7 +261,7 @@
   }
 
   .tickerUnit {
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
     padding: 1px 7px;
     border-radius: 99px;
@@ -301,7 +301,7 @@
   margin-bottom: 12px;
 }
 .modalTitle {
-  font-size: 16px;
+  font-size: 17.5px;
   font-weight: 700;
   color: var(--navy);
   font-family: var(--font-display);
@@ -320,7 +320,7 @@
 .modalHint {
   display: flex;
   gap: 8px;
-  font-size: 12px;
+  font-size: 13.5px;
   line-height: 1.5;
   color: var(--ink-mid);
   background: rgba(201, 168, 76, 0.07);
@@ -342,7 +342,7 @@
   align-items: center;
 }
 .editRowHead {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -355,19 +355,19 @@
 .editRow:not(:last-child) { border-bottom: 1px solid var(--border-soft); }
 
 .editPurity {
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 600;
   color: var(--navy);
 }
 .editUnit {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   font-style: normal;
   color: var(--ink-soft);
   margin-left: 2px;
 }
 .editIbja {
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 600;
   color: var(--ink-mid);
 }
@@ -375,7 +375,7 @@
 .editInput,
 .editInputSm {
   width: 100%;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   color: var(--navy);
   border: 1px solid var(--border);
@@ -399,14 +399,14 @@
   margin-top: 14px;
   padding-top: 12px;
   border-top: 1px solid var(--border);
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--ink-mid);
 }
 .staleRow .editInputSm { width: 64px; flex-shrink: 0; }
 
 .editErr {
   margin-top: 10px;
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--err);
   background: rgba(190, 18, 60, 0.06);
   border-radius: 7px;
@@ -424,7 +424,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   border-radius: 8px;
   padding: 8px 16px;
@@ -452,5 +452,5 @@
     grid-template-columns: 1.2fr 0.9fr 1fr 0.8fr;
     gap: 6px;
   }
-  .editInput, .editInputSm { padding: 6px 6px; font-size: 12px; }
+  .editInput, .editInputSm { padding: 6px 6px; font-size: 13.5px; }
 }

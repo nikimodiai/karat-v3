@@ -3,13 +3,13 @@
 .toolbarActions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .tab {
   padding: 7px 14px; border: 1.5px solid var(--border-card); border-radius: 99px;
-  background: #fff; color: var(--ink); font-size: 13px; font-weight: 600;
+  background: #fff; color: var(--ink); font-size: 14.5px; font-weight: 600;
   font-family: var(--font-body); cursor: pointer; transition: all .12s;
 }
 .selectToggle {
   display: inline-flex; align-items: center; gap: 6px; flex: none; white-space: nowrap;
   padding: 7px 14px; border: 1.5px solid var(--border-card); border-radius: 99px;
-  background: #fff; color: var(--navy); font-size: 13px; font-weight: 700;
+  background: #fff; color: var(--navy); font-size: 14.5px; font-weight: 700;
   font-family: var(--font-body); cursor: pointer;
 }
 .selectToggle:hover { border-color: var(--gold); }
@@ -31,7 +31,7 @@
 .kindTag {
   position: absolute; bottom: 6px; left: 6px;
   padding: 2px 8px; border-radius: 8px; background: rgba(0,0,0,.6); color: #fff;
-  font-size: 10px; font-weight: 700; letter-spacing: .02em;
+  font-size: 11px; font-weight: 700; letter-spacing: .02em;
 }
 .playBadge {
   position: absolute; inset: 0; margin: auto; width: 44px; height: 44px; border-radius: 50%;
@@ -49,17 +49,17 @@
 .selDot {
   position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 50%;
   border: 2px solid #fff; background: rgba(0,0,0,.35); color: #0B1829;
-  font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+  font-size: 14.5px; font-weight: 800; display: flex; align-items: center; justify-content: center;
 }
 .selDotOn { background: var(--gold); }
 
 /* Bulk-share controls (inline in the toolbar, next to Select/Cancel) */
-.shareCount { font-size: 13px; font-weight: 600; color: var(--ink-soft); white-space: nowrap; }
+.shareCount { font-size: 14.5px; font-weight: 600; color: var(--ink-soft); white-space: nowrap; }
 .shareBtn {
   display: inline-flex; align-items: center; gap: 7px; white-space: nowrap;
   padding: 7px 14px; border: none; border-radius: 99px;
   background: linear-gradient(135deg, #25D366, #128C7E); color: #fff;
-  font-size: 13px; font-weight: 700; font-family: var(--font-body); cursor: pointer;
+  font-size: 14.5px; font-weight: 700; font-family: var(--font-body); cursor: pointer;
 }
 .shareBtn:disabled { opacity: .5; cursor: not-allowed; }
 
@@ -82,7 +82,7 @@
   display: inline-flex; align-items: center; gap: 7px;
   padding: 9px 15px; border: none; border-radius: 99px;
   background: rgba(255,255,255,.92); color: #0B1829;
-  font-size: 13px; font-weight: 700; font-family: var(--font-body); cursor: pointer;
+  font-size: 14.5px; font-weight: 700; font-family: var(--font-body); cursor: pointer;
 }
 .lbShareBtn:hover { background: #fff; }
 .lbShareBtn:disabled { opacity: .55; cursor: default; }

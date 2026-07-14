@@ -27,7 +27,7 @@
 .close:hover { background: var(--cream-dk); color: var(--ink); }
 
 .body { padding: 18px; overflow-y: auto; }
-.intro { font-size: 13px; color: var(--ink-mid); line-height: 1.5; margin: 0 0 16px; }
+.intro { font-size: 14.5px; color: var(--ink-mid); line-height: 1.5; margin: 0 0 16px; }
 
 .previewRow {
   display: flex; gap: 14px; align-items: center;
@@ -42,10 +42,10 @@
 }
 .previewMeta { display: flex; flex-direction: column; gap: 8px; flex: 1; }
 .previewMeta div { display: flex; flex-direction: column; gap: 2px; }
-.previewMeta span { font-size: 10px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); font-weight: 600; }
-.previewMeta strong { font-size: 14px; color: var(--ink); font-weight: 600; }
+.previewMeta span { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--ink-soft); font-weight: 600; }
+.previewMeta strong { font-size: 15.5px; color: var(--ink); font-weight: 600; }
 
-.err { font-size: 12px; color: var(--danger); margin-top: 5px; }
+.err { font-size: 13.5px; color: var(--danger); margin-top: 5px; }
 
 .footer {
   display: flex; justify-content: flex-end; gap: 10px;

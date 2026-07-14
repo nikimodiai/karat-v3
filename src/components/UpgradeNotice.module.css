@@ -17,14 +17,14 @@
 }
 .bannerBody { flex: 1; min-width: 0; }
 .bannerTitle {
-  font-size: 13px; font-weight: 600; color: var(--navy);
+  font-size: 14.5px; font-weight: 600; color: var(--navy);
   font-family: var(--font-display); display: flex; gap: 6px; align-items: center;
 }
-.bannerMsg { font-size: 12px; color: var(--ink-mid); margin-top: 2px; line-height: 1.5; }
+.bannerMsg { font-size: 13.5px; color: var(--ink-mid); margin-top: 2px; line-height: 1.5; }
 .bannerCta {
   background: linear-gradient(135deg,#E8CC7A 0%, #C9A84C 55%, #8B6914 100%);
   color: #0B1829; border: none; border-radius: 7px;
-  padding: 8px 14px; font-size: 12px; font-weight: 600;
+  padding: 8px 14px; font-size: 13.5px; font-weight: 600;
   cursor: pointer; font-family: var(--font-body);
   display: inline-flex; align-items: center; gap: 5px;
   transition: transform .15s, box-shadow .15s;
@@ -61,8 +61,8 @@
   font-family: var(--font-display); font-size: 22px;
   color: var(--navy); margin-bottom: 8px;
 }
-.dialogMsg { font-size: 13px; color: var(--ink-mid); line-height: 1.55; margin-bottom: 10px; }
-.dialogMeta { font-size: 12px; color: var(--ink-soft); margin-bottom: 22px; }
+.dialogMsg { font-size: 14.5px; color: var(--ink-mid); line-height: 1.55; margin-bottom: 10px; }
+.dialogMeta { font-size: 13.5px; color: var(--ink-soft); margin-bottom: 22px; }
 .dialogActions { display: flex; gap: 10px; justify-content: center; }
 
 /* ── LockedCard (full-page block) ─── */
@@ -76,5 +76,5 @@
   font-family: var(--font-display); font-size: 24px;
   color: var(--navy); margin: 18px 0 8px;
 }
-.lockedMsg { font-size: 13px; color: var(--ink-mid); margin-bottom: 6px; line-height: 1.55; }
-.lockedMeta { font-size: 12px; color: var(--ink-soft); margin-top: 8px; }
+.lockedMsg { font-size: 14.5px; color: var(--ink-mid); margin-bottom: 6px; line-height: 1.55; }
+.lockedMeta { font-size: 13.5px; color: var(--ink-soft); margin-top: 8px; }

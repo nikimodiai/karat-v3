@@ -12,14 +12,14 @@
 }
 
 .title {
-  font-size: 16px;
+  font-size: 17.5px;
   font-weight: 700;
   color: var(--navy, #0D1B2A);
   margin: 0 0 4px;
 }
 
 .subtitle {
-  font-size: 12px;
+  font-size: 13.5px;
   color: rgba(13,27,42,.5);
   margin: 0;
 }
@@ -51,7 +51,7 @@
   border: none;
   border-radius: 8px;
   color: #fff;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   padding: 8px 14px;
   cursor: pointer;
@@ -68,7 +68,7 @@
   padding: 48px 24px;
   text-align: center;
   color: rgba(13,27,42,.45);
-  font-size: 13px;
+  font-size: 14.5px;
 }
 
 /* User list */
@@ -96,7 +96,7 @@
   width: 36px; height: 36px;
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-weight: 700; font-size: 14px;
+  font-weight: 700; font-size: 15.5px;
   flex-shrink: 0;
 }
 
@@ -109,7 +109,7 @@
 }
 
 .rowName {
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   color: var(--navy, #0D1B2A);
   white-space: nowrap;
@@ -118,12 +118,12 @@
 }
 
 .rowUsername {
-  font-size: 11px;
+  font-size: 12.5px;
   color: rgba(13,27,42,.45);
 }
 
 .rowNotes {
-  font-size: 11px;
+  font-size: 12.5px;
   color: rgba(13,27,42,.4);
   font-style: italic;
   white-space: nowrap;
@@ -139,7 +139,7 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 600;
   padding: 3px 8px;
   border-radius: 99px;
@@ -152,7 +152,7 @@
 }
 
 .lastLogin {
-  font-size: 11px;
+  font-size: 12.5px;
   color: rgba(13,27,42,.4);
   white-space: nowrap;
 }
@@ -165,7 +165,7 @@
 }
 
 .actionBtn {
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 600;
   padding: 3px 8px;
   border-radius: 6px;
@@ -212,7 +212,7 @@
 }
 
 .legendTitle {
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 700;
   letter-spacing: .06em;
   text-transform: uppercase;
@@ -224,7 +224,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 13.5px;
   color: rgba(13,27,42,.6);
 }
 .legendItem strong { min-width: 70px; }
@@ -238,7 +238,7 @@
   padding: 40px 24px;
   text-align: center;
   color: rgba(13,27,42,.45);
-  font-size: 13px;
+  font-size: 14.5px;
 }
 
 /* ── Modal ───────────────────────────────────────────────────────────── */
@@ -275,7 +275,7 @@
 }
 
 .modalTitle {
-  font-size: 16px;
+  font-size: 17.5px;
   font-weight: 700;
   color: var(--navy, #0D1B2A);
   margin: 0;
@@ -301,7 +301,7 @@
 }
 
 .fieldLabel {
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 600;
   color: rgba(13,27,42,.65);
   margin-bottom: 2px;
@@ -319,7 +319,7 @@
   border: 1.5px solid rgba(13,27,42,.15);
   border-radius: 8px;
   padding: 9px 12px;
-  font-size: 13px;
+  font-size: 14.5px;
   font-family: var(--font-body, inherit);
   color: var(--navy, #0D1B2A);
   background: #fafafa;
@@ -354,14 +354,14 @@
 .roleCardActive { box-shadow: 0 2px 8px rgba(0,0,0,.08); }
 
 .roleLabel {
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   color: var(--navy, #0D1B2A);
   min-width: 90px;
 }
 
 .roleDesc {
-  font-size: 11px;
+  font-size: 12.5px;
   color: rgba(13,27,42,.45);
 }
 
@@ -379,7 +379,7 @@
   border: 1px solid rgba(13,27,42,.15);
   border-radius: 8px;
   color: rgba(13,27,42,.6);
-  font-size: 13px;
+  font-size: 14.5px;
   font-family: var(--font-body, inherit);
   font-weight: 500;
   padding: 8px 16px;
@@ -396,7 +396,7 @@
   border: none;
   border-radius: 8px;
   color: #fff;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 700;
   font-family: var(--font-body, inherit);
   padding: 8px 20px;

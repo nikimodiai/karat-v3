@@ -20,7 +20,7 @@
   font-size: 22px; font-weight: 700; color: var(--navy); margin: 0 0 5px;
 }
 .title svg { color: var(--gold); }
-.sub { font-size: 14px; color: var(--ink-soft); margin: 0; max-width: 60ch; }
+.sub { font-size: 15.5px; color: var(--ink-soft); margin: 0; max-width: 60ch; }
 
 /* ── Shared monthly meter ── */
 .meter {
@@ -32,10 +32,10 @@
 }
 .meterLabel {
   display: block;
-  font-size: 10px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+  font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
   color: var(--ink-soft);
 }
-.meterValue { display: block; font-size: 15px; font-weight: 700; color: var(--navy); margin: 2px 0 6px; }
+.meterValue { display: block; font-size: 16.5px; font-weight: 700; color: var(--navy); margin: 2px 0 6px; }
 .meterBar { height: 5px; border-radius: 99px; background: rgba(11,24,41,.08); overflow: hidden; }
 .meterFill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #C9A84C, #e8b84b); transition: width .3s; }
 
@@ -65,8 +65,8 @@
   background: rgba(200,149,108,.1); color: var(--gold);
 }
 .tileBody { min-width: 0; }
-.tileTitle { font-size: 15px; font-weight: 700; color: var(--navy); margin: 2px 0 4px; }
-.tileDesc { font-size: 13px; color: var(--ink-soft); margin: 0; line-height: 1.5; }
+.tileTitle { font-size: 16.5px; font-weight: 700; color: var(--navy); margin: 2px 0 4px; }
+.tileDesc { font-size: 14.5px; color: var(--ink-soft); margin: 0; line-height: 1.5; }
 
 /* ── Sub-feature header (back to hub) ── */
 .featHeader { margin-bottom: 20px; }
@@ -75,7 +75,7 @@
   padding: 6px 12px 6px 8px;
   border: 1.5px solid var(--border-card); border-radius: 99px;
   background: #fff; color: var(--ink-soft);
-  font-size: 12px; font-weight: 600; font-family: var(--font-body); cursor: pointer;
+  font-size: 13.5px; font-weight: 600; font-family: var(--font-body); cursor: pointer;
   margin-bottom: 14px;
   transition: all .15s;
 }

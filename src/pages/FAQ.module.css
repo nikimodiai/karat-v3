@@ -39,7 +39,7 @@
 }
 
 .subtitle {
-  font-size: 13px;
+  font-size: 14.5px;
   color: var(--ink-soft);
   margin: 0;
 }
@@ -53,7 +53,7 @@
   border: none;
   border-radius: 8px;
   padding: 8px 16px;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
@@ -80,7 +80,7 @@
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  font-size: 13px;
+  font-size: 14.5px;
   color: var(--navy);
   line-height: 1.5;
   flex: 1;
@@ -116,7 +116,7 @@
 
 .qNum {
   flex-shrink: 0;
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 700;
   color: #C9A84C;
   background: rgba(201,168,76,.1);
@@ -127,7 +127,7 @@
 
 .qText {
   flex: 1;
-  font-size: 14px;
+  font-size: 15.5px;
   font-weight: 600;
   color: var(--navy);
   line-height: 1.4;
@@ -151,7 +151,7 @@
 }
 
 .answerText {
-  font-size: 13.5px;
+  font-size: 15px;
   color: var(--ink-soft);
   line-height: 1.65;
   margin: 14px 0 0;
@@ -168,7 +168,7 @@
 }
 
 .cardLabel {
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .06em;
@@ -178,11 +178,11 @@
 
 /* Form fields */
 .fld { display: flex; flex-direction: column; gap: 4px; }
-.lbl { font-size: 12px; font-weight: 600; color: var(--navy); }
+.lbl { font-size: 13.5px; font-weight: 600; color: var(--navy); }
 .inp {
   width: 100%;
   padding: 8px 10px;
-  font-size: 13.5px;
+  font-size: 15px;
   border: 1px solid rgba(13,27,42,.2);
   border-radius: 8px;
   outline: none;
@@ -212,7 +212,7 @@
   border: none;
   border-radius: 8px;
   padding: 7px 16px;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   cursor: pointer;
   transition: opacity .15s;
@@ -229,7 +229,7 @@
   border: 1px solid rgba(13,27,42,.18);
   border-radius: 8px;
   padding: 7px 14px;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   cursor: pointer;
   transition: background .15s;
@@ -261,7 +261,7 @@
   gap: 12px;
   padding: 60px 0;
   color: var(--ink-soft);
-  font-size: 14px;
+  font-size: 15.5px;
   text-align: center;
 }
 
@@ -270,5 +270,5 @@
   .header { flex-direction: column; gap: 12px; }
   .addBtn { align-self: flex-start; }
   /* Prevent iOS Safari zoom on input focus */
-  .inp { font-size: 16px; }
+  .inp { font-size: 17.5px; }
 }

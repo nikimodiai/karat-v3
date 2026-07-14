@@ -20,7 +20,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 15px;
+  font-size: 16.5px;
   font-weight: 700;
   color: var(--navy);
   margin: 0 0 4px;
@@ -56,8 +56,8 @@
   color: #94A3B8;
   margin-bottom: 2px;
 }
-.dropText { font-size: 13px; font-weight: 600; color: var(--navy); }
-.dropSub  { font-size: 11px; color: var(--ink-soft); }
+.dropText { font-size: 14.5px; font-weight: 600; color: var(--navy); }
+.dropSub  { font-size: 12.5px; color: var(--ink-soft); }
 
 .previewWrap {
   position: relative;
@@ -99,7 +99,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 600;
   color: var(--ink-soft);
   text-transform: uppercase;
@@ -112,7 +112,7 @@
   padding: 9px 12px;
   border: 1.5px solid #E2E8F0;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 15.5px;
   color: var(--navy);
   outline: none;
   transition: border-color .15s;
@@ -126,7 +126,7 @@
   padding: 9px 12px;
   border: 1.5px solid #E2E8F0;
   border-radius: 8px;
-  font-size: 14px;
+  font-size: 15.5px;
   color: var(--navy);
   outline: none;
   transition: border-color .15s;
@@ -145,7 +145,7 @@
   padding: 10px 22px;
   background: linear-gradient(135deg, #C9A84C, #e8b84b);
   color: #0B1829;
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 700;
   border: none;
   border-radius: 8px;
@@ -160,7 +160,7 @@
 .listSection { display: flex; flex-direction: column; gap: 14px; }
 
 .listTitle {
-  font-size: 15px;
+  font-size: 16.5px;
   font-weight: 700;
   color: var(--navy);
   margin: 0;
@@ -170,7 +170,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
+  font-size: 14.5px;
   color: var(--ink-soft);
   padding: 20px 0;
 }
@@ -203,14 +203,14 @@
   margin-bottom: 6px;
 }
 .cardTitle {
-  font-size: 14px;
+  font-size: 15.5px;
   font-weight: 700;
   color: var(--navy);
   margin: 0;
   flex: 1;
 }
 .expiredPill {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   padding: 2px 8px;
   border-radius: 99px;
@@ -220,7 +220,7 @@
 }
 
 .cardDesc {
-  font-size: 13px;
+  font-size: 14.5px;
   color: var(--ink-soft);
   margin: 0 0 10px;
   line-height: 1.5;
@@ -236,7 +236,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--ink-soft);
 }
 
@@ -295,7 +295,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 700;
   color: #C9A84C;
   text-transform: uppercase;
@@ -305,7 +305,7 @@
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 600;
   color: #64748B;
   background: none;
@@ -345,7 +345,7 @@
 }
 
 .cancelBtnAlt {
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   color: #64748B;
   background: none;

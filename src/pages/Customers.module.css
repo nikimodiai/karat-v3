@@ -24,7 +24,7 @@
   font-weight: 700;
   color: var(--navy);
 }
-.sub { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+.sub { font-size: 13.5px; color: var(--ink-soft); margin-top: 2px; }
 
 .controls { display: flex; align-items: center; gap: 10px; }
 
@@ -34,7 +34,7 @@
   border: 1.5px solid rgba(201,168,76,.2);
   border-radius: 8px;
   padding: 9px 32px 9px 34px;
-  font-size: 13px;
+  font-size: 14.5px;
   font-family: var(--font-body);
   color: var(--ink);
   outline: none;
@@ -69,7 +69,7 @@
 }
 .table thead th {
   color: rgba(255,255,255,.75);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: .18em;
   text-transform: uppercase;
@@ -85,22 +85,22 @@
 .table tbody tr:last-child { border-bottom: none; }
 .table tbody td {
   padding: 13px 18px;
-  font-size: 13px;
+  font-size: 14.5px;
   color: var(--ink);
   vertical-align: middle;
 }
 
 .custName { font-weight: 600; color: var(--navy); }
-.custEmail { font-size: 11px; color: var(--ink-soft); margin-top: 2px; }
-.phone { font-size: 13px; }
-.notes { font-size: 12px; color: var(--ink-soft); max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.custEmail { font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; }
+.phone { font-size: 14.5px; }
+.notes { font-size: 13.5px; color: var(--ink-soft); max-width: 180px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* Tier badges */
 .tierBadge {
   display: inline-block;
   padding: 3px 12px;
   border-radius: 99px;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: .12em;
   text-transform: uppercase;
@@ -137,7 +137,7 @@
   color: var(--ink-soft);
 }
 .locked h2 { font-family: var(--font-display); font-size: 24px; color: var(--navy); }
-.locked p { font-size: 13px; line-height: 1.65; max-width: 340px; }
+.locked p { font-size: 14.5px; line-height: 1.65; max-width: 340px; }
 
 .center {
   display: flex;
@@ -156,7 +156,7 @@
   color: var(--ink-soft);
 }
 .empty h3 { font-family: var(--font-display); font-size: 20px; color: var(--navy); margin-top: 8px; }
-.empty p { font-size: 13px; }
+.empty p { font-size: 14.5px; }
 
 @media (max-width: 720px) {
   .header { padding: 14px 16px; }

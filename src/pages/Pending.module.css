@@ -38,7 +38,7 @@
 }
 
 .sub {
-  font-size: 13px;
+  font-size: 14.5px;
   color: rgba(13,27,42,.55);
   line-height: 1.7;
   margin-bottom: 24px;
@@ -59,12 +59,12 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 13px;
+  font-size: 14.5px;
   color: #0D1B2A;
 }
 
 .contact {
-  font-size: 12px;
+  font-size: 13.5px;
   color: rgba(13,27,42,.45);
   margin-bottom: 24px;
 }
@@ -81,7 +81,7 @@
   color: rgba(13,27,42,.55);
   border-radius: 8px;
   padding: 9px 22px;
-  font-size: 13px;
+  font-size: 14.5px;
   cursor: pointer;
   font-family: 'DM Sans', sans-serif;
   transition: all .18s;

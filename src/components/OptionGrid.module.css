@@ -29,7 +29,7 @@
   border: none;
   cursor: pointer;
   font-family: var(--font-body);
-  font-size: 13.5px;
+  font-size: 15px;
   color: var(--ink);
   text-align: left;
   min-height: 44px;            /* comfortable tap target */
@@ -66,5 +66,5 @@
 }
 
 @media (max-width: 640px) {
-  .chipMain { font-size: 14px; }
+  .chipMain { font-size: 15.5px; }
 }

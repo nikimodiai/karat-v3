@@ -25,7 +25,7 @@ const CustomTooltip = ({ active, payload, label }) => {
     <div style={{
       background:'#fff', border:'1px solid rgba(201,168,76,.2)',
       borderRadius:8, padding:'10px 14px',
-      boxShadow:'0 4px 16px rgba(11,24,41,.1)', fontSize:12
+      boxShadow:'0 4px 16px rgba(11,24,41,.1)', fontSize:13.5
     }}>
       {label && <div style={{fontWeight:600,color:'#0B1829',marginBottom:4}}>{label}</div>}
       {payload.map((p,i)=>(
@@ -208,8 +208,8 @@ export default function Dashboard({ onNavigate }) {
             {catData.length > 0 ? (
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={catData} barSize={26} margin={{top:4,right:8,left:-24,bottom:0}}>
-                  <XAxis dataKey="name" tick={{fontSize:11,fontFamily:'DM Sans',fill:'rgba(11,24,41,.5)'}} axisLine={false} tickLine={false} />
-                  <YAxis tick={{fontSize:10,fontFamily:'DM Sans',fill:'rgba(11,24,41,.4)'}} axisLine={false} tickLine={false} allowDecimals={false}/>
+                  <XAxis dataKey="name" tick={{fontSize:12.5,fontFamily:'DM Sans',fill:'rgba(11,24,41,.5)'}} axisLine={false} tickLine={false} />
+                  <YAxis tick={{fontSize:11,fontFamily:'DM Sans',fill:'rgba(11,24,41,.4)'}} axisLine={false} tickLine={false} allowDecimals={false}/>
                   <Tooltip content={<CustomTooltip/>} cursor={{fill:'rgba(201,168,76,.06)'}} />
                   <Bar dataKey="value" name="Items" radius={[5,5,0,0]}>
                     {catData.map((_, i) => (

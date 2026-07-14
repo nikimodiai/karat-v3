@@ -7,7 +7,7 @@
   flex-shrink:0;
 }
 .title { font-family:var(--font-display); font-size:22px; font-weight:700; color:var(--navy); }
-.sub   { font-size:12px; color:var(--ink-soft); margin-top:2px; }
+.sub   { font-size:13.5px; color:var(--ink-soft); margin-top:2px; }
 .wrap  { flex:1; overflow-y:auto; padding:24px 28px 48px; }
 
 /* Plan hero */
@@ -28,19 +28,19 @@
   pointer-events:none;
 }
 .planHeroLabel {
-  font-size:10px; font-weight:700; letter-spacing:.18em;
+  font-size:11px; font-weight:700; letter-spacing:.18em;
   text-transform:uppercase; color:rgba(201,168,76,.55); margin-bottom:5px;
 }
 .planHeroName {
   font-family:var(--font-display); font-size:28px; font-weight:700;
   color:#E8CC7A; margin-bottom:6px;
 }
-.planHeroSub { font-size:12px; color:rgba(255,255,255,.45); }
+.planHeroSub { font-size:13.5px; color:rgba(255,255,255,.45); }
 .planHeroBadge {
   display:flex; align-items:center; gap:8px;
   background:rgba(201,168,76,.12); border:1px solid rgba(201,168,76,.25);
   border-radius:99px; padding:8px 18px;
-  color:#E8CC7A; font-size:14px; font-weight:700;
+  color:#E8CC7A; font-size:15.5px; font-weight:700;
   letter-spacing:.06em; flex-shrink:0;
 }
 
@@ -53,25 +53,25 @@
   padding:22px 24px;
 }
 .cardTitle {
-  font-family:var(--font-display); font-size:16px; font-weight:700; color:var(--navy);
+  font-family:var(--font-display); font-size:17.5px; font-weight:700; color:var(--navy);
   margin-bottom:18px; display:flex; align-items:center; gap:8px;
 }
 .field { margin-bottom:16px; }
 .fieldLabel {
-  font-size:11px; font-weight:600; letter-spacing:.1em;
+  font-size:12.5px; font-weight:600; letter-spacing:.1em;
   text-transform:uppercase; color:var(--navy);
   margin-bottom:6px; display:flex; align-items:center; gap:6px;
 }
 .editable {
-  font-size:10px; font-weight:500; color:var(--gold);
+  font-size:11px; font-weight:500; color:var(--gold);
   letter-spacing:.04em; text-transform:none;
 }
 .lockedNote {
   display:flex; align-items:center; gap:4px;
-  font-size:10px; color:var(--ink-soft); margin-top:4px;
+  font-size:11px; color:var(--ink-soft); margin-top:4px;
 }
 .fieldHint {
-  font-size:12px; line-height:1.6; color:var(--ink-soft);
+  font-size:13.5px; line-height:1.6; color:var(--ink-soft);
   margin-top:7px; padding:9px 12px;
   background:rgba(201,168,76,.06);
   border-left:2px solid rgba(201,168,76,.35);
@@ -89,22 +89,22 @@
 .featureRowOff { opacity:.55; }
 .featureName {
   display:flex; align-items:center; gap:8px;
-  font-size:13px; color:var(--navy);
+  font-size:14.5px; color:var(--navy);
 }
-.featureNote { font-size:10px; color:var(--ink-soft); }
+.featureNote { font-size:11px; color:var(--ink-soft); }
 .featureOn {
   display:flex; align-items:center; gap:4px;
-  font-size:11px; font-weight:600; color:var(--success);
+  font-size:12.5px; font-weight:600; color:var(--success);
   background:var(--success-bg); padding:3px 9px; border-radius:99px;
 }
 .featureOff {
   display:flex; align-items:center; gap:4px;
-  font-size:11px; font-weight:600; color:var(--ink-soft);
+  font-size:12.5px; font-weight:600; color:var(--ink-soft);
   background:rgba(11,24,41,.05); padding:3px 9px; border-radius:99px;
 }
 .featureUpgrade {
   display:flex; align-items:center; gap:4px;
-  font-size:11px; font-weight:600; color:#8B6914;
+  font-size:12.5px; font-weight:600; color:#8B6914;
   background:rgba(201,168,76,.12); padding:3px 9px; border-radius:99px;
   text-decoration:none; cursor:pointer; transition:background .12s;
 }
@@ -126,14 +126,14 @@
 .creditItem:hover { background: var(--cream); }
 .creditFeature {
   display: flex; align-items: center; gap: 7px;
-  font-size: 13px; color: var(--navy);
+  font-size: 14.5px; color: var(--navy);
 }
 .creditCost {
-  font-size: 12px; color: var(--ink-mid);
+  font-size: 13.5px; color: var(--ink-mid);
   display: flex; align-items: center; gap: 4px;
 }
-.creditCost strong { color: var(--navy); font-size: 14px; }
-.creditNote { font-size: 10px; color: var(--ink-soft); }
+.creditCost strong { color: var(--navy); font-size: 15.5px; }
+.creditNote { font-size: 11px; color: var(--ink-soft); }
 
 /* Plan-limit rows */
 .limitRow { display: flex; flex-direction: column; gap: 5px; }
@@ -142,12 +142,12 @@
 }
 .limitLabel {
   display: inline-flex; align-items: center; gap: 6px;
-  font-size: 12px; color: var(--ink-mid); font-weight: 500;
+  font-size: 13.5px; color: var(--ink-mid); font-weight: 500;
 }
 .limitVals {
-  font-size: 12px; color: var(--ink-soft);
+  font-size: 13.5px; color: var(--ink-soft);
 }
-.limitVals strong { color: var(--navy); font-weight: 600; font-size: 13px; }
+.limitVals strong { color: var(--navy); font-weight: 600; font-size: 14.5px; }
 .limitTrack {
   height: 6px; background: rgba(11,24,41,.06);
   border-radius: 99px; overflow: hidden;

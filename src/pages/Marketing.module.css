@@ -24,7 +24,7 @@
   font-weight: 700;
   color: var(--navy);
 }
-.sub { font-size: 12px; color: var(--ink-soft); margin-top: 2px; }
+.sub { font-size: 13.5px; color: var(--ink-soft); margin-top: 2px; }
 
 .labelRow {
   display: flex;
@@ -70,7 +70,7 @@
   padding: 22px 24px;
 }
 
-.hint { font-size: 11px; color: var(--ink-soft); margin-top: 6px; line-height: 1.5; }
+.hint { font-size: 12.5px; color: var(--ink-soft); margin-top: 6px; line-height: 1.5; }
 .hint a { color: var(--gold-dk); font-weight: 600; text-decoration: none; }
 .hint a:hover { text-decoration: underline; }
 
@@ -83,7 +83,7 @@
   color: #8a2c20;
   border-radius: 8px;
   padding: 10px 12px;
-  font-size: 12px;
+  font-size: 13.5px;
   line-height: 1.5;
   margin-top: 8px;
 }
@@ -96,7 +96,7 @@
   padding: 12px 14px;
 }
 .previewLabel {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: .12em;
   text-transform: uppercase;
@@ -104,7 +104,7 @@
   margin-bottom: 6px;
 }
 .previewBody {
-  font-size: 13px;
+  font-size: 14.5px;
   color: var(--ink);
   white-space: pre-wrap;
   line-height: 1.55;
@@ -125,7 +125,7 @@
   border-radius: 10px;
   padding: 12px 14px;
   margin-top: 12px;
-  font-size: 13px;
+  font-size: 14.5px;
   color: var(--navy);
 }
 
@@ -155,9 +155,9 @@
 }
 
 .logBody { flex: 1; min-width: 0; }
-.logTitle { font-size: 13px; font-weight: 600; color: var(--navy); }
-.logMeta { font-size: 11px; color: var(--ink-soft); margin-top: 2px; }
-.logError { font-size: 11px; color: #C0392B; margin-top: 4px; }
+.logTitle { font-size: 14.5px; font-weight: 600; color: var(--navy); }
+.logMeta { font-size: 12.5px; color: var(--ink-soft); margin-top: 2px; }
+.logError { font-size: 12.5px; color: #C0392B; margin-top: 4px; }
 
 @media (max-width: 900px) {
   .body { grid-template-columns: 1fr; }

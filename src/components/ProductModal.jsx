@@ -591,7 +591,7 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
               {/* Custom color — shown only when color is typed outside the 5 presets */}
               {form.color && !VARIANT_COLORS.find(c => c.value === form.color) && (
                 <span className={`${styles.colorChip} ${styles.colorChipActive}`}>
-                  {form.color} <button type="button" style={{ background:'none',border:'none',cursor:'pointer',fontSize:11,color:'var(--navy)',marginLeft:2 }} onClick={() => set('color','')}>×</button>
+                  {form.color} <button type="button" style={{ background:'none',border:'none',cursor:'pointer',fontSize:12.5,color:'var(--navy)',marginLeft:2 }} onClick={() => set('color','')}>×</button>
                 </span>
               )}
               <button
@@ -858,7 +858,7 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
                 {/* HUID */}
                 <div className="fg fg2" style={{ marginTop: 12 }}>
                   <div className="fld">
-                    <label className="lbl">HUID <span style={{ fontWeight: 400, fontSize: 10, color: 'var(--ink-soft)', textTransform: 'none', letterSpacing: 0 }}>(BIS Hallmark Unique ID)</span></label>
+                    <label className="lbl">HUID <span style={{ fontWeight: 400, fontSize: 11, color: 'var(--ink-soft)', textTransform: 'none', letterSpacing: 0 }}>(BIS Hallmark Unique ID)</span></label>
                     <input
                       className="inp"
                       value={form.huid}
@@ -866,7 +866,7 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
                       placeholder="e.g. AB1C2D"
                       maxLength={6}
                     />
-                    <div style={{ fontSize: 10, color: 'var(--ink-soft)', marginTop: 4 }}>6-character code stamped on the hallmark</div>
+                    <div style={{ fontSize: 11, color: 'var(--ink-soft)', marginTop: 4 }}>6-character code stamped on the hallmark</div>
                   </div>
                   <div className="fld">
                     <label className="lbl">Hallmark Certificate</label>
@@ -989,7 +989,7 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
           {/* ④ AI Model */}
           <div className="sec-label" style={{ marginTop: 20 }}>
             <Sparkles size={11} style={{ verticalAlign: 'middle', marginRight: 4 }} /> ④ AI Model Try-On
-            <span style={{ fontWeight: 400, textTransform: 'none', fontSize: 11, marginLeft: 8, color: 'var(--ink-soft)' }}>
+            <span style={{ fontWeight: 400, textTransform: 'none', fontSize: 12.5, marginLeft: 8, color: 'var(--ink-soft)' }}>
               — generate a campaign-quality model photo
             </span>
           </div>
@@ -1010,7 +1010,7 @@ export default function ProductModal({ product, store, onSave, onClose, checkSKU
           <div className="sec-label" style={{ marginTop: 20 }}>
             <Layers size={11} style={{ verticalAlign: 'middle', marginRight: 4 }}/>
             ⑤ Variants
-            <span style={{ fontWeight: 400, textTransform: 'none', fontSize: 11, marginLeft: 8, color: 'var(--ink-soft)' }}>
+            <span style={{ fontWeight: 400, textTransform: 'none', fontSize: 12.5, marginLeft: 8, color: 'var(--ink-soft)' }}>
               — offer this design in multiple carats or colors
             </span>
           </div>

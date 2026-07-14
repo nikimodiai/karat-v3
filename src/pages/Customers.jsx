@@ -272,7 +272,7 @@ function CustomerModal({ customer, hasTiers, userId, onSave, onClose }) {
               <div className="fld">
                 <label className="lbl">Customer Tier</label>
                 <input className="inp" value="Regular" readOnly style={{ background: 'var(--cream)', color: 'var(--ink-soft)' }} />
-                <div style={{ fontSize: 11, color: 'var(--ink-soft)', marginTop: 4 }}>Tiers available on Professional & Enterprise plans.</div>
+                <div style={{ fontSize: 12.5, color: 'var(--ink-soft)', marginTop: 4 }}>Tiers available on Professional & Enterprise plans.</div>
               </div>
             )}
           </div>

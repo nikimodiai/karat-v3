@@ -261,7 +261,7 @@ export default function VoiceStyleSection({ store, user, onProfileUpdated }) {
                 <p>Your AI learned from <strong>{exchangesLearned}</strong> conversation{exchangesLearned !== 1 ? 's' : ''} in this chat.</p>
               )}
               <p>It will now reply in your language, your tone, and your style.</p>
-              <button onClick={reset} style={{ background: 'none', border: 'none', color: '#15803d', cursor: 'pointer', fontSize: 12, textDecoration: 'underline', padding: 0, textAlign: 'left' }}>
+              <button onClick={reset} style={{ background: 'none', border: 'none', color: '#15803d', cursor: 'pointer', fontSize: 13.5, textDecoration: 'underline', padding: 0, textAlign: 'left' }}>
                 Upload another chat
               </button>
             </div>
@@ -274,7 +274,7 @@ export default function VoiceStyleSection({ store, user, onProfileUpdated }) {
                 <strong>Upload failed</strong>
               </div>
               <p>{errorMsg}</p>
-              <button onClick={reset} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: 12, textDecoration: 'underline', padding: 0, textAlign: 'left' }}>
+              <button onClick={reset} style={{ background: 'none', border: 'none', color: '#dc2626', cursor: 'pointer', fontSize: 13.5, textDecoration: 'underline', padding: 0, textAlign: 'left' }}>
                 Try again
               </button>
             </div>
@@ -312,7 +312,7 @@ export default function VoiceStyleSection({ store, user, onProfileUpdated }) {
                 padding: '10px 14px', borderRadius: 8,
                 border: `1.5px solid ${selectedAuthor === name ? '#C9A84C' : 'rgba(13,27,42,.15)'}`,
                 background: selectedAuthor === name ? 'rgba(201,168,76,.1)' : '#fff',
-                fontSize: 13, fontWeight: selectedAuthor === name ? 600 : 400,
+                fontSize: 14.5, fontWeight: selectedAuthor === name ? 600 : 400,
                 color: selectedAuthor === name ? '#8B6914' : 'var(--navy)',
                 transition: 'all .15s',
               }}>
@@ -330,7 +330,7 @@ export default function VoiceStyleSection({ store, user, onProfileUpdated }) {
           </div>
 
           {errorMsg && (
-            <p style={{ fontSize: 12, color: '#dc2626', margin: '4px 0 0' }}>⚠ {errorMsg}</p>
+            <p style={{ fontSize: 13.5, color: '#dc2626', margin: '4px 0 0' }}>⚠ {errorMsg}</p>
           )}
 
           <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
@@ -347,7 +347,7 @@ export default function VoiceStyleSection({ store, user, onProfileUpdated }) {
               style={{
                 border: '1px solid rgba(13,27,42,.18)', borderRadius: 8,
                 background: 'none', color: 'rgba(13,27,42,.5)',
-                fontSize: 13, padding: '0 16px', cursor: 'pointer',
+                fontSize: 14.5, padding: '0 16px', cursor: 'pointer',
               }}
             >
               Cancel

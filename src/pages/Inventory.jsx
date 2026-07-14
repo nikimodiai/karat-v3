@@ -727,7 +727,7 @@ export default function Inventory() {
           <div>
             <div className={styles.statNum} style={{ color: '#8B6914' }}>
               {products.length}
-              <span style={{ fontSize: 13, fontWeight: 400, color: 'rgba(13,27,42,.38)' }}>
+              <span style={{ fontSize: 14.5, fontWeight: 400, color: 'rgba(13,27,42,.38)' }}>
                 /{prodLimit === Infinity ? '∞' : prodLimit}
               </span>
             </div>

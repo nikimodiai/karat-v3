@@ -11,7 +11,7 @@
   display: flex; align-items: center; justify-content: space-between;
   padding: 16px 18px; border-bottom: 1px solid var(--border-card);
 }
-.headTitle { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; color: var(--navy); }
+.headTitle { display: flex; align-items: center; gap: 8px; font-size: 16.5px; font-weight: 700; color: var(--navy); }
 .headTitle svg { color: var(--gold); }
 .close {
   width: 30px; height: 30px; border-radius: 8px; border: none; background: transparent;
@@ -25,7 +25,7 @@
   padding: 54px 24px; color: var(--ink-soft);
 }
 .empty svg { color: var(--gold); }
-.empty p { font-size: 13px; max-width: 34ch; margin: 0; }
+.empty p { font-size: 14.5px; max-width: 34ch; margin: 0; }
 
 /* Category tabs — horizontal, scrollable on narrow screens */
 .tabs {
@@ -34,7 +34,7 @@
 }
 .tab {
   flex: none; padding: 7px 14px; border: 1.5px solid var(--border-card); border-radius: 99px;
-  background: #fff; color: var(--ink); font-size: 12.5px; font-weight: 600;
+  background: #fff; color: var(--ink); font-size: 14px; font-weight: 600;
   font-family: var(--font-body); cursor: pointer; white-space: nowrap;
 }
 .tab:hover { border-color: var(--gold); }
@@ -54,7 +54,7 @@
 .cellSel { border-color: var(--gold); }
 .check {
   position: absolute; top: 5px; right: 5px; width: 22px; height: 22px; border-radius: 50%;
-  background: var(--gold); color: #0B1829; font-size: 13px; font-weight: 800;
+  background: var(--gold); color: #0B1829; font-size: 14.5px; font-weight: 800;
   display: flex; align-items: center; justify-content: center;
 }
 
@@ -62,10 +62,10 @@
   display: flex; align-items: center; justify-content: space-between;
   padding: 14px 18px; border-top: 1px solid var(--border-card);
 }
-.count { font-size: 13px; color: var(--ink-soft); }
+.count { font-size: 14.5px; color: var(--ink-soft); }
 .useBtn {
   padding: 9px 18px; border: none; border-radius: var(--r-sm);
   background: linear-gradient(135deg, #C9A84C, #e8b84b); color: #0B1829;
-  font-size: 13px; font-weight: 700; font-family: var(--font-body); cursor: pointer;
+  font-size: 14.5px; font-weight: 700; font-family: var(--font-body); cursor: pointer;
 }
 .useBtn:disabled { opacity: .5; cursor: not-allowed; }
