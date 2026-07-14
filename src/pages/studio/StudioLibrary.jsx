@@ -123,7 +123,14 @@ export default function StudioLibrary({ onBack }) {
         </div>
         {!loading && !isEmpty && (
           selectMode ? (
-            <button className={styles.selectToggle} onClick={exitSelect}><X size={14} /> Cancel</button>
+            <div className={styles.toolbarActions}>
+              <span className={styles.shareCount}>{selected.length} selected</span>
+              <button className={styles.shareBtn} disabled={selected.length === 0 || sharing} onClick={shareSelected}>
+                {sharing ? <div className="spinner spinner-sm" /> : <Share2 size={15} />}
+                Share {selected.length || ''} to WhatsApp
+              </button>
+              <button className={styles.selectToggle} onClick={exitSelect}><X size={14} /> Cancel</button>
+            </div>
           ) : (
             <button className={styles.selectToggle} onClick={() => setSelectMode(true)}><CheckSquare size={14} /> Select</button>
           )
@@ -173,17 +180,6 @@ export default function StudioLibrary({ onBack }) {
               </div>
             );
           })}
-        </div>
-      )}
-
-      {/* Bulk-share bar */}
-      {selectMode && (
-        <div className={styles.shareBar}>
-          <span className={styles.shareCount}>{selected.length} selected</span>
-          <button className={styles.shareBtn} disabled={selected.length === 0 || sharing} onClick={shareSelected}>
-            {sharing ? <div className="spinner spinner-sm" /> : <Share2 size={15} />}
-            Share {selected.length || ''} to WhatsApp
-          </button>
         </div>
       )}
 
