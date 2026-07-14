@@ -66,6 +66,12 @@ export const N8N_REEL_IMAGE_UPLOAD = N8N_BASE + '/reel-image-upload';
 export const N8N_REEL_GENERATE     = N8N_BASE + '/reel-generate';
 export const N8N_REEL_STATUS       = N8N_BASE + '/reel-status';
 
+// Owner metal-rate override: after the jeweller saves their own rate/premium
+// into app_owner_metal_rates, POST { owner_id } here to immediately re-price
+// that owner's dynamic products/variants (scoped run of the Daily Dynamic
+// Pricing Updater). Absent owner_id = the scheduled run re-prices everyone.
+export const N8N_OWNER_RATE_SAVE = N8N_BASE + '/swarnix-owner-rate-save';
+
 export const db = createClient(SUPABASE_URL, SUPABASE_KEY, {
   auth: {
     persistSession: true,
