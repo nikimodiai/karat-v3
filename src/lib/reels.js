@@ -34,6 +34,41 @@ export const QUALITIES = [
 ];
 export const DEFAULT_RESOLUTION = '720p';
 
+// Overlay text styling — keys must match OVERLAY_FONTS / OVERLAY_COLORS in the
+// render service (server.js). Keep the two in sync.
+export const OVERLAY_FONTS = [
+  { value: 'sans',  label: 'Modern',  css: "'Segoe UI', system-ui, sans-serif" },
+  { value: 'serif', label: 'Classic', css: "Georgia, 'Times New Roman', serif" },
+  { value: 'mono',  label: 'Mono',    css: "'Courier New', monospace" },
+];
+export const DEFAULT_OVERLAY_FONT = 'sans';
+export const OVERLAY_COLORS = [
+  { value: 'white', label: 'White', css: '#ffffff' },
+  { value: 'gold',  label: 'Gold',  css: '#C9A84C' },
+  { value: 'cream', label: 'Cream', css: '#F4F0E8' },
+  { value: 'navy',  label: 'Navy',  css: '#0B1829' },
+  { value: 'black', label: 'Black', css: '#000000' },
+  { value: 'red',   label: 'Red',   css: '#BE123C' },
+];
+export const DEFAULT_OVERLAY_COLOR = 'white';
+
+// Max size for a user-uploaded music track.
+export const MAX_MUSIC_BYTES = 10 * 1024 * 1024;  // 10 MB
+
+// Upload a user-chosen audio file to Cloudinary; returns the secure_url to send
+// as music_url. Uses the same unsigned preset as images (resource_type video —
+// Cloudinary treats audio as a video resource for upload).
+export async function uploadReelMusic(file) {
+  if (file.size > MAX_MUSIC_BYTES) throw new Error('Music file is over 10 MB. Please pick a shorter track.');
+  const fd = new FormData();
+  fd.append('file', file);
+  fd.append('upload_preset', CLOUDINARY_PRESET);
+  fd.append('folder', 'swarnix-reel-music');
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/video/upload`, { method: 'POST', body: fd });
+  if (!res.ok) throw new Error('Could not upload that music file. Try another.');
+  return (await res.json()).secure_url;
+}
+
 const REEL_JOB_COLUMNS = 'id, status, output_url, error_message, ratio, length_seconds, resolution, created_at';
 
 function mapJob(row) {
@@ -67,7 +102,7 @@ export async function uploadReelImage(fileOrBlob, filename = 'reel.jpg') {
 }
 
 // Submit a reel job. Returns job_id immediately (render runs in background).
-export async function submitReel({ userId, imageUrls, lengthSeconds, ratio, resolution, customPrompt, musicId, overlayText, overlayPosition }) {
+export async function submitReel({ userId, imageUrls, lengthSeconds, ratio, resolution, customPrompt, musicId, musicUrl, overlayText, overlayPosition, overlayFont, overlayColor }) {
   if (!imageUrls?.length) throw new Error('Add at least one image for your reel.');
   const body = {
     user_id: userId,
@@ -79,13 +114,17 @@ export async function submitReel({ userId, imageUrls, lengthSeconds, ratio, reso
   };
   if (imageUrls[1]) body.image2_url = imageUrls[1];
   if (customPrompt?.trim()) body.custom_prompt = customPrompt.trim();
-  if (musicId) body.music_id = musicId;
+  // Custom uploaded track (music_url) wins over a built-in library pick (music_id).
+  if (musicUrl) body.music_url = musicUrl;
+  else if (musicId) body.music_id = musicId;
 
   const overlay = overlayText?.trim();
   if (overlay) {
     body.overlay_text = overlay;
     body.overlay_position = overlayPosition === 'end' ? 'end' : 'whole';
     if (body.overlay_position === 'end') body.overlay_start_at = lengthSeconds - endOverlayDuration(lengthSeconds);
+    if (overlayFont) body.overlay_font = overlayFont;
+    if (overlayColor) body.overlay_color = overlayColor;
   }
 
   let res;

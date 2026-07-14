@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { X, Images } from 'lucide-react';
 import { db } from '../lib/config';
 import { useAuth } from '../hooks/useAuth';
 import styles from './StudioLibraryPicker.module.css';
 
-// Section order + labels for app_gallery.kind — mirrors the tabs on the
-// Studio Suite Library page so this picker reads the same way.
+// Tab order + labels for app_gallery.kind — mirrors the tabs on the Studio Suite
+// Library page so this picker reads the same way.
 const KIND_SECTIONS = [
   { id: 'design', label: 'Designs' },
   { id: 'ai_model', label: 'AI Models' },
@@ -28,6 +28,7 @@ export default function StudioLibraryPicker({ onClose, onPick, onPickMany, multi
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState([]); // urls, for multi
+  const [activeTab, setActiveTab] = useState('all');
 
   useEffect(() => {
     let active = true;
@@ -53,14 +54,28 @@ export default function StudioLibraryPicker({ onClose, onPick, onPickMany, multi
     setSelected((prev) => prev.includes(url) ? prev.filter((u) => u !== url) : [...prev, url]);
   };
 
-  // Group items by kind, in the same order as the Library page's tabs, so a
-  // jeweller sees "Designs", "AI Models", etc. as separate sections instead of
-  // one flat stack of every generated image.
-  const sections = KIND_SECTIONS
-    .map((s) => ({ ...s, items: items.filter((im) => im.kind === s.id) }))
-    .filter((s) => s.items.length > 0);
+  // Build the tab row: "All" plus only the kinds that actually have items, in
+  // the same order as the Library page. "Other" catches any unmapped kinds.
   const otherItems = items.filter((im) => !KIND_LABELS[im.kind]);
-  if (otherItems.length) sections.push({ id: 'other', label: 'Other', items: otherItems });
+  const tabs = useMemo(() => {
+    const t = [{ id: 'all', label: 'All' }];
+    for (const s of KIND_SECTIONS) {
+      if (items.some((im) => im.kind === s.id)) t.push(s);
+    }
+    if (otherItems.length) t.push({ id: 'other', label: 'Other' });
+    return t;
+  }, [items]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // If the active tab no longer exists (e.g. after load), fall back to "All".
+  useEffect(() => {
+    if (!tabs.some((t) => t.id === activeTab)) setActiveTab('all');
+  }, [tabs, activeTab]);
+
+  const visibleItems = useMemo(() => {
+    if (activeTab === 'all') return items;
+    if (activeTab === 'other') return otherItems;
+    return items.filter((im) => im.kind === activeTab);
+  }, [items, activeTab]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -78,28 +93,37 @@ export default function StudioLibraryPicker({ onClose, onPick, onPickMany, multi
             <p>No generated images yet. Create something in Studio Suite first.</p>
           </div>
         ) : (
-          <div className={styles.sections}>
-            {sections.map((section) => (
-              <div key={section.id} className={styles.section}>
-                <div className={styles.sectionHead}>{section.label}</div>
-                <div className={styles.grid}>
-                  {section.items.map((im) => {
-                    const isSel = selected.includes(im.image_url);
-                    return (
-                      <button
-                        key={im.id}
-                        className={`${styles.cell} ${isSel ? styles.cellSel : ''}`}
-                        onClick={() => toggle(im.image_url)}
-                      >
-                        <img src={im.image_url} alt={im.title || 'image'} />
-                        {isSel && <span className={styles.check}>✓</span>}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
+          <>
+            {/* Category tabs — pick one at a time instead of scrolling through
+                every kind stacked one after another. */}
+            <div className={styles.tabs}>
+              {tabs.map((t) => (
+                <button
+                  key={t.id}
+                  className={`${styles.tab} ${activeTab === t.id ? styles.tabActive : ''}`}
+                  onClick={() => setActiveTab(t.id)}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+
+            <div className={styles.grid}>
+              {visibleItems.map((im) => {
+                const isSel = selected.includes(im.image_url);
+                return (
+                  <button
+                    key={im.id}
+                    className={`${styles.cell} ${isSel ? styles.cellSel : ''}`}
+                    onClick={() => toggle(im.image_url)}
+                  >
+                    <img src={im.image_url} alt={im.title || 'image'} />
+                    {isSel && <span className={styles.check}>✓</span>}
+                  </button>
+                );
+              })}
+            </div>
+          </>
         )}
 
         {multi && (

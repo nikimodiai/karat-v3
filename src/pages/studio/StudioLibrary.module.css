@@ -1,9 +1,17 @@
-.tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+.toolbar { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+.tabs { display: flex; flex-wrap: wrap; gap: 8px; flex: 1; }
 .tab {
   padding: 7px 14px; border: 1.5px solid var(--border-card); border-radius: 99px;
   background: #fff; color: var(--ink); font-size: 13px; font-weight: 600;
   font-family: var(--font-body); cursor: pointer; transition: all .12s;
 }
+.selectToggle {
+  display: inline-flex; align-items: center; gap: 6px; flex: none; white-space: nowrap;
+  padding: 7px 14px; border: 1.5px solid var(--border-card); border-radius: 99px;
+  background: #fff; color: var(--navy); font-size: 13px; font-weight: 700;
+  font-family: var(--font-body); cursor: pointer;
+}
+.selectToggle:hover { border-color: var(--gold); }
 .tab:hover { border-color: var(--gold); }
 .tabActive { border-color: var(--gold); background: rgba(200,149,108,.12); color: var(--navy); }
 
@@ -35,6 +43,31 @@
 }
 .delBtn:hover { background: rgba(190,18,60,.9); }
 
+/* Selection */
+.cellSel { border-color: var(--gold); box-shadow: 0 0 0 2px var(--gold) inset; }
+.selDot {
+  position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 50%;
+  border: 2px solid #fff; background: rgba(0,0,0,.35); color: #0B1829;
+  font-size: 13px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+}
+.selDotOn { background: var(--gold); }
+
+/* Bulk-share bar */
+.shareBar {
+  position: sticky; bottom: 0; margin-top: 16px;
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 12px 16px; border: 1.5px solid var(--border-card); border-radius: 14px;
+  background: #fff; box-shadow: 0 -6px 20px rgba(11,24,41,.08);
+}
+.shareCount { font-size: 13px; font-weight: 600; color: var(--ink-soft); }
+.shareBtn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 11px 18px; border: none; border-radius: var(--r-sm);
+  background: linear-gradient(135deg, #25D366, #128C7E); color: #fff;
+  font-size: 13.5px; font-weight: 700; font-family: var(--font-body); cursor: pointer;
+}
+.shareBtn:disabled { opacity: .5; cursor: not-allowed; }
+
 /* Lightbox */
 .lbOverlay {
   position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.85);
@@ -46,4 +79,21 @@
   position: absolute; top: -14px; right: -14px; width: 34px; height: 34px; border-radius: 50%;
   border: none; background: #fff; color: #0B1829; cursor: pointer;
   display: flex; align-items: center; justify-content: center; z-index: 1;
+}
+.lbShare {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 14px;
+}
+.lbShareBtn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 15px; border: none; border-radius: 99px;
+  background: rgba(255,255,255,.92); color: #0B1829;
+  font-size: 13px; font-weight: 700; font-family: var(--font-body); cursor: pointer;
+}
+.lbShareBtn:hover { background: #fff; }
+.lbShareBtn:disabled { opacity: .55; cursor: default; }
+.waBtn { background: #25D366; color: #fff; }
+.waBtn:hover { background: #1ebe5b; }
+
+@media (max-width: 720px) {
+  .lbShare { position: relative; }
 }

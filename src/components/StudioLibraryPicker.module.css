@@ -27,17 +27,23 @@
 .empty svg { color: var(--gold); }
 .empty p { font-size: 13px; max-width: 34ch; margin: 0; }
 
-.sections {
-  flex: 1; min-height: 0;
-  overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 20px;
+/* Category tabs — horizontal, scrollable on narrow screens */
+.tabs {
+  display: flex; gap: 8px; padding: 14px 16px 4px; overflow-x: auto;
+  border-bottom: 1px solid var(--border-card); flex: none;
 }
-.section:last-child { margin-bottom: 0; }
-.sectionHead {
-  font-size: 12px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase;
-  color: var(--ink-soft); margin-bottom: 10px;
+.tab {
+  flex: none; padding: 7px 14px; border: 1.5px solid var(--border-card); border-radius: 99px;
+  background: #fff; color: var(--ink); font-size: 12.5px; font-weight: 600;
+  font-family: var(--font-body); cursor: pointer; white-space: nowrap;
 }
+.tab:hover { border-color: var(--gold); }
+.tabActive { border-color: var(--gold); background: rgba(200,149,108,.14); color: var(--navy); }
+
 .grid {
+  flex: 1; min-height: 0; overflow-y: auto; padding: 16px;
   display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px;
+  align-content: start;
 }
 .cell {
   position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; padding: 0;

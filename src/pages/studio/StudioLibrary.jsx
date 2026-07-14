@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Images, Trash2, X, Play } from 'lucide-react';
+import { Images, Trash2, X, Play, Share2, MessageCircle, Download, Link2, CheckSquare } from 'lucide-react';
 import { db } from '../../lib/config';
 import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../hooks/useToast';
 import { reelPosterUrl } from '../../lib/reels';
+import { nativeShareMedia, shareToWhatsApp, copyLink, downloadMedia } from '../../lib/share';
 import { SuiteFeatureHeader } from '../StudioSuite';
 import hub from '../StudioSuite.module.css';
 import styles from './StudioLibrary.module.css';
@@ -26,6 +27,9 @@ export default function StudioLibrary({ onBack }) {
   const [reels, setReels] = useState([]);     // completed reel_jobs
   const [loading, setLoading] = useState(true);
   const [lightbox, setLightbox] = useState(null); // { type:'image'|'reel', url, poster? }
+  const [selectMode, setSelectMode] = useState(false);
+  const [selected, setSelected] = useState([]);    // [{ url, kind }]
+  const [sharing, setSharing] = useState(false);
 
   const load = useCallback(async () => {
     if (!store?.owner_id) return;
@@ -66,6 +70,38 @@ export default function StudioLibrary({ onBack }) {
   const showReels = tab === 'all' || tab === 'reel';
   const filteredImages = tab === 'all' || tab === 'reel' ? images : images.filter((r) => r.kind === tab);
 
+  // ── Selection + sharing ──
+  const isSelected = (url) => selected.some((s) => s.url === url);
+  const toggleSelect = (url) => setSelected((prev) =>
+    prev.some((s) => s.url === url) ? prev.filter((s) => s.url !== url) : [...prev, { url }]);
+  const exitSelect = () => { setSelectMode(false); setSelected([]); };
+
+  // Share a single item: native sheet (real file on mobile) with graceful
+  // fallback to WhatsApp link on desktop.
+  const shareOne = async (url, name) => {
+    setSharing(true);
+    try {
+      const res = await nativeShareMedia([{ url, name }], { title: 'Swarnix', text: '' });
+      if (res === 'unsupported') { shareToWhatsApp(url); }
+    } finally { setSharing(false); }
+  };
+
+  const shareSelected = async () => {
+    if (selected.length === 0) return;
+    setSharing(true);
+    try {
+      const urls = selected.map((s) => s.url);
+      const res = await nativeShareMedia(selected.map((s) => ({ url: s.url })), { title: 'Swarnix' });
+      if (res === 'unsupported') shareToWhatsApp(urls);   // link fallback
+      if (res !== 'cancelled') exitSelect();
+    } finally { setSharing(false); }
+  };
+
+  const doCopy = async (url) => {
+    const ok = await copyLink(url);
+    showToast(ok ? 'Link copied.' : 'Could not copy link.', ok ? '#166534' : '#be123c');
+  };
+
   const isEmpty = !loading
     && (!showImages || filteredImages.length === 0)
     && (!showReels || reels.length === 0);
@@ -77,12 +113,21 @@ export default function StudioLibrary({ onBack }) {
         sub="Every photo and video you’ve generated with AI Studio Suite."
       />
 
-      <div className={styles.tabs}>
-        {TABS.map((t) => (
-          <button key={t.id} className={`${styles.tab} ${tab === t.id ? styles.tabActive : ''}`} onClick={() => setTab(t.id)}>
-            {t.label}
-          </button>
-        ))}
+      <div className={styles.toolbar}>
+        <div className={styles.tabs}>
+          {TABS.map((t) => (
+            <button key={t.id} className={`${styles.tab} ${tab === t.id ? styles.tabActive : ''}`} onClick={() => setTab(t.id)}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+        {!loading && !isEmpty && (
+          selectMode ? (
+            <button className={styles.selectToggle} onClick={exitSelect}><X size={14} /> Cancel</button>
+          ) : (
+            <button className={styles.selectToggle} onClick={() => setSelectMode(true)}><CheckSquare size={14} /> Select</button>
+          )
+        )}
       </div>
 
       {loading ? (
@@ -98,22 +143,47 @@ export default function StudioLibrary({ onBack }) {
           {/* Reels first when relevant */}
           {showReels && reels.map((r) => {
             const poster = reelPosterUrl(r.output_url);
+            const sel = isSelected(r.output_url);
             return (
-              <button key={`reel-${r.id}`} className={styles.cell} onClick={() => setLightbox({ type: 'reel', url: r.output_url, poster })}>
+              <div
+                key={`reel-${r.id}`}
+                className={`${styles.cell} ${sel ? styles.cellSel : ''}`}
+                onClick={() => selectMode ? toggleSelect(r.output_url) : setLightbox({ type: 'reel', url: r.output_url, poster })}
+              >
                 {poster ? <img src={poster} alt="reel" className={styles.cellImg} /> : <div className={styles.cellImg} />}
                 <span className={styles.playBadge}><Play size={14} fill="#fff" /></span>
                 <span className={styles.kindTag}>{r.length_seconds ? `${r.length_seconds}s reel` : 'Reel'}</span>
-              </button>
+                {selectMode && <span className={`${styles.selDot} ${sel ? styles.selDotOn : ''}`}>{sel ? '✓' : ''}</span>}
+              </div>
             );
           })}
-          {showImages && filteredImages.map((im) => (
-            <div key={im.id} className={styles.cell}>
-              <img src={im.image_url} alt={im.title || 'image'} className={styles.cellImg}
-                onClick={() => setLightbox({ type: 'image', url: im.image_url })} />
-              {im.kind && <span className={styles.kindTag}>{TABS.find((t) => t.id === im.kind)?.label || im.kind}</span>}
-              <button className={styles.delBtn} onClick={() => deleteImage(im.id)} title="Delete"><Trash2 size={13} /></button>
-            </div>
-          ))}
+          {showImages && filteredImages.map((im) => {
+            const sel = isSelected(im.image_url);
+            return (
+              <div
+                key={im.id}
+                className={`${styles.cell} ${sel ? styles.cellSel : ''}`}
+                onClick={() => selectMode ? toggleSelect(im.image_url) : setLightbox({ type: 'image', url: im.image_url })}
+              >
+                <img src={im.image_url} alt={im.title || 'image'} className={styles.cellImg} />
+                {im.kind && <span className={styles.kindTag}>{TABS.find((t) => t.id === im.kind)?.label || im.kind}</span>}
+                {selectMode
+                  ? <span className={`${styles.selDot} ${sel ? styles.selDotOn : ''}`}>{sel ? '✓' : ''}</span>
+                  : <button className={styles.delBtn} onClick={(e) => { e.stopPropagation(); deleteImage(im.id); }} title="Delete"><Trash2 size={13} /></button>}
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Bulk-share bar */}
+      {selectMode && (
+        <div className={styles.shareBar}>
+          <span className={styles.shareCount}>{selected.length} selected</span>
+          <button className={styles.shareBtn} disabled={selected.length === 0 || sharing} onClick={shareSelected}>
+            {sharing ? <div className="spinner spinner-sm" /> : <Share2 size={15} />}
+            Share {selected.length || ''} to WhatsApp
+          </button>
         </div>
       )}
 
@@ -124,6 +194,23 @@ export default function StudioLibrary({ onBack }) {
             {lightbox.type === 'reel'
               ? <video className={styles.lbMedia} src={lightbox.url} poster={lightbox.poster || undefined} controls autoPlay playsInline />
               : <img className={styles.lbMedia} src={lightbox.url} alt="full" />}
+
+            <div className={styles.lbShare}>
+              <button className={styles.lbShareBtn} disabled={sharing}
+                onClick={() => shareOne(lightbox.url, lightbox.type === 'reel' ? 'swarnix-reel.mp4' : 'swarnix.jpg')}>
+                <Share2 size={16} /> Share
+              </button>
+              <button className={`${styles.lbShareBtn} ${styles.waBtn}`} onClick={() => shareToWhatsApp(lightbox.url)}>
+                <MessageCircle size={16} /> WhatsApp
+              </button>
+              <button className={styles.lbShareBtn} onClick={() => doCopy(lightbox.url)}>
+                <Link2 size={16} /> Copy link
+              </button>
+              <button className={styles.lbShareBtn}
+                onClick={() => downloadMedia(lightbox.url, lightbox.type === 'reel' ? 'swarnix-reel.mp4' : 'swarnix.jpg')}>
+                <Download size={16} /> Download
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -68,6 +68,58 @@
 .chip:hover { border-color: var(--gold); }
 .chipActive { border-color: var(--gold); background: rgba(200,149,108,.12); color: var(--navy); }
 
+/* Music picker */
+.musicList { display: flex; flex-direction: column; gap: 6px; }
+.musicRow {
+  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
+  padding: 9px 12px; border: 1.5px solid var(--border-card); border-radius: var(--r-sm);
+  background: #fff; cursor: pointer; font-family: var(--font-body);
+}
+.musicRow:hover { border-color: var(--gold); }
+.musicActive { border-color: var(--gold); background: rgba(200,149,108,.1); }
+.musicName { flex: 1; font-size: 13px; font-weight: 600; color: var(--navy); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.musicMood { font-size: 11px; color: var(--ink-soft); }
+.musicIcon { color: var(--gold); }
+.previewBtn {
+  width: 28px; height: 28px; flex: none; border-radius: 50%; border: 1.5px solid var(--gold);
+  background: #fff; color: var(--gold); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.previewBtn:hover { background: var(--gold); color: #fff; }
+.musicRemove {
+  width: 22px; height: 22px; flex: none; border-radius: 50%; border: none;
+  background: rgba(190,18,60,.9); color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+.uploadMusicBtn {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: 8px;
+  padding: 8px 13px; border: 1.5px dashed var(--border-card); border-radius: var(--r-sm);
+  background: #fff; color: var(--ink-soft); font-size: 12.5px; font-weight: 600;
+  font-family: var(--font-body); cursor: pointer;
+}
+.uploadMusicBtn:hover { border-color: var(--gold); color: var(--gold); }
+.uploadMusicBtn:disabled { opacity: .6; cursor: default; }
+
+/* Overlay text styling */
+.miniLabel { display: block; font-size: 11.5px; font-weight: 700; color: var(--ink-soft); margin-bottom: 6px; }
+.overlayPreview {
+  margin-top: 10px; border-radius: var(--r-sm); padding: 22px 16px;
+  background: linear-gradient(135deg, #2a2a2a, #4a4038);
+  display: flex; align-items: flex-end; justify-content: center; min-height: 70px;
+}
+.overlayPreviewText {
+  font-size: 16px; font-weight: 700; text-align: center; line-height: 1.3;
+  text-shadow: 0 2px 4px rgba(0,0,0,.5); padding: 3px 8px;
+  background: rgba(0,0,0,.28); border-radius: 4px; max-width: 100%;
+  overflow-wrap: break-word;
+}
+.swatchRow { display: flex; flex-wrap: wrap; gap: 7px; }
+.swatch {
+  width: 28px; height: 28px; border-radius: 50%; cursor: pointer;
+  border: 2px solid var(--border-card); padding: 0;
+}
+.swatchActive { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(200,149,108,.3); }
+
 /* Inputs */
 .input, .textarea {
   width: 100%; border: 1.5px solid var(--border-card); border-radius: var(--r-sm);
