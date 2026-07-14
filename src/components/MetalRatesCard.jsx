@@ -4,18 +4,47 @@ import { db, N8N_OWNER_RATE_SAVE } from '../lib/config';
 import { useAuth } from '../hooks/useAuth';
 import styles from './MetalRatesCard.module.css';
 
-function purityLabel(key) {
-  const m = key.match(/(\d+)/);
-  if (m) return `${m[1]} Purity`;
-  if (/plat/i.test(key)) return 'Platinum';
-  return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
-}
+// Fineness -> karat, for the golds IBJA/our pricing engine actually quotes
+const FINENESS_KARAT = { 999: 24, 995: 24, 916: 22, 750: 18, 585: 14 };
 
 function metalType(key) {
   const k = key.toLowerCase();
   if (k.includes('silver')) return 'Silver';
   if (k.includes('plat'))   return 'Platinum';
   return 'Gold';
+}
+
+// "999 Purity" told you nothing useful — show the metal + karat jewellers
+// actually think in, e.g. "Gold 24K (999)" / "Silver 999 (Fine)".
+function purityLabel(key) {
+  const type = metalType(key);
+  const m = key.match(/(\d+)/);
+  const fineness = m ? Number(m[1]) : null;
+
+  if (type === 'Gold') {
+    const karat = fineness != null ? FINENESS_KARAT[fineness] : null;
+    return karat ? `Gold ${karat}K (${fineness})` : (fineness != null ? `Gold (${fineness})` : 'Gold');
+  }
+  if (type === 'Silver') {
+    return fineness != null ? `Silver ${fineness}` : 'Silver';
+  }
+  if (type === 'Platinum') return 'Platinum';
+  return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+// Short form for chips already grouped under a Gold/Silver header — the
+// metal name would just be noise there, so show karat/fineness only.
+function purityLabelShort(key) {
+  const type = metalType(key);
+  const m = key.match(/(\d+)/);
+  const fineness = m ? Number(m[1]) : null;
+
+  if (type === 'Gold') {
+    const karat = fineness != null ? FINENESS_KARAT[fineness] : null;
+    return karat ? `${karat}K (${fineness})` : (fineness != null ? `${fineness}` : 'Gold');
+  }
+  if (fineness != null) return `${fineness} Fine`;
+  return type;
 }
 
 function unitLabel(key) {
@@ -235,7 +264,7 @@ export default function MetalRatesCard() {
                           className={styles.chip}
                           style={i < groupItems.length - 1 ? { borderRight: '1px solid var(--border)' } : {}}
                         >
-                          <span className={styles.chipPurity}>{purityLabel(r.metal_key)}</span>
+                          <span className={styles.chipPurity}>{purityLabelShort(r.metal_key)}</span>
                           <div className={styles.chipRate}>
                             <span className={styles.chipSym}>₹</span>
                             <span className={styles.chipNum}>{Math.round(r.effValue).toLocaleString('en-IN')}</span>
@@ -267,7 +296,7 @@ export default function MetalRatesCard() {
                       {item.group}
                     </span>
                     <span className={styles.tickerDot} />
-                    <span className={styles.tickerPurity}>{purityLabel(item.metal_key)}</span>
+                    <span className={styles.tickerPurity}>{purityLabelShort(item.metal_key)}</span>
                     <span className={styles.tickerRate}>
                       ₹{Math.round(item.effValue).toLocaleString('en-IN')}
                     </span>
@@ -312,6 +341,7 @@ function RateEditor({ ownerId, ibjaRates, overrides, staleDays, onClose, onSaved
       const ov = overrides[bk] || {};
       return {
         metal_key: bk,
+        type: metalType(r.metal_key),
         label: purityLabel(r.metal_key),
         unit: unitLabel(r.metal_key),
         ibja: Number(r.rate_inr) || 0,
@@ -412,31 +442,40 @@ function RateEditor({ ownerId, ibjaRates, overrides, staleDays, onClose, onSaved
 
         <div className={styles.editTable}>
           <div className={styles.editRowHead}>
-            <span>Purity</span>
+            <span>Karat / Purity</span>
             <span>IBJA today</span>
             <span>My rate (₹)</span>
             <span>Premium %</span>
           </div>
-          {rows.map((r, i) => (
-            <div key={r.metal_key} className={styles.editRow}>
-              <span className={styles.editPurity}>
-                {r.label}<em className={styles.editUnit}>/{r.unit}</em>
-              </span>
-              <span className={styles.editIbja}>₹{Math.round(r.ibja).toLocaleString('en-IN')}</span>
-              <input
-                type="number" inputMode="numeric" placeholder="—"
-                className={styles.editInput}
-                value={r.rate_inr}
-                onChange={e => setField(i, 'rate_inr', e.target.value)}
-              />
-              <input
-                type="number" inputMode="decimal" placeholder="0" step="0.5"
-                className={styles.editInputSm}
-                value={r.premium_pct}
-                onChange={e => setField(i, 'premium_pct', e.target.value)}
-              />
-            </div>
-          ))}
+          {rows.map((r, i) => {
+            const prevType = i > 0 ? rows[i - 1].type : null;
+            const showGroupHead = r.type !== prevType;
+            return (
+              <div key={r.metal_key}>
+                {showGroupHead && (
+                  <div className={styles.editGroupHead}>{r.type}</div>
+                )}
+                <div className={styles.editRow}>
+                  <span className={styles.editPurity}>
+                    {r.label}<em className={styles.editUnit}>/{r.unit}</em>
+                  </span>
+                  <span className={styles.editIbja}>₹{Math.round(r.ibja).toLocaleString('en-IN')}</span>
+                  <input
+                    type="number" inputMode="numeric" placeholder="—"
+                    className={styles.editInput}
+                    value={r.rate_inr}
+                    onChange={e => setField(i, 'rate_inr', e.target.value)}
+                  />
+                  <input
+                    type="number" inputMode="decimal" placeholder="0" step="0.5"
+                    className={styles.editInputSm}
+                    value={r.premium_pct}
+                    onChange={e => setField(i, 'premium_pct', e.target.value)}
+                  />
+                </div>
+              </div>
+            );
+          })}
         </div>
 
         <div className={styles.staleRow}>
