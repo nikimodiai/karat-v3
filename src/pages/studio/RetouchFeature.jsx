@@ -147,7 +147,7 @@ export default function RetouchFeature({
         <div className={hub.lock}>
           <Sparkles size={28} strokeWidth={1.4} />
           <h2>{title} isn’t available on your plan</h2>
-          <p>Upgrade your plan to use Studio Suite.</p>
+          <p>Upgrade your plan to use AI Studio Suite.</p>
         </div>
       ) : (
         <div className={styles.layout}>

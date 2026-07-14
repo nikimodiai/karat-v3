@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Film, Upload, X, Sparkles, AlertCircle, ArrowLeft, CheckCircle2, Loader2, Images } from 'lucide-react';
+import { Film, Upload, X, Sparkles, AlertCircle, ArrowLeft, CheckCircle2, Loader2, Images, Camera } from 'lucide-react';
 import { db, MAX_IMAGE_BYTES } from '../../lib/config';
 import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../hooks/useToast';
@@ -37,6 +37,7 @@ export default function ReelStudio({ onBack }) {
   const [libOpen, setLibOpen] = useState(false);
   const chargedRef = useRef(false);              // guard: charge once per job
   const fileRef = useRef(null);
+  const camRef = useRef(null);
 
   const featureOn = hasFeature(store, 'ai_studio_suite');
   const unitsLeft = suiteUnitsLeft(store);
@@ -189,7 +190,7 @@ export default function ReelStudio({ onBack }) {
         <div className={hub.lock}>
           <Sparkles size={28} strokeWidth={1.4} />
           <h2>Reels aren’t available on your plan</h2>
-          <p>Upgrade your plan to use Studio Suite.</p>
+          <p>Upgrade your plan to use AI Studio Suite.</p>
         </div>
       ) : (
         <div className={styles.form}>
@@ -209,6 +210,9 @@ export default function ReelStudio({ onBack }) {
                   <button className={styles.addSlot} onClick={() => fileRef.current?.click()}>
                     <Upload size={18} /><small>Upload</small>
                   </button>
+                  <button className={styles.addSlot} onClick={() => camRef.current?.click()}>
+                    <Camera size={18} /><small>Camera</small>
+                  </button>
                   <button className={styles.addSlot} onClick={() => setLibOpen(true)}>
                     <Images size={18} /><small>Library</small>
                   </button>
@@ -216,8 +220,10 @@ export default function ReelStudio({ onBack }) {
               )}
               <input ref={fileRef} type="file" accept="image/*" multiple style={{ display: 'none' }}
                 onChange={(e) => addFiles(e.target.files)} />
+              <input ref={camRef} type="file" accept="image/*" capture="environment" style={{ display: 'none' }}
+                onChange={(e) => addFiles(e.target.files)} />
             </div>
-            {images.length === 0 && <p className={styles.hint}>Add at least one image — from your device or Studio Library. The reel flows through them in order.</p>}
+            {images.length === 0 && <p className={styles.hint}>Add at least one image — upload, camera, or your Studio Library. The reel flows through them in order.</p>}
           </div>
 
           {/* Format */}

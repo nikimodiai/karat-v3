@@ -27,9 +27,17 @@
 .empty svg { color: var(--gold); }
 .empty p { font-size: 13px; max-width: 34ch; margin: 0; }
 
+.sections {
+  flex: 1; min-height: 0;
+  overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 20px;
+}
+.section:last-child { margin-bottom: 0; }
+.sectionHead {
+  font-size: 12px; font-weight: 700; letter-spacing: .02em; text-transform: uppercase;
+  color: var(--ink-soft); margin-bottom: 10px;
+}
 .grid {
   display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px;
-  padding: 16px; overflow-y: auto;
 }
 .cell {
   position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; padding: 0;
@@ -38,10 +46,6 @@
 .cell:hover { border-color: var(--gold); }
 .cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .cellSel { border-color: var(--gold); }
-.kindTag {
-  position: absolute; bottom: 5px; left: 5px; padding: 2px 7px; border-radius: 7px;
-  background: rgba(0,0,0,.6); color: #fff; font-size: 9.5px; font-weight: 700;
-}
 .check {
   position: absolute; top: 5px; right: 5px; width: 22px; height: 22px; border-radius: 50%;
   background: var(--gold); color: #0B1829; font-size: 13px; font-weight: 800;

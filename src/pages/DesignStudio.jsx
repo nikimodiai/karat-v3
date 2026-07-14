@@ -395,7 +395,7 @@ export default function DesignStudio({ onBack }) {
       <div className={styles.page}>
         {onBack && (
           <button className={styles.tabBtn} onClick={onBack} style={{ marginBottom: 14 }}>
-            <ArrowLeft size={15} /> Studio Suite
+            <ArrowLeft size={15} /> AI Studio Suite
           </button>
         )}
         <div className={styles.lock}>
@@ -413,7 +413,7 @@ export default function DesignStudio({ onBack }) {
     <div className={styles.page}>
       {onBack && (
         <button className={styles.tabBtn} onClick={onBack} style={{ marginBottom: 14 }}>
-          <ArrowLeft size={15} /> Studio Suite
+          <ArrowLeft size={15} /> AI Studio Suite
         </button>
       )}
       {/* Header */}

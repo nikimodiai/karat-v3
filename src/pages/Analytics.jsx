@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import {
-  MessageSquare, Package, Cpu, Shirt, ArrowRight,
+  MessageSquare, Package, Cpu, ArrowRight,
   Gem, Users, Activity, BarChart as BarChartIcon, Layers,
   Info, Zap, ShieldCheck,
 } from 'lucide-react';
@@ -109,10 +109,10 @@ export default function Analytics() {
   const convUsed  = store?._conv_used  || 0;
   const convLimit = effectiveLimit(store, 'conversations');
   const prodLimit = effectiveLimit(store, 'products');
-  const aiUsed    = store?._ai_used    || 0;
-  const aiLimit   = effectiveLimit(store, 'ai_models');
-  const vtUsed    = store?._vt_used    || 0;
-  const vtLimit   = effectiveLimit(store, 'selfie_tryon');
+  // Unified AI Studio Suite meter (replaces the separate AI Model / Selfie
+  // Try-On breakdowns — those columns still exist but are no longer surfaced).
+  const suiteUsed  = store?._ai_studio_suite_used || 0;
+  const suiteLimit = effectiveLimit(store, 'ai_studio_suite');
 
   // ── Aggregates ─────────────────────────────────────────────────
   const catData = useMemo(() => {
@@ -212,11 +212,8 @@ export default function Analytics() {
         <div className={styles.usageGrid}>
           <UsageCard icon={MessageSquare} label="Conversations" used={convUsed}        limit={convLimit}/>
           <UsageCard icon={Package}       label="Products"      used={products.length} limit={prodLimit}/>
-          {hasFeature(store, 'ai_models') && (
-            <UsageCard icon={Cpu} label="AI Model Try-Ons" used={aiUsed} limit={aiLimit}/>
-          )}
-          {hasFeature(store, 'virtual_tryon') && (
-            <UsageCard icon={Shirt} label="Selfie Try-Ons" used={vtUsed} limit={vtLimit}/>
+          {hasFeature(store, 'ai_studio_suite') && (
+            <UsageCard icon={Cpu} label="AI Studio Suite Credits" used={suiteUsed} limit={suiteLimit}/>
           )}
         </div>
 
@@ -350,20 +347,20 @@ export default function Analytics() {
                 </ResponsiveContainer>
               </ChartBox>
 
-              {hasFeature(store, 'ai_models') && (
-                <ChartBox title="AI Model Usage" height={220}>
+              {hasFeature(store, 'ai_studio_suite') && (
+                <ChartBox title="AI Studio Suite Usage" height={220}>
                   <div className={styles.aiUsageBox}>
                     <div className={styles.aiUsageBig}>
                       <Zap size={24} color="#7c3aed"/>
                       <div>
-                        <div className={styles.aiUsageNum}>{aiUsed.toLocaleString('en-IN')}</div>
-                        <div className={styles.aiUsageLbl}>calls this month</div>
+                        <div className={styles.aiUsageNum}>{suiteUsed.toLocaleString('en-IN')}</div>
+                        <div className={styles.aiUsageLbl}>credits used this month</div>
                       </div>
                     </div>
                     <div className={styles.aiUsageMeta}>
-                      <div><span>Limit</span><strong>{fmtLimit(aiLimit)}</strong></div>
+                      <div><span>Limit</span><strong>{fmtLimit(suiteLimit)}</strong></div>
                       <div><span>Model</span><strong>{tokenInfo.model}</strong></div>
-                      <div><span>Source</span><strong>stores.ai_models_limit</strong></div>
+                      <div><span>Source</span><strong>stores._ai_studio_suite_limit</strong></div>
                     </div>
                   </div>
                 </ChartBox>

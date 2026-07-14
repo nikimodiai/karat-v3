@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import {
   Lock, Check, X, Crown, Store, Phone, Mail, MapPin, Wifi, Diamond,
   ShoppingBag, Users, Cpu, Shirt, BarChart2, Camera, MessageSquare, HardDrive, Zap, Upload, Image as ImageIcon,
+  Wand2, Film,
 } from 'lucide-react';
 import { db, CLOUDINARY_CLOUD, CLOUDINARY_PRESET } from '../lib/config';
 import { compressImage } from '../lib/imageUtils';
@@ -416,12 +417,24 @@ export default function Profile() {
                   <div className={styles.creditCost}><strong>3</strong> credits</div>
                 </div>
                 <div className={styles.creditItem}>
+                  <div className={styles.creditFeature}><Wand2 size={12} color="#8B6914"/> Studio Photo</div>
+                  <div className={styles.creditCost}><strong>1</strong> AI Studio Suite credit <span className={styles.creditNote}>(separate pool)</span></div>
+                </div>
+                <div className={styles.creditItem}>
+                  <div className={styles.creditFeature}><Wand2 size={12} color="#8B6914"/> Metal Swap</div>
+                  <div className={styles.creditCost}><strong>1</strong> AI Studio Suite credit <span className={styles.creditNote}>(separate pool)</span></div>
+                </div>
+                <div className={styles.creditItem}>
                   <div className={styles.creditFeature}><Cpu size={12} color="#8B6914"/> AI model try-on</div>
-                  <div className={styles.creditCost}><strong>1</strong> AI credit <span className={styles.creditNote}>(separate pool)</span></div>
+                  <div className={styles.creditCost}><strong>1</strong> AI Studio Suite credit <span className={styles.creditNote}>(separate pool)</span></div>
                 </div>
                 <div className={styles.creditItem}>
                   <div className={styles.creditFeature}><Shirt size={12} color="#8B6914"/> Selfie try-on</div>
-                  <div className={styles.creditCost}><strong>1</strong> AI credit <span className={styles.creditNote}>(separate pool)</span></div>
+                  <div className={styles.creditCost}><strong>1</strong> AI Studio Suite credit <span className={styles.creditNote}>(separate pool)</span></div>
+                </div>
+                <div className={styles.creditItem}>
+                  <div className={styles.creditFeature}><Film size={12} color="#8B6914"/> Generate Reels</div>
+                  <div className={styles.creditCost}><strong>From 2</strong> AI Studio Suite credits <span className={styles.creditNote}>(separate pool)</span></div>
                 </div>
               </div>
             </div>

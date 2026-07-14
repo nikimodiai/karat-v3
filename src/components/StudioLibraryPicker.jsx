@@ -4,13 +4,15 @@ import { db } from '../lib/config';
 import { useAuth } from '../hooks/useAuth';
 import styles from './StudioLibraryPicker.module.css';
 
-// Filter labels for app_gallery.kind (+ the reels tab reads reel_jobs).
-const KIND_LABELS = {
-  design: 'Designs',
-  ai_model: 'AI Models',
-  studio_photo: 'Studio Photos',
-  metal_swap: 'Metal Swaps',
-};
+// Section order + labels for app_gallery.kind — mirrors the tabs on the
+// Studio Suite Library page so this picker reads the same way.
+const KIND_SECTIONS = [
+  { id: 'design', label: 'Designs' },
+  { id: 'ai_model', label: 'AI Models' },
+  { id: 'studio_photo', label: 'Studio Photos' },
+  { id: 'metal_swap', label: 'Metal Swaps' },
+];
+const KIND_LABELS = Object.fromEntries(KIND_SECTIONS.map((s) => [s.id, s.label]));
 
 /**
  * Modal that lets a jeweller pick a previously generated Studio Suite image as
@@ -51,6 +53,15 @@ export default function StudioLibraryPicker({ onClose, onPick, onPickMany, multi
     setSelected((prev) => prev.includes(url) ? prev.filter((u) => u !== url) : [...prev, url]);
   };
 
+  // Group items by kind, in the same order as the Library page's tabs, so a
+  // jeweller sees "Designs", "AI Models", etc. as separate sections instead of
+  // one flat stack of every generated image.
+  const sections = KIND_SECTIONS
+    .map((s) => ({ ...s, items: items.filter((im) => im.kind === s.id) }))
+    .filter((s) => s.items.length > 0);
+  const otherItems = items.filter((im) => !KIND_LABELS[im.kind]);
+  if (otherItems.length) sections.push({ id: 'other', label: 'Other', items: otherItems });
+
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -67,21 +78,27 @@ export default function StudioLibraryPicker({ onClose, onPick, onPickMany, multi
             <p>No generated images yet. Create something in Studio Suite first.</p>
           </div>
         ) : (
-          <div className={styles.grid}>
-            {items.map((im) => {
-              const isSel = selected.includes(im.image_url);
-              return (
-                <button
-                  key={im.id}
-                  className={`${styles.cell} ${isSel ? styles.cellSel : ''}`}
-                  onClick={() => toggle(im.image_url)}
-                >
-                  <img src={im.image_url} alt={im.title || 'image'} />
-                  {im.kind && <span className={styles.kindTag}>{KIND_LABELS[im.kind] || im.kind}</span>}
-                  {isSel && <span className={styles.check}>✓</span>}
-                </button>
-              );
-            })}
+          <div className={styles.sections}>
+            {sections.map((section) => (
+              <div key={section.id} className={styles.section}>
+                <div className={styles.sectionHead}>{section.label}</div>
+                <div className={styles.grid}>
+                  {section.items.map((im) => {
+                    const isSel = selected.includes(im.image_url);
+                    return (
+                      <button
+                        key={im.id}
+                        className={`${styles.cell} ${isSel ? styles.cellSel : ''}`}
+                        onClick={() => toggle(im.image_url)}
+                      >
+                        <img src={im.image_url} alt={im.title || 'image'} />
+                        {isSel && <span className={styles.check}>✓</span>}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         )}
 

@@ -83,7 +83,7 @@ export default function StudioSuite({ onNavigate }) {
       <div className={styles.page}>
         <div className={styles.lock}>
           <Lock size={30} strokeWidth={1.4} />
-          <h2>Studio Suite isn’t available on your plan</h2>
+          <h2>AI Studio Suite isn’t available on your plan</h2>
           <p>Upgrade to generate studio photos, AI models, jewellery designs and reels.</p>
         </div>
       </div>
@@ -94,7 +94,7 @@ export default function StudioSuite({ onNavigate }) {
     <div className={styles.page}>
       <div className={styles.header}>
         <div>
-          <h1 className={styles.title}><Wand2 size={20} /> Studio Suite</h1>
+          <h1 className={styles.title}><Wand2 size={20} /> AI Studio Suite</h1>
           <p className={styles.sub}>
             AI tools to shoot, restyle, design and animate your jewellery — all in one place.
           </p>
@@ -134,7 +134,7 @@ export function SuiteFeatureHeader({ onBack, icon: Icon, title, sub, right }) {
   return (
     <div className={styles.featHeader}>
       <button className={styles.backBtn} onClick={onBack}>
-        <ArrowLeft size={16} /> Studio Suite
+        <ArrowLeft size={16} /> AI Studio Suite
       </button>
       <div className={styles.featTitleRow}>
         <div className={styles.featTitleLeft}>

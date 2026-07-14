@@ -8,12 +8,18 @@ const ROLE_LABELS = { owner: 'Owner', admin: 'Admin', read_write: 'Read & Write'
 const NAV_ITEMS = [
   { id: 'dashboard',  label: 'Dashboard',         icon: Home },
   { id: 'inventory',  label: 'Inventory',          icon: LayoutGrid },
-  { id: 'design',     label: 'Studio Suite',       icon: Wand2, isNew: true },
+  { id: 'design',     label: 'AI Studio Suite',    icon: Wand2, isNew: true },
   { id: 'customers',  label: 'Customers',          icon: Users },
   { id: 'analytics',  label: 'Analytics',          icon: BarChart2 },
-  { id: 'offers',     label: 'Offers',             icon: Tag },
   { id: 'marketing',  label: 'Marketing',          icon: Megaphone, isNew: true },
-  { id: 'voice',      label: 'Teach AI Your Style', icon: Sparkles, isNew: true },
+];
+
+// Secondary items tucked under the profile name (like Team / Reviews / FAQ)
+// instead of the main tab row, so the top bar doesn't overflow on smaller
+// screens once AI Studio Suite + Marketing were added.
+const MORE_ITEMS = [
+  { id: 'offers', label: 'Offers',              icon: Tag },
+  { id: 'voice',  label: 'Teach AI Your Style',  icon: Sparkles },
 ];
 
 const PLAN_COLORS = {
@@ -114,6 +120,11 @@ export default function Topbar({ activeTab, onTabChange, productCount }) {
                 <button className={styles.ddItem} onClick={() => { setDropOpen(false); onTabChange('faq'); }}>
                   <HelpCircle size={14} /> FAQ
                 </button>
+                {MORE_ITEMS.map(({ id, label, icon: Icon }) => (
+                  <button key={id} className={styles.ddItem} onClick={() => { setDropOpen(false); onTabChange(id); }}>
+                    <Icon size={14} /> {label}
+                  </button>
+                ))}
                 <div className={styles.ddDivider} />
                 <button className={`${styles.ddItem} ${styles.ddItemDanger}`} onClick={logout}>
                   <LogOut size={14} /> Sign Out
@@ -168,6 +179,15 @@ export default function Topbar({ activeTab, onTabChange, productCount }) {
           >
             <HelpCircle size={16} strokeWidth={2} /> FAQ
           </button>
+          {MORE_ITEMS.map(({ id, label, icon: Icon }) => (
+            <button
+              key={id}
+              className={`${styles.mobileNavItem} ${activeTab === id ? styles.mobileNavActive : ''}`}
+              onClick={() => { onTabChange(id); setMobileOpen(false); }}
+            >
+              <Icon size={16} strokeWidth={2} /> {label}
+            </button>
+          ))}
           <div className={styles.mobileDivider} />
           <button className={`${styles.mobileNavItem} ${styles.mobileNavDanger}`} onClick={logout}>
             <LogOut size={16} /> Sign Out

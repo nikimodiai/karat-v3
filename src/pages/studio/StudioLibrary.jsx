@@ -74,7 +74,7 @@ export default function StudioLibrary({ onBack }) {
     <div className={hub.page}>
       <SuiteFeatureHeader
         onBack={onBack} icon={Images} title="Library"
-        sub="Every photo and video you’ve generated with Studio Suite."
+        sub="Every photo and video you’ve generated with AI Studio Suite."
       />
 
       <div className={styles.tabs}>
@@ -91,7 +91,7 @@ export default function StudioLibrary({ onBack }) {
         <div className={hub.lock}>
           <Images size={28} strokeWidth={1.4} />
           <h2>Nothing here yet</h2>
-          <p>Generate a photo or reel from Studio Suite and it’ll show up here.</p>
+          <p>Generate a photo or reel from AI Studio Suite and it’ll show up here.</p>
         </div>
       ) : (
         <div className={styles.grid}>
