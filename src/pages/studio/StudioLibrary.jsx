@@ -12,10 +12,10 @@ import styles from './StudioLibrary.module.css';
 // Filter tabs. 'reel' is special (reads reel_jobs); the rest map to app_gallery.kind.
 const TABS = [
   { id: 'all', label: 'All' },
-  { id: 'design', label: 'Designs' },
-  { id: 'ai_model', label: 'AI Models' },
   { id: 'studio_photo', label: 'Studio Photos' },
   { id: 'metal_swap', label: 'Metal Swaps' },
+  { id: 'design', label: 'Designs' },
+  { id: 'ai_model', label: 'AI Models' },
   { id: 'reel', label: 'Reels' },
 ];
 

@@ -68,8 +68,14 @@
   position: fixed; inset: 0; z-index: 1000; background: rgba(0,0,0,.85);
   display: flex; align-items: center; justify-content: center; padding: 24px;
 }
-.lbContent { position: relative; max-width: 92vw; max-height: 92vh; }
-.lbMedia { max-width: 92vw; max-height: 92vh; object-fit: contain; border-radius: 10px; background: #000; }
+.lbContent {
+  position: relative; max-width: 92vw; max-height: 92vh;
+  display: flex; flex-direction: column; align-items: center; gap: 0;
+}
+/* Media takes whatever height is left after the share row, so the share
+   buttons always stay within the viewport instead of being pushed off the
+   bottom (behind the OS taskbar) by a tall image. */
+.lbMedia { max-width: 92vw; flex: 1 1 auto; min-height: 0; object-fit: contain; border-radius: 10px; background: #000; }
 .lbClose {
   position: absolute; top: -14px; right: -14px; width: 34px; height: 34px; border-radius: 50%;
   border: none; background: #fff; color: #0B1829; cursor: pointer;
@@ -77,6 +83,7 @@
 }
 .lbShare {
   display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 14px;
+  flex: 0 0 auto;
 }
 .lbShareBtn {
   display: inline-flex; align-items: center; gap: 7px;
@@ -88,7 +95,3 @@
 .lbShareBtn:disabled { opacity: .55; cursor: default; }
 .waBtn { background: #25D366; color: #fff; }
 .waBtn:hover { background: #1ebe5b; }
-
-@media (max-width: 720px) {
-  .lbShare { position: relative; }
-}
