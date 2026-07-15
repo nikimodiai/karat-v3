@@ -202,6 +202,17 @@ export default function DesignStudio({ onBack }) {
       setRenders(urls);
       setStatus('draft');
 
+      // Auto-save to the shared Studio Suite library (app_gallery) so a new
+      // design shows up alongside Metal Swap / Studio Photo results without an
+      // explicit save — same pattern RetouchFeature uses. Non-fatal.
+      const galleryTitle = [params.style, params.earring_subtype, params.piece_type]
+        .filter(Boolean).join(' ') || 'Jewellery Design';
+      try {
+        await db.from('app_gallery').insert(
+          urls.map(u => ({ user_id: store.owner_id, image_url: u, title: galleryTitle, kind: 'design' }))
+        );
+      } catch { /* non-fatal — the render is still shown and can be saved to the design library */ }
+
       // Charge the shared Studio Suite meter: one unit per render produced.
       await chargeSuite(store.owner_id, urls.length);
       await refreshStore();

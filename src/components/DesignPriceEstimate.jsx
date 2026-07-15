@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Calculator, Info, AlertTriangle } from 'lucide-react';
+import { Calculator, Info } from 'lucide-react';
 import {
   calcJewelleryPrice, fmtINR, MAKING_CHARGE_MODES,
-  resolveMetalRate,
+  resolveMetalRate, purityToMetalType, RATE_UNIT,
 } from '../lib/pricing';
 import { db } from '../lib/config';
 import { toGoldCaratLabel } from '../lib/designTaxonomy';
@@ -14,6 +14,11 @@ import styles from './DesignPriceEstimate.module.css';
 export const DEFAULT_PRICING = {
   making_mode: 'percent',   // 'per_gram' | 'percent' | 'flat'
   making_value: '',
+  // Jeweller-entered metal rate for the chosen purity, in the quoting unit
+  // (per 10g for gold/platinum, per kg for silver). Blank by default — the
+  // estimate does NOT auto-populate from IBJA; today's IBJA rate is only
+  // offered as a tap-to-fill hint. See metal_rate_per_unit below.
+  metal_rate_per_unit: '',
   stone_weight_ct: '',
   stone_rate_per_ct: '',
   flat_stone_cost: '',
@@ -30,18 +35,33 @@ export const DEFAULT_PRICING = {
 // Returns { metalCost, makingCost, stoneCost, hallmark, diamondCert,
 //           subtotal, gstPct, gst, total, rateInfo } — or rateInfo.source
 // === 'missing' when there is no published rate for the chosen purity.
+// Unit (per 10g / per kg) + label for the chosen purity, so the manual rate
+// input is interpreted the same way jewellers quote it. Falls back to the
+// gold /10g convention for anything unrecognised.
+export function metalRateUnitFor(purityLabel) {
+  const key = purityToMetalType(purityLabel);
+  const family = key?.startsWith('silver') ? 'silver' : key === 'platinum' ? 'platinum' : 'gold';
+  return RATE_UNIT[family] || RATE_UNIT.gold;
+}
+
 export function computeDesignEstimate(params = {}, rates = []) {
   const p = { ...DEFAULT_PRICING, ...(params.pricing || {}) };
   const weight = Number(params.metal_weight_g) || 0;
   const isSilver = params.metal_type === 'Silver';
   const purityLabel = toGoldCaratLabel(params.metal_type, params.purity);
+  // IBJA rate is looked up only to offer a tap-to-fill hint — it never drives
+  // the estimate. The metal cost uses the jeweller's entered rate below.
   const rateInfo = resolveMetalRate(purityLabel, rates);
+
+  // Jeweller-entered rate (in the quoting unit) → per-gram for the calculator.
+  const unit = metalRateUnitFor(purityLabel);
+  const enteredRatePerGram = (Number(p.metal_rate_per_unit) || 0) / unit.perGramFactor;
 
   const base = calcJewelleryPrice({
     goldGrams:        isSilver ? 0 : weight,
-    goldRatePerGram:  isSilver ? 0 : rateInfo.rate,
+    goldRatePerGram:  isSilver ? 0 : enteredRatePerGram,
     silverGrams:      isSilver ? weight : 0,
-    silverRatePerGram: isSilver ? rateInfo.rate : 0,
+    silverRatePerGram: isSilver ? enteredRatePerGram : 0,
     making:           p.making_value,
     makingMode:       p.making_mode,
     stoneWeightCt:    p.stone_weight_ct,
@@ -67,6 +87,8 @@ export function computeDesignEstimate(params = {}, rates = []) {
     gst,
     total,
     rateInfo,
+    unitLabel: unit.label,
+    enteredRatePerUnit: Number(p.metal_rate_per_unit) || 0,
   };
 }
 
@@ -108,34 +130,45 @@ export default function DesignPriceEstimate({ params, setParams, onEstimate }) {
   const setPricing = (key, val) =>
     setParams(f => ({ ...f, pricing: { ...DEFAULT_PRICING, ...(f.pricing || {}), [key]: val } }));
 
-  const rateMissing = est.rateInfo.source === 'missing' || est.rateInfo.rate === 0;
   const purityLabel = toGoldCaratLabel(params.metal_type, params.purity);
+  const metalName = params.metal_type === 'Silver' ? 'Silver' : 'Gold';
+  // Today's IBJA rate, offered only as a tap-to-fill convenience (never auto-applied).
+  const ibjaRate = est.rateInfo.source !== 'missing' ? Math.round(est.rateInfo.displayRate) : 0;
 
   return (
     <div className={styles.panel}>
       <div className={styles.head}>
         <Calculator size={14} />
         <span>Price estimate</span>
-        <InfoTip text="A rough price only. Gold cost uses today's rate × weight; you set the making, stone and GST values below." label="Price estimate" />
+        <InfoTip text="A rough price only. You enter today's metal rate and set the making, stone and GST values below." label="Price estimate" />
         <span className={styles.estimateTag}>Estimate</span>
       </div>
 
-      {/* Metal rate status — never invents a number */}
-      {rateMissing ? (
-        <div className={styles.rateWarn}>
-          <AlertTriangle size={13} />
-          <span>
-            No published rate for {purityLabel || 'this metal'} yet. Today's rates load
-            from the dashboard — metal cost shows ₹0 until a rate is set.
-          </span>
+      {/* Jeweller-entered metal rate — the estimate never auto-fills from IBJA. */}
+      <div className={styles.rateEntry}>
+        <label>
+          {metalName} rate ({purityLabel || 'purity'})
+          <InfoTip text={`Enter today's ${metalName.toLowerCase()} rate for this purity, the way you quote it (${est.unitLabel || '/10g'}). The metal cost is this rate × weight.`} label="Metal rate" />
+        </label>
+        <div className={styles.rateInputRow}>
+          <input
+            type="number" min="0" inputMode="decimal"
+            value={p.metal_rate_per_unit}
+            onChange={e => setPricing('metal_rate_per_unit', e.target.value)}
+            placeholder={`enter rate ${est.unitLabel || '/10g'}`}
+          />
+          <span className={styles.rateUnit}>{est.unitLabel || '/10g'}</span>
         </div>
-      ) : (
-        <div className={styles.rateOk}>
-          Today's {purityLabel} rate: <strong>{fmtINR(est.rateInfo.displayRate)}</strong>
-          <small>{est.rateInfo.unitLabel}</small>
-          {est.rateInfo.source === 'derived' && <em> (derived from 999 base)</em>}
-        </div>
-      )}
+        {ibjaRate > 0 && Number(p.metal_rate_per_unit) !== ibjaRate && (
+          <button
+            type="button"
+            className={styles.rateHint}
+            onClick={() => setPricing('metal_rate_per_unit', String(ibjaRate))}
+          >
+            Today's IBJA {purityLabel}: {fmtINR(ibjaRate)} {est.unitLabel} — use this
+          </button>
+        )}
+      </div>
 
       {/* Editable per-design charges */}
       <div className={styles.inputs}>

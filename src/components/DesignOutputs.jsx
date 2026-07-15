@@ -70,7 +70,7 @@ export default function DesignOutputs({
 
       {/* ── Output 3: maker's spec sheet ── */}
       <div className={styles.block}>
-        <SpecSheet params={params} setParams={setParams} estimate={estimate} />
+        <SpecSheet params={params} setParams={setParams} estimate={estimate} renderUrl={renders?.[0]} />
       </div>
 
       {/* ── Per-design decision ── */}
