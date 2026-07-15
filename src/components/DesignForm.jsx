@@ -301,9 +301,9 @@ export default function DesignForm({
         )}
       </Step>
 
-      {/* STEP 7 — Motif / theme */}
-      <Step n="7" title="Motif / theme" hint="pick any" open={open[7]} onToggle={() => toggle(7)}>
-        <FieldLabel tip="The pattern or design theme. Tap any that apply.">Motifs</FieldLabel>
+      {/* STEP 7 — Pattern / theme */}
+      <Step n="7" title="Pattern / theme" hint="pick any" open={open[7]} onToggle={() => toggle(7)}>
+        <FieldLabel tip="The pattern or design theme. Tap any that apply.">Patterns</FieldLabel>
         <div className={styles.chips}>
           {MOTIFS.map(m => {
             const info = MOTIF_INFO[m] || {};
@@ -321,7 +321,7 @@ export default function DesignForm({
         </div>
         {motifs.includes('Custom') && (
           <input className="inp" style={{ marginTop: 12 }} value={params.motif_custom || ''}
-            onChange={e => set('motif_custom', e.target.value)} placeholder="Describe your custom motif…" />
+            onChange={e => set('motif_custom', e.target.value)} placeholder="Describe your custom pattern…" />
         )}
       </Step>
 

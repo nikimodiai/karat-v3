@@ -85,7 +85,7 @@ function printSpec(spec) {
     ['Centre stone', centre],
     ['Accent stones', accents],
     ['Dimensions', dimLines || '—'],
-    ['Motifs', spec.motifs.length ? spec.motifs.join(', ') : '—'],
+    ['Patterns', spec.motifs.length ? spec.motifs.join(', ') : '—'],
     ['Occasion', spec.occasion || '—'],
     ['Wearer', spec.target_wearer || '—'],
     ['Special note', spec.extra_details || '—'],
@@ -163,7 +163,7 @@ export default function SpecSheet({ params, setParams, estimate }) {
             : ''}
         </Item>
         <Item label="Dimensions">{dimText}</Item>
-        <Item label="Motifs">{spec.motifs.join(', ')}</Item>
+        <Item label="Patterns">{spec.motifs.join(', ')}</Item>
         <Item label="Occasion">{spec.occasion}</Item>
         <Item label="Wearer">{spec.target_wearer}</Item>
         <Item label="Special note">{spec.extra_details}</Item>

@@ -40,7 +40,7 @@ export const N8N_MARKETING_SEND = N8N_BASE + '/marketing-send';
 // Design Studio generation: receives FormData { owner_id, prompt, mode ('scratch'|'reference'),
 // variation ('0'|'1'), and (Mode B) a `reference` image file. Calls Vertex AI server-side,
 // uploads the render(s) to Cloudinary, returns { renders: ["https://…"] }.
-export const N8N_DESIGN_GENERATE = N8N_BASE + '/swarnix-design-generate';
+export const N8N_DESIGN_GENERATE = N8N_BASE + '/swarnix-design-generate-v2';
 // Background removal: receives FormData { image (file) } or { image_url },
 // runs the self-hosted rembg service, uploads the transparent PNG to
 // Cloudinary, returns { secure_url, public_id }. Cost ₹0 (VPS compute).
