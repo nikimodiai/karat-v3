@@ -103,11 +103,9 @@ export default function Profile() {
   // Effective limits & usage
   const convUsed          = store?._conv_used || 0;
   const suiteUsed         = store?._ai_studio_suite_used || 0;
-  const vtUsed            = store?._vt_used   || 0;
   const convLimit         = effectiveLimit(store, 'conversations');
   const prodLimit         = effectiveLimit(store, 'products');
   const suiteLimit        = effectiveLimit(store, 'ai_studio_suite');
-  const selfieTryonLimit  = effectiveLimit(store, 'selfie_tryon');
   const storageLimit      = effectiveLimit(store, 'image_storage');
 
   const productCount = products.length;
@@ -120,6 +118,7 @@ export default function Profile() {
     { icon: Users,       label: 'Customer Tiers (VVIP/VIP)', active: hasFeature(store, 'customer_tiers') },
     { icon: Cpu,         label: 'AI Studio Suite',           active: hasFeature(store, 'ai_studio_suite') },
     { icon: Shirt,       label: 'Selfie Try-On',             active: hasFeature(store, 'virtual_tryon') },
+    { icon: Wifi,        label: 'Website Storefront',        active: hasFeature(store, 'storefront') },
     { icon: BarChart2,   label: 'Analytics',                 active: !!planSpec.features.analytics, note: planSpec.features.analytics },
   ];
 
@@ -473,8 +472,7 @@ export default function Profile() {
               <div style={{ display: 'flex', flexDirection: 'column', gap: 14, marginTop: 4 }}>
                 <LimitRow icon={MessageSquare} label="Conversations / month" used={convUsed}   limit={convLimit}/>
                 <LimitRow icon={ShoppingBag}   label="Products"           used={productCount} limit={prodLimit}/>
-                <LimitRow icon={Cpu}           label="Studio Credits"     used={suiteUsed}    limit={suiteLimit}/>
-                <LimitRow icon={Shirt}         label="Selfie Try-On"      used={vtUsed}       limit={selfieTryonLimit}/>
+                <LimitRow icon={Cpu}           label="Studio Credits (incl. Selfie Try-On)" used={suiteUsed} limit={suiteLimit}/>
               </div>
             </div>
 
@@ -484,7 +482,7 @@ export default function Profile() {
               <div className={styles.featureList}>
                 {features.map((f, i) => <FeatureRow key={i} {...f} />)}
               </div>
-              {isOwner && (planName === 'trial' || planName === 'starter') && (
+              {isOwner && (planName === 'trial' || planName === 'basic' || planName === 'starter') && (
                 <a
                   href="mailto:support@nelishkaai.in?subject=SWARNIX Plan Upgrade"
                   className="btn-gold"

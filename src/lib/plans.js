@@ -10,10 +10,11 @@
 // "Check Subscription & Usage" node, and (iii) the SQL trigger in
 // MIGRATIONS.sql that hard-rejects inserts past product_limit.
 
-export const PLAN_KEYS = ['trial', 'starter', 'professional', 'enterprise'];
+export const PLAN_KEYS = ['trial', 'basic', 'starter', 'professional', 'enterprise'];
 
 export const PLAN_LABELS = {
   trial:        'Trial',
+  basic:        'Basic',
   starter:      'Starter',
   professional: 'Professional',
   enterprise:   'Enterprise',
@@ -28,18 +29,18 @@ export const PLAN_LIMITS = {
     products:       100,
     image_storage:  1,        // GB
     ai_models:      20,       // AI Models Try-On / month
-    selfie_tryon:   10,       // Selfie Try-On for Customers / month
     design_studio:  15,       // Design Studio generations / month  (legacy)
     // AI Studio Suite / month — FALLBACK only. Source of truth is
     // subscription_plans.ai_studio_suite_limit → copied to stores._ai_studio_suite_limit
     // at signup; this value is used only when the store column is null/0.
+    // Selfie Try-On also deducts from this shared meter (no separate limit).
     ai_studio_suite: 20,
     monthly_inr:    0,
     features: {
       whatsapp:        true,
       inventory:       true,
       voice_search:    true,
-      image_search:    false,
+      image_search:    true,
       customer_tiers:  false,
       teach_ai_style:  false,
       ai_models:       true,
@@ -47,18 +48,18 @@ export const PLAN_LIMITS = {
       design_studio:   true,
       ai_studio_suite: true,
       marketing_messages: false,
+      storefront:      true,
       analytics:       'PROFESSIONAL',
     },
   },
-  starter: {
+  basic: {
     conversations:  1000,
     products:       500,
     image_storage:  5,
-    ai_models:      50,
-    selfie_tryon:   30,
-    design_studio:  0,        // off on Starter (legacy Design Studio meter)
-    ai_studio_suite: 150,     // AI Studio Suite is unlocked on every plan
-    monthly_inr:    3999,
+    ai_models:      0,
+    design_studio:  0,
+    ai_studio_suite: 0,       // no AI Studio Suite credits on Basic
+    monthly_inr:    999,
     features: {
       whatsapp:        true,
       inventory:       true,
@@ -66,20 +67,44 @@ export const PLAN_LIMITS = {
       image_search:    false,
       customer_tiers:  false,
       teach_ai_style:  false,
-      ai_models:       true,
-      virtual_tryon:   true,
+      ai_models:       false,
+      virtual_tryon:   false,
       design_studio:   false,
-      ai_studio_suite: true,
+      ai_studio_suite: false,
       marketing_messages: false,
+      storefront:      false,
       analytics:       'STARTER',
     },
   },
-  professional: {
+  starter: {
     conversations:  3000,
     products:       1000,
     image_storage:  25,
     ai_models:      200,
-    selfie_tryon:   100,
+    design_studio:  0,        // off on Starter (legacy Design Studio meter)
+    ai_studio_suite: 150,     // AI Studio Suite / month
+    monthly_inr:    4999,
+    features: {
+      whatsapp:        true,
+      inventory:       true,
+      voice_search:    true,
+      image_search:    true,
+      customer_tiers:  true,
+      teach_ai_style:  true,
+      ai_models:       true,
+      virtual_tryon:   true,
+      design_studio:   false,
+      ai_studio_suite: true,
+      marketing_messages: true,
+      storefront:      false,
+      analytics:       'PROFESSIONAL',
+    },
+  },
+  professional: {
+    conversations:  10000,
+    products:       5000,
+    image_storage:  100,
+    ai_models:      500,
     design_studio:  100,
     ai_studio_suite: 400,     // AI Studio Suite / month
     monthly_inr:    8999,
@@ -95,15 +120,16 @@ export const PLAN_LIMITS = {
       design_studio:   true,
       ai_studio_suite: true,
       marketing_messages: true,
+      storefront:      true,
       analytics:       'PROFESSIONAL',
     },
   },
+  // Hidden/custom tier — not shown in public pricing since Jul 2026.
   enterprise: {
     conversations:  10000,
     products:       5000,
     image_storage:  Infinity,
     ai_models:      500,
-    selfie_tryon:   300,
     design_studio:  300,
     ai_studio_suite: 1000,    // AI Studio Suite / month
     monthly_inr:    17999,
@@ -119,6 +145,7 @@ export const PLAN_LIMITS = {
       design_studio:   true,
       ai_studio_suite: true,
       marketing_messages: true,
+      storefront:      true,
       analytics:       'ENTERPRISE',
     },
   },
@@ -136,7 +163,8 @@ export function planLimits(store) {
 
 // Returns the *effective* limit for a resource: the store's per-tenant
 // override (if set in the DB) or the plan default.
-// resource ∈ 'conversations' | 'products' | 'image_storage' | 'ai_models' | 'selfie_tryon' | 'design_studio' | 'ai_studio_suite'
+// resource ∈ 'conversations' | 'products' | 'image_storage' | 'ai_models' | 'design_studio' | 'ai_studio_suite'
+// Selfie Try-On has no separate meter — it deducts from 'ai_studio_suite'.
 export function effectiveLimit(store, resource) {
   const plan = planLimits(store);
   const ov = store && {
@@ -144,7 +172,6 @@ export function effectiveLimit(store, resource) {
     products:       store.product_limit,
     image_storage:  store.image_storage_gb,
     ai_models:      store.ai_models_limit,
-    selfie_tryon:   store.virtual_tryon,   // virtual_tryon column = Selfie Try-On limit
     design_studio:  store.design_studio_limit,
     ai_studio_suite: store._ai_studio_suite_limit,  // unified Studio Suite meter
   }[resource];
@@ -162,11 +189,11 @@ export function hasFeature(store, featureKey) {
     image_search:   store.has_image_search,
     customer_tiers: store.customer_tiers,
     ai_models:      store.ai_models,
-    virtual_tryon:  store.virtual_tryon,
+    storefront:     store.has_storefront,
     design_studio:  store.design_studio,
-    // ai_studio_suite has no per-store override column — it falls through to
-    // the plan default below (on for every plan). Don't reference a column that
-    // doesn't exist here, or STORE_SELECT/hasFeature could break the store load.
+    // virtual_tryon has no per-store toggle any more (legacy stores.virtual_tryon
+    // was the old numeric selfie meter) — it falls through to the plan default.
+    // ai_studio_suite also has no per-store override column — plan default.
   }[featureKey];
   if (typeof dbToggle === 'boolean') return dbToggle;
   return !!planLimits(store).features[featureKey];
@@ -200,10 +227,10 @@ export function analyticsTier(store) {
 }
 
 // True if the user can use Pro-tier features (Trial unlocks them so the
-// owner can evaluate the product before paying).
+// owner can evaluate the product before paying). Since the Jul 2026 pricing,
+// Starter also carries advanced analytics/summaries — only Basic is limited.
 export function isProTier(store) {
-  const p = planKey(store);
-  return p === 'trial' || p === 'professional' || p === 'enterprise';
+  return planKey(store) !== 'basic';
 }
 
 // Render a limit value for display: ∞ for Infinity, locale for numbers.
@@ -224,7 +251,8 @@ export function pctUsed(used, limit) {
 export function conversationTokenCopy(plan) {
   const map = {
     trial:        { tokensPerConv: 4000, model: 'GPT-4o (Trial unlock)', fairUse: 'evaluation only' },
-    starter:      { tokensPerConv: 3500, model: 'Groq Llama 3.1 70B',    fairUse: '1 customer chat ≈ 1 conversation' },
+    basic:        { tokensPerConv: 3500, model: 'Groq Llama 3.1 70B',    fairUse: '1 customer chat ≈ 1 conversation' },
+    starter:      { tokensPerConv: 4500, model: 'GPT-4o Mini',           fairUse: '1 customer chat ≈ 1 conversation' },
     professional: { tokensPerConv: 4500, model: 'GPT-4o Mini',           fairUse: '1 customer chat ≈ 1 conversation' },
     enterprise:   { tokensPerConv: 6000, model: 'GPT-4o (full)',         fairUse: 'unlimited, fair use' },
   };

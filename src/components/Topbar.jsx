@@ -24,6 +24,7 @@ const MORE_ITEMS = [
 
 const PLAN_COLORS = {
   trial:        { bg: 'rgba(201,168,76,.12)', color: '#8B6914', label: 'Trial' },
+  basic:        { bg: 'rgba(107,114,128,.12)', color: '#4B5563', label: 'Basic' },
   starter:      { bg: 'rgba(21,128,61,.1)',   color: '#15803d', label: 'Starter' },
   professional: { bg: 'rgba(23,48,90,.12)',   color: '#17305A', label: 'Pro' },
   enterprise:   { bg: 'rgba(139,69,20,.12)',  color: '#8B4514', label: 'Enterprise' },

@@ -5,10 +5,11 @@ import { useToast } from '../hooks/useToast';
 import styles from './StoreSignup.module.css';
 
 const PLANS = [
-  { value: 'trial',        label: 'Trial',        note: 'Full Professional features to evaluate' },
-  { value: 'starter',      label: 'Starter',      note: 'WhatsApp bot + inventory' },
-  { value: 'professional', label: 'Professional', note: 'Voice/image search, CRM tiers, advanced AI' },
-  { value: 'enterprise',   label: 'Enterprise',   note: 'Online webstore, enhanced limits' },
+  { value: 'trial',        label: 'Trial',        note: 'Full Pro features free for 15 days' },
+  { value: 'basic',        label: 'Basic',        note: 'WhatsApp AI agent + inventory' },
+  { value: 'starter',      label: 'Starter',      note: 'Voice/image search, tiers, marketing, selfie try-on' },
+  { value: 'professional', label: 'Professional', note: 'Everything + your own website storefront' },
+  { value: 'enterprise',   label: 'Enterprise',   note: 'Custom limits for large stores' },
 ];
 
 // Common countries for an Indian jewellery-store customer base; India first/default.
