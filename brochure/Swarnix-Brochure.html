@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Swarnix — Product Brochure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ============================================================
+     SWARNIX BROCHURE — print-ready A4
+     Palette: gold #C9A84C, deep navy #0B1829 / #17305A
+     Open in Chrome/Edge → Ctrl+P → "Save as PDF"
+     Layout: A4, Background graphics ON, Margins: None
+     ============================================================ */
+
+  :root{
+    --gold:#C9A84C;
+    --gold-light:#E8CC7A;
+    --gold-deep:#8B6914;
+    --gold-pale:#F5E9C5;
+    --navy:#0B1829;
+    --navy-2:#17305A;
+    --ink:#1a2436;
+    --muted:#5c6677;
+    --line:rgba(201,168,76,.30);
+    --paper:#FCFBF7;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+
+  html,body{
+    font-family:'DM Sans', system-ui, sans-serif;
+    color:var(--ink);
+    background:#3a3f47;          /* screen-only backdrop */
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+
+  .serif{ font-family:'Cormorant Garamond', Georgia, serif; }
+
+  /* ---------- PAGE FRAME ---------- */
+  .page{
+    position:relative;
+    width:210mm;
+    height:297mm;
+    max-height:297mm;
+    margin:0 auto 10mm;
+    background:var(--paper);
+    overflow:hidden;
+    box-shadow:0 8px 40px rgba(0,0,0,.4);
+    page-break-after:always;
+    break-after:page;
+    display:flex;
+    flex-direction:column;
+  }
+  .page:last-child{ page-break-after:auto; break-after:auto; margin-bottom:0; }
+
+  /* Ornamental double border on every page */
+  .frame{
+    position:absolute;
+    inset:8mm;
+    border:1.4px solid var(--gold);
+    pointer-events:none;
+    z-index:2;
+  }
+  .frame::after{
+    content:"";
+    position:absolute;
+    inset:2.4mm;
+    border:0.5px solid var(--line);
+  }
+  /* corner flourishes */
+  .corner{ position:absolute; width:13mm; height:13mm; z-index:3; pointer-events:none; }
+  .corner svg{ width:100%; height:100%; display:block; }
+  .corner.tl{ top:6mm; left:6mm; }
+  .corner.tr{ top:6mm; right:6mm; transform:scaleX(-1); }
+  .corner.bl{ bottom:6mm; left:6mm; transform:scaleY(-1); }
+  .corner.br{ bottom:6mm; right:6mm; transform:scale(-1,-1); }
+
+  .inner{
+    position:relative;
+    z-index:4;
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    padding:18mm 16mm 14mm;
+  }
+
+  /* running footer */
+  .pfoot{
+    position:absolute;
+    left:16mm; right:16mm; bottom:11mm;
+    z-index:4;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:8pt;
+    letter-spacing:.06em;
+    color:var(--muted);
+    text-transform:uppercase;
+  }
+  .pfoot .dot{ color:var(--gold); margin:0 6px; }
+  .pfoot b{ color:var(--gold-deep); font-weight:600; }
+
+  /* ---------- SECTION HEADERS ---------- */
+  .eyebrow{
+    font-size:8.5pt;
+    letter-spacing:.34em;
+    text-transform:uppercase;
+    color:var(--gold-deep);
+    font-weight:600;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before, .eyebrow::after{
+    content:"";
+    height:1px; flex:0 0 24px;
+    background:linear-gradient(90deg,transparent,var(--gold));
+  }
+  .eyebrow::after{ background:linear-gradient(90deg,var(--gold),transparent); }
+
+  .scr-no{
+    font-family:'Cormorant Garamond',serif;
+    font-size:11pt; font-weight:600;
+    color:var(--gold-deep);
+    letter-spacing:.05em;
+  }
+
+  h2.title{
+    font-family:'Cormorant Garamond',serif;
+    font-weight:600;
+    font-size:30pt;
+    line-height:1.02;
+    color:var(--navy);
+    margin:6px 0 2px;
+  }
+  h2.title em{ color:var(--gold-deep); font-style:italic; }
+
+  .subtitle{
+    font-size:10.5pt;
+    color:var(--muted);
+    line-height:1.5;
+    max-width:150mm;
+    margin-bottom:4mm;
+  }
+
+  .rule{
+    height:2px; width:100%;
+    background:linear-gradient(90deg,var(--gold) 0%, var(--gold-light) 40%, transparent 100%);
+    margin:3mm 0 5mm;
+    border-radius:2px;
+  }
+
+  /* ---------- SCREENSHOT PLACEHOLDER ---------- */
+  .shot{
+    position:relative;
+    border:1.4px dashed var(--gold);
+    border-radius:8px;
+    background:
+      repeating-linear-gradient(45deg, rgba(201,168,76,.05) 0 14px, rgba(201,168,76,.02) 14px 28px),
+      var(--paper);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    color:var(--gold-deep);
+    gap:6px;
+    min-height:0;
+  }
+  .shot .ph-icn{ font-size:22pt; opacity:.55; }
+  .shot .ph-lbl{ font-size:9.5pt; font-weight:600; letter-spacing:.04em; }
+  .shot .ph-hint{ font-size:7.8pt; color:var(--muted); letter-spacing:.02em; max-width:80%; }
+  .shot .ph-tag{
+    position:absolute; top:8px; left:8px;
+    font-size:7pt; letter-spacing:.12em; text-transform:uppercase;
+    background:var(--navy); color:var(--gold-light);
+    padding:3px 8px; border-radius:4px; font-weight:600;
+  }
+
+  /* ---------- FEATURE LIST ---------- */
+  .feat-head{
+    font-size:8.5pt; letter-spacing:.22em; text-transform:uppercase;
+    color:var(--navy-2); font-weight:700; margin-bottom:3mm;
+    display:flex; align-items:center; gap:8px;
+  }
+  .feat-head .gem{ color:var(--gold); }
+
+  ul.feats{ list-style:none; display:flex; flex-direction:column; gap:3.4mm; }
+  ul.feats li{ display:flex; gap:11px; align-items:flex-start; }
+  ul.feats .bullet{
+    flex:0 0 auto; margin-top:1.5px;
+    width:17px; height:17px; border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, var(--gold-light), var(--gold) 60%, var(--gold-deep));
+    display:flex; align-items:center; justify-content:center;
+    color:#fff; font-size:9pt; font-weight:700;
+    box-shadow:0 1px 3px rgba(139,105,20,.4);
+  }
+  ul.feats .ft{ flex:1; }
+  ul.feats .ft b{ color:var(--navy); font-weight:700; font-size:10.5pt; }
+  ul.feats .ft span{ display:block; color:var(--muted); font-size:9pt; line-height:1.45; margin-top:1px; }
+
+  /* layout: two columns — shot left, features right (and reverse) */
+  .split{ display:grid; grid-template-columns:1fr 1fr; gap:10mm; flex:1; align-items:stretch; }
+  .split.rev .col-shot{ order:2; }
+  .split .col-shot{ display:flex; }
+  .split .col-shot .shot{ flex:1; width:100%; }
+  .split .col-text{ display:flex; flex-direction:column; justify-content:center; }
+
+  /* stacked layout: big shot on top, 2-col features below */
+  .stack{ display:flex; flex-direction:column; flex:1; gap:6mm; }
+  .stack .shot{ flex:1.2; }
+  .feat-grid{ display:grid; grid-template-columns:1fr 1fr; gap:3.4mm 9mm; }
+  .feat-grid ul.feats{ gap:3.4mm; }
+
+  .tagstrip{
+    display:flex; flex-wrap:wrap; gap:6px; margin-top:4mm;
+  }
+  .tagstrip .chip{
+    font-size:7.6pt; letter-spacing:.04em;
+    background:rgba(201,168,76,.12);
+    border:1px solid var(--line);
+    color:var(--gold-deep); font-weight:600;
+    padding:4px 10px; border-radius:20px;
+  }
+
+  /* ============================================================
+     COVER
+     ============================================================ */
+  .cover{
+    background:
+      radial-gradient(120% 80% at 50% -10%, #15294a 0%, var(--navy) 55%, #050b15 100%);
+    color:#fff;
+  }
+  .cover .frame{ border-color:var(--gold); }
+  .cover .frame::after{ border-color:rgba(201,168,76,.4); }
+  .cover .inner{ align-items:center; text-align:center; justify-content:space-between; padding:26mm 18mm 22mm; }
+
+  .cover .logo-badge{
+    width:46mm; height:46mm; border-radius:50%;
+    background:radial-gradient(circle at 50% 35%, #1c3357, #0a1424 75%);
+    border:1.4px solid var(--gold);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 0 6px rgba(201,168,76,.08), 0 10px 40px rgba(0,0,0,.5);
+    margin-bottom:7mm;
+  }
+  .cover .logo-badge img{ width:78%; }
+
+  .cover .kicker{
+    font-size:9pt; letter-spacing:.42em; text-transform:uppercase;
+    color:var(--gold-light); font-weight:600; margin-bottom:5mm;
+  }
+  .cover h1{
+    font-family:'Cormorant Garamond',serif; font-weight:600;
+    font-size:46pt; line-height:1.03; letter-spacing:.01em;
+  }
+  .cover h1 em{ font-style:italic; color:var(--gold-light); display:block; }
+  .cover .lede{
+    font-size:11.5pt; color:rgba(255,255,255,.82);
+    max-width:130mm; line-height:1.6; margin-top:7mm;
+  }
+  .cover .divider{
+    width:60mm; height:1px; margin:9mm auto;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent);
+    position:relative;
+  }
+  .cover .divider::after{
+    content:"\2756"; position:absolute; top:-9px; left:50%; transform:translateX(-50%);
+    color:var(--gold); font-size:12pt; background:transparent;
+  }
+  .cover .pillars{ display:flex; gap:8mm; justify-content:center; margin-top:2mm; }
+  .cover .pillar{ text-align:center; }
+  .cover .pillar .p-ic{ font-size:18pt; color:var(--gold-light); }
+  .cover .pillar .p-tx{ font-size:8.4pt; letter-spacing:.14em; text-transform:uppercase; color:rgba(255,255,255,.75); margin-top:4px; }
+
+  .cover .cfoot{ margin-top:auto; }
+  .cover .cfoot .web{ font-size:12pt; letter-spacing:.16em; color:var(--gold-light); font-weight:600; }
+  .cover .cfoot .sup{ font-size:8.5pt; letter-spacing:.1em; color:rgba(255,255,255,.6); margin-top:4px; text-transform:uppercase; }
+
+  /* ============================================================
+     CONTENTS PAGE
+     ============================================================ */
+  .toc-list{ display:flex; flex-direction:column; gap:0; margin-top:4mm; flex:1; }
+  .toc-row{
+    display:flex; align-items:baseline; gap:10px;
+    padding:3.1mm 0; border-bottom:1px dotted rgba(139,105,20,.3);
+  }
+  .toc-row .tn{ font-family:'Cormorant Garamond',serif; font-size:15pt; font-weight:600; color:var(--gold-deep); width:26px; }
+  .toc-row .tt{ font-size:11pt; font-weight:600; color:var(--navy); }
+  .toc-row .td{ font-size:8.6pt; color:var(--muted); margin-left:4px; }
+  .toc-row .tp{ margin-left:auto; font-size:9pt; color:var(--gold-deep); font-weight:600; }
+
+  /* ============================================================
+     WHATSAPP HERO PAGE
+     ============================================================ */
+  .hero-wa{ background:radial-gradient(130% 90% at 50% -10%, #15294a 0%, var(--navy) 60%, #060d18 100%); color:#fff; }
+  .hero-wa .frame{ border-color:var(--gold); }
+  .hero-wa .frame::after{ border-color:rgba(201,168,76,.4); }
+  .hero-wa .eyebrow{ color:var(--gold-light); }
+  .hero-wa .eyebrow::before,.hero-wa .eyebrow::after{ background:linear-gradient(90deg,transparent,var(--gold-light)); }
+  .hero-wa h2.title{ color:#fff; }
+  .hero-wa h2.title em{ color:var(--gold-light); }
+  .hero-wa .subtitle{ color:rgba(255,255,255,.8); }
+  .hero-wa ul.feats .ft b{ color:#fff; }
+  .hero-wa ul.feats .ft span{ color:rgba(255,255,255,.72); }
+  .hero-wa .feat-head{ color:var(--gold-light); }
+  .hero-wa .shot{
+    border-color:var(--gold);
+    background:repeating-linear-gradient(45deg, rgba(201,168,76,.08) 0 14px, rgba(201,168,76,.03) 14px 28px), rgba(255,255,255,.03);
+    color:var(--gold-light);
+  }
+  .hero-wa .shot .ph-hint{ color:rgba(255,255,255,.6); }
+  .hero-wa .rule{ background:linear-gradient(90deg,var(--gold) 0%, var(--gold-light) 40%, transparent 100%); }
+
+  /* ============================================================
+     CLOSING PAGE
+     ============================================================ */
+  .close{ background:radial-gradient(120% 90% at 50% 0%, #15294a 0%, var(--navy) 55%, #050b15 100%); color:#fff; }
+  .close .frame{ border-color:var(--gold); }
+  .close .frame::after{ border-color:rgba(201,168,76,.4); }
+  .close .inner{ align-items:center; text-align:center; justify-content:center; gap:6mm; }
+  .close .logo-badge{
+    width:34mm; height:34mm; border-radius:50%;
+    background:radial-gradient(circle at 50% 35%, #1c3357, #0a1424 75%);
+    border:1.2px solid var(--gold); display:flex; align-items:center; justify-content:center;
+    margin-bottom:2mm;
+  }
+  .close .logo-badge img{ width:76%; }
+  .close h2{ font-family:'Cormorant Garamond',serif; font-size:34pt; font-weight:600; line-height:1.1; }
+  .close h2 em{ font-style:italic; color:var(--gold-light); }
+  .close p{ font-size:11pt; color:rgba(255,255,255,.82); max-width:128mm; line-height:1.6; }
+  .close .cta-row{ display:flex; gap:8mm; margin-top:3mm; }
+  .close .cta{ text-align:center; }
+  .close .cta .lbl{ font-size:8pt; letter-spacing:.18em; text-transform:uppercase; color:rgba(255,255,255,.55); }
+  .close .cta .val{ font-size:12pt; color:var(--gold-light); font-weight:600; margin-top:3px; letter-spacing:.04em; }
+  .close .divider{
+    width:60mm; height:1px; margin:4mm auto; position:relative;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  }
+  .close .divider::after{ content:"\2756"; position:absolute; top:-9px; left:50%; transform:translateX(-50%); color:var(--gold); font-size:12pt; }
+
+  /* highlighted callout strip (e.g. storefront AI chatbot) */
+  .callout{
+    display:flex; align-items:center; gap:12px;
+    border:1px solid var(--gold);
+    border-radius:8px;
+    padding:3.4mm 5mm;
+    background:linear-gradient(90deg, rgba(201,168,76,.14), rgba(201,168,76,.04));
+  }
+  .callout .co-ic{
+    flex:0 0 auto; width:34px; height:34px; border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, var(--gold-light), var(--gold) 65%, var(--gold-deep));
+    display:flex; align-items:center; justify-content:center;
+    font-size:15pt; color:#fff;
+    box-shadow:0 2px 6px rgba(139,105,20,.45);
+  }
+  .callout .co-tx b{ font-size:11pt; color:var(--navy); font-weight:700; }
+  .callout .co-tx span{ display:block; font-size:9pt; color:var(--muted); line-height:1.45; margin-top:1px; }
+  .hero-wa .callout{ border-color:var(--gold); background:linear-gradient(90deg, rgba(201,168,76,.20), rgba(201,168,76,.05)); }
+  .hero-wa .callout .co-tx b{ color:#fff; }
+  .hero-wa .callout .co-tx span{ color:rgba(255,255,255,.78); }
+
+  /* ---------- PLAN MATRIX TABLE ---------- */
+  .matrix{ width:100%; border-collapse:separate; border-spacing:0; font-size:8.6pt; margin-top:1mm; }
+  .matrix th, .matrix td{ padding:2.5mm 2mm; text-align:center; border-bottom:1px solid rgba(139,105,20,.18); }
+  .matrix thead th{
+    background:var(--navy); color:#fff; font-weight:600;
+    font-size:9pt; letter-spacing:.03em; padding:3.2mm 2mm;
+    border-bottom:2px solid var(--gold);
+  }
+  .matrix thead th:first-child{ background:#0a1320; }
+  .matrix thead th.pop{ background:linear-gradient(180deg,#1c3357,var(--navy)); position:relative; }
+  .matrix thead th .plan-name{ font-family:'Cormorant Garamond',serif; font-size:13pt; font-weight:600; color:var(--gold-light); display:block; }
+  .matrix thead th .plan-price{ font-size:9.5pt; color:#fff; font-weight:500; display:block; margin-top:2px; }
+  .matrix thead th .plan-price small{ font-size:7pt; color:rgba(255,255,255,.65); font-weight:400; }
+  .matrix thead th .pop-tag{
+    display:inline-block; font-size:6.4pt; letter-spacing:.12em; text-transform:uppercase;
+    background:var(--gold); color:var(--navy); font-weight:700;
+    padding:1.5px 6px; border-radius:10px; margin-bottom:3px;
+  }
+  .matrix tbody th{
+    text-align:left; font-weight:600; color:var(--navy); font-size:8.8pt;
+    background:rgba(201,168,76,.06); padding-left:3mm; white-space:nowrap;
+  }
+  .matrix tbody tr:nth-child(even) td,
+  .matrix tbody tr:nth-child(even) th{ background:rgba(201,168,76,.03); }
+  .matrix tbody tr:nth-child(even) th{ background:rgba(201,168,76,.09); }
+  .matrix td.col-pop{ background:rgba(201,168,76,.07); }
+  .matrix tbody tr:nth-child(even) td.col-pop{ background:rgba(201,168,76,.11); }
+  .matrix .yes{ color:#15803d; font-weight:700; font-size:10pt; }
+  .matrix .no{ color:rgba(11,24,41,.28); font-size:10pt; }
+  .matrix .val{ color:var(--ink); font-weight:600; }
+  .matrix .inf{ color:var(--gold-deep); font-weight:700; font-size:11pt; }
+  .matrix tbody tr:last-child td, .matrix tbody tr:last-child th{ border-bottom:none; }
+  .matrix-note{ font-size:7.6pt; color:var(--muted); margin-top:3mm; line-height:1.5; text-align:center; }
+  .matrix-note b{ color:var(--gold-deep); }
+
+  /* ---------- REAL SCREENSHOT COLLAGE — borders on the image, scattered like a hero gallery ---------- */
+  .shot-collage{
+    position:relative;
+    flex:1;
+    min-height:0;
+    margin-bottom:4mm;
+  }
+  .shot-collage .shot-poly{
+    position:absolute;
+    border:2px solid var(--gold);
+    border-radius:6px;
+    box-shadow:0 6px 20px rgba(0,0,0,.35);
+    overflow:hidden;
+    background:#fff;
+  }
+  .shot-collage .shot-poly img{
+    display:block;
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    background:#fff;
+  }
+  .shot-collage .shot-poly-empty{
+    border:1.4px dashed var(--gold);
+    background:
+      repeating-linear-gradient(45deg, rgba(201,168,76,.07) 0 10px, rgba(201,168,76,.025) 10px 20px),
+      var(--paper);
+    box-shadow:none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .shot-collage .shot-tag{
+    position:absolute;
+    bottom:-3.6mm;
+    left:50%;
+    transform:translateX(-50%);
+    background:var(--navy);
+    color:var(--gold-light);
+    font-size:6.8pt;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    font-weight:700;
+    padding:1.6px 8px;
+    border-radius:10px;
+    border:1px solid var(--gold);
+    white-space:nowrap;
+  }
+
+  /* ---------- DRAG & DROP EDITOR (screen only, never printed) ---------- */
+  [data-drop]{ cursor:pointer; transition:box-shadow .15s, border-color .15s; }
+  [data-drop].drag-over{
+    border-color:#22c55e !important;
+    box-shadow:0 0 0 4px rgba(34,197,94,.25) !important;
+  }
+  [data-drop].has-img{ border-style:solid; }
+  [data-drop] .drop-img{
+    position:absolute; inset:0; width:100%; height:100%;
+    object-fit:contain; background:#fff; display:block;
+  }
+  .shot[data-drop] .drop-img{ border-radius:7px; }
+  [data-drop] .drop-remove{
+    position:absolute; top:4px; right:4px; z-index:20;
+    width:20px; height:20px; border-radius:50%;
+    background:rgba(11,24,41,.85); color:#fff; border:none;
+    font-size:12px; line-height:20px; text-align:center; cursor:pointer;
+    display:none;
+  }
+  [data-drop].has-img:hover .drop-remove{ display:block; }
+  [data-drop]{ position:relative; }
+
+  #editor-toolbar{
+    position:fixed; top:14px; right:14px; z-index:9999;
+    background:#0B1829; color:#fff; border:1px solid #C9A84C;
+    border-radius:10px; padding:10px 14px;
+    font-family:'DM Sans',sans-serif; font-size:11px;
+    box-shadow:0 6px 24px rgba(0,0,0,.4);
+    max-width:240px; line-height:1.5;
+  }
+  #editor-toolbar b{ color:#E8CC7A; display:block; margin-bottom:4px; font-size:12px; }
+  #editor-toolbar button{
+    margin-top:8px; width:100%; padding:7px 0; border-radius:6px;
+    background:#C9A84C; color:#0B1829; border:none; font-weight:700;
+    font-size:11px; cursor:pointer;
+  }
+  @page{ size:210mm 297mm; margin:0; }
+  @media print{
+    html,body{ background:#fff; }
+    .page{ margin:0 !important; box-shadow:none; }
+    #editor-toolbar{ display:none !important; }
+    [data-drop] .drop-remove{ display:none !important; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ helper: corner flourishes (reused) ============ -->
+<template id="corners">
+  <div class="corner tl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><path d="M10 2 H22" stroke="#C9A84C" stroke-width="1.4"/><path d="M2 22 V10" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/><path d="M14 14 l5 -5 M14 14 l-5 5" stroke="#8B6914" stroke-width="1"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><path d="M10 2 H22" stroke="#C9A84C" stroke-width="1.4"/><path d="M2 22 V10" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><path d="M10 2 H22" stroke="#C9A84C" stroke-width="1.4"/><path d="M2 22 V10" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><path d="M10 2 H22" stroke="#C9A84C" stroke-width="1.4"/><path d="M2 22 V10" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+</template>
+
+<!-- ============================================================
+     PAGE 1 — COVER
+     ============================================================ -->
+<section class="page cover">
+  <div class="frame"></div>
+  <div class="corner tl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><path d="M10 2 H22" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/><path d="M16 16 l6 -6 M16 16 l-6 6" stroke="#C9A84C" stroke-width="1"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><path d="M10 2 H22" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><path d="M10 2 H22" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><path d="M10 2 H22" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+
+  <div class="inner">
+    <div>
+      <div class="logo-badge"><img src="assets/swarnix-logo.png" alt="Swarnix" /></div>
+      <div class="kicker">Smart Inventory &nbsp;•&nbsp; WhatsApp AI Agent</div>
+      <h1>Your Jewellery Store,<em>Beautifully Organised</em></h1>
+      <p class="lede">
+        The complete AI-powered platform built for Indian jewellers —
+        sell on WhatsApp around the clock, price every piece to the daily gold rate,
+        and manage your entire catalogue from one elegant dashboard.
+      </p>
+      <div class="divider"></div>
+      <div class="pillars" style="gap:6mm">
+        <div class="pillar"><div class="p-ic">&#128241;</div><div class="p-tx">Sell on WhatsApp</div></div>
+        <div class="pillar"><div class="p-ic">&#9889;</div><div class="p-tx">Live Gold Pricing</div></div>
+        <div class="pillar"><div class="p-ic">&#10024;</div><div class="p-tx">AI Model Photos</div></div>
+        <div class="pillar"><div class="p-ic">&#128247;</div><div class="p-tx">Selfie Try-On</div></div>
+        <div class="pillar"><div class="p-ic">&#128142;</div><div class="p-tx">One Dashboard</div></div>
+      </div>
+    </div>
+
+    <div class="cfoot">
+      <div class="web">swarnixai.in</div>
+      <div class="sup">Support &nbsp;•&nbsp; support@nelishkaai.in</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     PAGE 2 — CONTENTS / WHY SWARNIX
+     ============================================================ -->
+<section class="page">
+  <div class="frame"></div>
+  <div class="corner tl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+
+  <div class="inner">
+    <div class="eyebrow">A Guided Tour</div>
+    <h2 class="title">Inside <em>Swarnix</em></h2>
+    <p class="subtitle">Every screen, designed to win more sales and save your time — at a glance.</p>
+    <div class="rule"></div>
+
+    <div class="toc-list">
+      <div class="toc-row"><span class="tn">★</span><span class="tt">WhatsApp AI Sales Agent</span><span class="td">— Your 24×7 salesperson on WhatsApp</span><span class="tp">p.3</span></div>
+      <div class="toc-row"><span class="tn">★</span><span class="tt">Your Online Showroom</span><span class="td">— A ready-made website, live in minutes</span><span class="tp">p.4</span></div>
+      <div class="toc-row"><span class="tn">★</span><span class="tt">Selfie Try-On</span><span class="td">— Try jewellery on, on WhatsApp or your website</span><span class="tp">p.5</span></div>
+      <div class="toc-row"><span class="tn">01</span><span class="tt">The App — Welcome &amp; Login</span><span class="td">— Owner &amp; staff access, secure by design</span><span class="tp">p.6</span></div>
+      <div class="toc-row"><span class="tn">02</span><span class="tt">Dashboard</span><span class="td">— Your whole store at a glance</span><span class="tp">p.7</span></div>
+      <div class="toc-row"><span class="tn">03</span><span class="tt">Inventory</span><span class="td">— Your full catalogue, beautifully organised</span><span class="tp">p.8</span></div>
+      <div class="toc-row"><span class="tn">04</span><span class="tt">Add Product · Pricing · Variants</span><span class="td">— Fixed or live-rate dynamic pricing</span><span class="tp">p.9</span></div>
+      <div class="toc-row"><span class="tn">05</span><span class="tt">Generate AI Model Photos</span><span class="td">— Model shoots without a model shoot</span><span class="tp">p.10</span></div>
+      <div class="toc-row"><span class="tn">06</span><span class="tt">Customers (CRM &amp; Tiers)</span><span class="td">— Know every client, reward your VVIPs</span><span class="tp">p.11</span></div>
+      <div class="toc-row"><span class="tn">07</span><span class="tt">Analytics &amp; Chat Summaries</span><span class="td">— See what sells, hear what customers want</span><span class="tp">p.12</span></div>
+      <div class="toc-row"><span class="tn">08</span><span class="tt">Offers &amp; Marketing Messages</span><span class="td">— Promote and broadcast on WhatsApp</span><span class="tp">p.13</span></div>
+      <div class="toc-row"><span class="tn">09</span><span class="tt">Teach AI Your Style</span><span class="td">— The AI replies the way you do</span><span class="tp">p.14</span></div>
+      <div class="toc-row"><span class="tn">10</span><span class="tt">Team, Reviews &amp; FAQ</span><span class="td">— Run your store with your people</span><span class="tp">p.15</span></div>
+      <div class="toc-row"><span class="tn">11</span><span class="tt">My Profile &amp; Plan</span><span class="td">— Your plan, usage &amp; WhatsApp connection</span><span class="tp">p.16</span></div>
+      <div class="toc-row"><span class="tn">★</span><span class="tt">Plans &amp; Pricing</span><span class="td">— Compare all four plans side by side</span><span class="tp">p.17</span></div>
+    </div>
+  </div>
+
+  <div class="pfoot"><span><b>SWARNIX</b><span class="dot">◆</span>Smart Inventory · WhatsApp AI Agent</span><span>swarnixai.in</span></div>
+</section>
+
+<!-- ============================================================
+     PAGE 3 — WHATSAPP AI AGENT (HERO)
+     ============================================================ -->
+<section class="page hero-wa">
+  <div class="frame"></div>
+  <div class="corner tl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+
+  <div class="inner">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+      <div>
+        <div class="eyebrow">The Headline Feature</div>
+        <h2 class="title">Your 24×7 <em>WhatsApp Salesperson</em></h2>
+      </div>
+      <div class="scr-no" style="color:var(--gold-light)">★</div>
+    </div>
+    <p class="subtitle">An AI agent that talks to your customers on your own WhatsApp Business number — answering questions, sharing photos and prices, and never sleeping.</p>
+    <div class="rule"></div>
+
+    <div class="stack">
+      <div class="shot" data-drop="whatsapp-chat">
+        <div class="ph-tag">Screenshot</div>
+        <div class="ph-icn">&#128172;</div>
+        <div class="ph-lbl">WhatsApp Chat with Customer</div>
+        <div class="ph-hint">Place a real WhatsApp conversation — customer asking for a necklace, the AI replying with a photo &amp; price</div>
+      </div>
+      <div class="feat-grid">
+        <ul class="feats">
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Answers customers instantly, day or night</b><span>Never miss an enquiry again — replies even at 2am, on festivals, or when you're busy at the counter.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Search by voice or photo</b><span>Customers can send a voice note or a picture of a design and the AI finds matching pieces from your catalogue.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Shares live prices &amp; photos</b><span>Sends your real product images and today's price — calculated on the live gold rate for dynamic items.</span></div></li>
+        </ul>
+        <ul class="feats">
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Answers FAQs in your words</b><span>Store timings, buyback, hallmarking, making charges — answered from the FAQs you set.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Shows the right pieces to the right tier</b><span>Exclusive VVIP designs stay reserved for your top customers, automatically.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Your number, your brand</b><span>Runs on your official WhatsApp Business number — customers chat with your store, not a third party.</span></div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="pfoot" style="color:rgba(255,255,255,.55)"><span style="color:var(--gold-light)"><b style="color:var(--gold-light)">SWARNIX</b> ◆ WhatsApp AI Sales Agent</span><span style="color:rgba(255,255,255,.55)">swarnixai.in</span></div>
+</section>
+
+<!-- ============================================================
+     PAGE 4 — CUSTOMER WEBSITE / STOREFRONT
+     ============================================================ -->
+<section class="page hero-wa">
+  <div class="frame"></div>
+  <div class="corner tl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+
+  <div class="inner">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+      <div>
+        <div class="eyebrow">Your Customers See This</div>
+        <h2 class="title">Your Online Showroom — <em>In Minutes</em></h2>
+      </div>
+      <div class="scr-no" style="color:var(--gold-light)">★</div>
+    </div>
+    <p class="subtitle">A beautiful page showcasing your entire collection — live in minutes, no website or developer needed — where customers browse arrivals and chat with your AI assistant.</p>
+    <div class="rule"></div>
+
+    <div class="stack">
+      <div class="shot" data-drop="storefront-home" style="flex:1.3; border-color:var(--gold); color:var(--gold-light);">
+        <div class="ph-tag">Screenshot · 2 captures · landscape</div>
+        <div class="ph-icn">&#128142;</div>
+        <div class="ph-lbl">Storefront Home &amp; Latest Arrivals</div>
+        <div class="ph-hint">Place captures from swarnixai.in/store/swarnix-jewellers — (1) the home/landing screen, (2) the Latest Arrivals grid</div>
+      </div>
+      <div class="feat-grid">
+        <div>
+          <div class="feat-head" style="margin-bottom:2.4mm"><span class="gem">&#10022;</span> Home Screen</div>
+          <ul class="feats" style="gap:2.6mm">
+            <li><span class="bullet">&#10003;</span><div class="ft"><b>Your brand, front &amp; centre</b><span>Your store name, logo &amp; hero imagery.</span></div></li>
+            <li><span class="bullet">&#10003;</span><div class="ft"><b>Elegant, mobile-first design</b><span>Looks premium on every phone.</span></div></li>
+            <li><span class="bullet">&#10003;</span><div class="ft"><b>Live the day you sign up</b><span>No web designer needed.</span></div></li>
+          </ul>
+        </div>
+        <div>
+          <div class="feat-head" style="margin-bottom:2.4mm"><span class="gem">&#10022;</span> Latest Arrivals</div>
+          <ul class="feats" style="gap:2.6mm">
+            <li><span class="bullet">&#10003;</span><div class="ft"><b>Newest pieces first</b><span>Fresh designs greet every visitor.</span></div></li>
+            <li><span class="bullet">&#10003;</span><div class="ft"><b>Always in sync</b><span>Add in Inventory, it shows here at once.</span></div></li>
+            <li><span class="bullet">&#10003;</span><div class="ft"><b>Photos, prices &amp; detail</b><span>Each piece shown beautifully.</span></div></li>
+          </ul>
+        </div>
+      </div>
+      <div class="callout">
+        <div class="co-ic">&#128172;</div>
+        <div class="co-tx">
+          <b>Built-in AI Chatbot on your website</b>
+          <span>Shoppers can ask questions right on your storefront — the AI assistant answers about pieces, prices and your store, helping them buy without ever leaving the page.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pfoot" style="color:rgba(255,255,255,.55)"><span style="color:var(--gold-light)"><b style="color:var(--gold-light)">SWARNIX</b> ◆ Your Customer Website</span><span style="color:rgba(255,255,255,.55)">swarnixai.in/store</span></div>
+</section>
+
+<!-- ============================================================
+     PAGE 5 — SELFIE TRY-ON
+     ============================================================ -->
+<section class="page hero-wa">
+  <div class="frame"></div>
+  <div class="corner tl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+
+  <div class="inner">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+      <div>
+        <div class="eyebrow">Try Before You Buy</div>
+        <h2 class="title">Selfie <em>Try-On</em></h2>
+      </div>
+      <div class="scr-no" style="color:var(--gold-light)">★</div>
+    </div>
+    <p class="subtitle">Customers see jewellery on themselves before they buy — with just a selfie. Available both on your website and right inside WhatsApp.</p>
+    <div class="rule"></div>
+
+    <div class="stack">
+      <div class="shot" data-drop="selfie-tryon" style="flex:1.3">
+        <div class="ph-tag">Screenshot · landscape</div>
+        <div class="ph-icn">&#128247;</div>
+        <div class="ph-lbl">Selfie Try-On</div>
+        <div class="ph-hint">Capture the Virtual Try-On flow — selfie upload + the generated "wearing it" result</div>
+      </div>
+      <div class="feat-grid">
+        <ul class="feats">
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Try it on with a selfie</b><span>Customers see the piece on themselves before they decide to buy.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Works on WhatsApp too</b><span>The same try-on can be generated right inside a WhatsApp chat with your AI agent — not just on the website.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Buy with confidence</b><span>Seeing it worn — not just photographed on a model — drives the sale.</span></div></li>
+        </ul>
+        <ul class="feats">
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>You set who gets it</b><span>All customers, or reserve it for VIP &amp; VVIP only — your choice.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Styled for the occasion</b><span>Customers can pick a look — wedding, festive, party or everyday — for a more realistic try-on.</span></div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="pfoot" style="color:rgba(255,255,255,.55)"><span style="color:var(--gold-light)"><b style="color:var(--gold-light)">SWARNIX</b> ◆ Selfie Try-On</span><span style="color:rgba(255,255,255,.55)">swarnixai.in/store · WhatsApp</span></div>
+</section>
+
+<!-- ============================================================
+     PAGE 6 — THE APP — WELCOME &amp; LOGIN
+     ============================================================ -->
+<section class="page">
+  <div class="frame"></div>
+  <div class="corner tl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+
+  <div class="inner">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+      <div>
+        <div class="eyebrow">The Swarnix App</div>
+        <h2 class="title">The App — Welcome &amp; <em>Login</em></h2>
+      </div>
+      <div class="scr-no">01</div>
+    </div>
+    <p class="subtitle">Your owner &amp; staff dashboard — the Swarnix app you manage everything from. A secure front door: no passwords to remember for the owner, controlled access for the team.</p>
+    <div class="rule"></div>
+
+    <div class="split">
+      <div class="col-shot">
+        <div class="shot" data-drop="app-login">
+          <div class="ph-tag">Screenshot</div>
+          <div class="ph-icn">&#128274;</div>
+          <div class="ph-lbl">App Login Screen</div>
+          <div class="ph-hint">Place a full-screen capture of the Owner / Staff login here</div>
+        </div>
+      </div>
+      <div class="col-text">
+        <div class="feat-head"><span class="gem">&#10022;</span> What this screen does</div>
+        <ul class="feats">
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>One-tap Owner login with Google</b><span>No password to set or forget — sign in safely with the Google account you already use.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Separate Staff login</b><span>Your team signs in with a username and password you create for them — kept apart from your owner account.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Bank-grade security</b><span>Built on Google authentication; your store data stays private and protected at all times.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Works on any device</b><span>Open it on your phone, tablet, or computer — the experience adapts beautifully to each.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Auto sign-out for safety</b><span>Idle sessions log out on their own, so a shared shop device never stays open to the wrong eyes.</span></div></li>
+        </ul>
+        <div class="tagstrip">
+          <span class="chip">Owner · Google</span><span class="chip">Staff · Username</span><span class="chip">Auto-logout</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pfoot"><span><b>SWARNIX</b><span class="dot">◆</span>The App · Welcome &amp; Login</span><span>swarnixai.in · support@nelishkaai.in</span></div>
+</section>
+
+<!-- ============================================================
+     PAGE 7 — DASHBOARD
+     ============================================================ -->
+<section class="page">
+  <div class="frame"></div>
+  <div class="corner tl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+
+  <div class="inner">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+      <div><div class="eyebrow">Screen 02</div><h2 class="title">Your Store, <em>At a Glance</em></h2></div>
+      <div class="scr-no">02</div>
+    </div>
+    <p class="subtitle">Open Swarnix and instantly see how your store is doing — stock, sales activity, today's gold rate, and what needs your attention.</p>
+    <div class="rule"></div>
+
+    <div class="stack">
+      <div class="shot" data-drop="dashboard" style="flex:1.3">
+        <div class="ph-tag">Screenshot · landscape</div>
+        <div class="ph-icn">&#128202;</div>
+        <div class="ph-lbl">Dashboard</div>
+        <div class="ph-hint">Capture the full dashboard — hero greeting, KPI cards, charts &amp; metal rates</div>
+      </div>
+      <div class="feat-grid">
+        <ul class="feats">
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Key numbers up front</b><span>Total pieces, in-stock vs sold-out, customers, WhatsApp chats and total catalogue value — all in one view.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Today's gold &amp; silver rates</b><span>The live metal rate card keeps you and your dynamic pricing in sync with the market.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Visual inventory charts</b><span>Category breakdown and stock-status charts show what you have — and what's running low — at a glance.</span></div></li>
+        </ul>
+        <ul class="feats">
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Smart alerts</b><span>Friendly nudges when stock is low, credits are near the limit, or your plan is about to expire.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>One-tap quick actions</b><span>Jump straight to adding a product, managing customers, or viewing analytics.</span></div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="pfoot"><span><b>SWARNIX</b><span class="dot">◆</span>Dashboard</span><span>swarnixai.in · support@nelishkaai.in</span></div>
+</section>
+
+<!-- ============================================================
+     PAGE 8 — INVENTORY
+     ============================================================ -->
+<section class="page">
+  <div class="frame"></div>
+  <div class="corner tl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+
+  <div class="inner">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+      <div><div class="eyebrow">Screen 03</div><h2 class="title">Your Full <em>Catalogue</em></h2></div>
+      <div class="scr-no">03</div>
+    </div>
+    <p class="subtitle">Every piece you sell, organised in beautiful cards you can search, filter and update in seconds — the same catalogue your WhatsApp AI sells from.</p>
+    <div class="rule"></div>
+
+    <div class="stack">
+      <div class="shot" data-drop="inventory" style="flex:1.3">
+        <div class="ph-tag">Screenshot · landscape</div>
+        <div class="ph-icn">&#128081;</div>
+        <div class="ph-lbl">Inventory Grid</div>
+        <div class="ph-hint">Capture the inventory page — product cards with photos, prices &amp; in-stock badges</div>
+      </div>
+      <div class="feat-grid">
+        <ul class="feats">
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Beautiful product cards</b><span>Each piece shown with photo, code, category, price and stock status — easy to scan at a glance.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Search &amp; filter instantly</b><span>Find any item by code, name or category in moments, even with thousands of pieces.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Add, edit &amp; restock in a tap</b><span>Update price, mark sold-out, or edit details directly — changes reflect everywhere instantly.</span></div></li>
+        </ul>
+        <ul class="feats">
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Bulk import to get started fast</b><span>Already have a list? Import many products at once instead of typing them in one by one.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Safe by design</b><span>Deleting hides an item but keeps your history; staff with view-only access can't change anything.</span></div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="pfoot"><span><b>SWARNIX</b><span class="dot">◆</span>Inventory</span><span>swarnixai.in · support@nelishkaai.in</span></div>
+</section>
+
+<!-- ============================================================
+     PAGE 9 — ADD/EDIT PRODUCT + PRICING + VARIANTS
+     ============================================================ -->
+<section class="page">
+  <div class="frame"></div>
+  <div class="corner tl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+
+  <div class="inner">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+      <div><div class="eyebrow">Screen 04</div><h2 class="title">Add a Piece — <em>Priced to the Gram</em></h2></div>
+      <div class="scr-no">04</div>
+    </div>
+    <p class="subtitle">List a new piece with photos, weight, stones and pricing — then offer it in multiple carats and colours, all under one listing.</p>
+    <div class="rule"></div>
+
+    <div class="stack">
+      <div class="shot" style="flex:1" data-drop="add-product">
+        <div class="ph-tag">Screenshot · 2 captures</div>
+        <div class="ph-icn">&#9889;</div>
+        <div class="ph-lbl">Add/Edit Product — Dynamic Pricing &amp; Variants</div>
+        <div class="ph-hint">Place two captures side by side: (1) the Dynamic Pricing calculator, (2) the Variants section</div>
+      </div>
+      <div class="feat-grid">
+        <ul class="feats">
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Fixed or Dynamic pricing</b><span>Type a set price, or switch to ⚡ Dynamic and let the price auto-update daily with the live gold/silver rate.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Priced the way jewellers price</b><span>Metal × purity × weight, plus making charges, stones, hallmark &amp; GST — calculated correctly, every time.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Up to 5 photos per piece</b><span>Upload from your gallery or shoot with the camera; the first photo powers WhatsApp photo-search.</span></div></li>
+        </ul>
+        <ul class="feats">
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>One design, many variants</b><span>Same ring in 18K Yellow, Rose &amp; White Gold — each with its own photos and price, under one listing.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Full jewellery detail</b><span>Category, purity, diamond &amp; stone details, sizes, hallmark HUID and certificates — all captured.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Choose who can see it</b><span>Set each piece to All Customers, VVIP-only, or VVIP &amp; VIP — perfect for exclusive collections.</span></div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="pfoot"><span><b>SWARNIX</b><span class="dot">◆</span>Add Product · Pricing · Variants</span><span>swarnixai.in · support@nelishkaai.in</span></div>
+</section>
+
+<!-- ============================================================
+     PAGE 10 — GENERATE AI MODEL
+     ============================================================ -->
+<section class="page">
+  <div class="frame"></div>
+  <div class="corner tl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+
+  <div class="inner">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+      <div><div class="eyebrow">Screen 05</div><h2 class="title">Model Shoots, <em>Without the Shoot</em></h2></div>
+      <div class="scr-no">05</div>
+    </div>
+    <p class="subtitle">Generate a realistic photo of a model wearing your piece — straight from a plain product photo, in under a minute. No studio, no models, no budget.</p>
+    <div class="rule"></div>
+
+    <div class="stack">
+      <div class="shot" data-drop="ai-model-panel" style="flex:1.3">
+        <div class="ph-tag">Screenshot · landscape</div>
+        <div class="ph-icn">&#10024;</div>
+        <div class="ph-lbl">AI Model Try-On Panel</div>
+        <div class="ph-hint">Capture the AI Model panel — uploaded jewellery photo + generated model result side by side</div>
+      </div>
+      <div class="feat-grid">
+        <ul class="feats">
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Plain photo in, model photo out</b><span>Drop a clear jewellery photo and tap Generate — get a polished model wearing your piece in 30–60 seconds.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Knows the jewellery type</b><span>Ring, necklace, earrings — it places the piece correctly based on your product's category.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Don't like it? Regenerate</b><span>Try as many times as you like and keep the version you love.</span></div></li>
+        </ul>
+        <ul class="feats">
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Add straight to the product</b><span>One tap drops the model photo into your product gallery — ready for WhatsApp and your website.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Share anywhere</b><span>Send it to WhatsApp, Instagram or email right from the screen to promote the piece.</span></div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="pfoot"><span><b>SWARNIX</b><span class="dot">◆</span>Generate AI Model</span><span>swarnixai.in · support@nelishkaai.in</span></div>
+</section>
+
+<!-- ============================================================
+     PAGE 11 — CUSTOMERS
+     ============================================================ -->
+<section class="page">
+  <div class="frame"></div>
+  <div class="corner tl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+
+  <div class="inner">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+      <div><div class="eyebrow">Screen 06</div><h2 class="title">Know Every <em>Customer</em></h2></div>
+      <div class="scr-no">06</div>
+    </div>
+    <p class="subtitle">Your customer book, organised — with tiers that let you treat your most valued clients like royalty.</p>
+    <div class="rule"></div>
+
+    <div class="stack">
+      <div class="shot" data-drop="customers" style="flex:1.3">
+        <div class="ph-tag">Screenshot · landscape</div>
+        <div class="ph-icn">&#128100;</div>
+        <div class="ph-lbl">Customers (CRM)</div>
+        <div class="ph-hint">Capture the customer list with tier badges (Regular / VIP / VVIP)</div>
+      </div>
+      <div class="feat-grid">
+        <ul class="feats">
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>One tidy customer book</b><span>Name, WhatsApp number, city, email and private notes — every client in one searchable place.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Regular, VIP &amp; VVIP tiers</b><span>Tag your best clients and reserve exclusive pieces and try-on perks just for them.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Notes that remember for you</b><span>Anniversaries, preferred designs, sizes — jot it down and never forget a personal touch.</span></div></li>
+        </ul>
+        <ul class="feats">
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Search in a second</b><span>Find anyone by name or number instantly, no matter how long your list grows.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Powers your WhatsApp AI</b><span>Tiers decide which pieces each customer sees when they chat with your AI agent.</span></div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="pfoot"><span><b>SWARNIX</b><span class="dot">◆</span>Customers</span><span>swarnixai.in · support@nelishkaai.in</span></div>
+</section>
+
+<!-- ============================================================
+     PAGE 12 — ANALYTICS
+     ============================================================ -->
+<section class="page">
+  <div class="frame"></div>
+  <div class="corner tl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+
+  <div class="inner">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+      <div><div class="eyebrow">Screen 07</div><h2 class="title">See What <em>Sells</em></h2></div>
+      <div class="scr-no">07</div>
+    </div>
+    <p class="subtitle">Clear charts of your inventory and customers — plus AI-written summaries of what your customers have been asking about on WhatsApp.</p>
+    <div class="rule"></div>
+
+    <div class="stack">
+      <div class="shot" data-drop="analytics" style="flex:1.3">
+        <div class="ph-tag">Screenshot · landscape</div>
+        <div class="ph-icn">&#128200;</div>
+        <div class="ph-lbl">Analytics &amp; Chat Summaries</div>
+        <div class="ph-hint">Capture the analytics charts + an AI conversation summary card</div>
+      </div>
+      <div class="feat-grid">
+        <ul class="feats">
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Inventory insights</b><span>See your pieces by category, material, purity, price range and stock status — know your mix instantly.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Usage this month</b><span>Track WhatsApp credits, products, AI model photos and try-ons against your plan — no surprises.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>AI chat summaries</b><span>A plain-English wrap-up of what customers asked for — spot demand and trending designs.</span></div></li>
+        </ul>
+        <ul class="feats">
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Read full conversations</b><span>Expand any customer's WhatsApp thread to see exactly what they discussed.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Customer &amp; usage trends</b><span>Tier mix, top categories and 6-month credit trends help you plan stock and promotions.</span></div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="pfoot"><span><b>SWARNIX</b><span class="dot">◆</span>Analytics</span><span>swarnixai.in · support@nelishkaai.in</span></div>
+</section>
+
+<!-- ============================================================
+     PAGE 13 — OFFERS + MARKETING
+     ============================================================ -->
+<section class="page">
+  <div class="frame"></div>
+  <div class="corner tl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+
+  <div class="inner">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+      <div><div class="eyebrow">Screen 08</div><h2 class="title">Offers &amp; <em>Broadcasts</em></h2></div>
+      <div class="scr-no">08</div>
+    </div>
+    <p class="subtitle">Post seasonal offers and send WhatsApp broadcasts to the right customers — fill your shop on festivals and quiet days alike.</p>
+    <div class="rule"></div>
+
+    <div class="stack">
+      <div class="shot" style="flex:1" data-drop="offers-marketing">
+        <div class="ph-tag">Screenshot · 2 captures</div>
+        <div class="ph-icn">&#128226;</div>
+        <div class="ph-lbl">Offers &amp; Marketing Messages</div>
+        <div class="ph-hint">Place two captures: (1) the Offers page with an offer card, (2) the Marketing broadcast composer</div>
+      </div>
+      <div class="feat-grid">
+        <ul class="feats">
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Post festival &amp; seasonal offers</b><span>Add an image or video, a catchy title, details and a valid-till date — promote your latest deals.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Auto-expiry</b><span>Offers neatly mark themselves "Expired" once the date passes — no stale deals on show.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Photos &amp; videos welcome</b><span>Showcase pieces in motion with short videos, not just static images.</span></div></li>
+        </ul>
+        <ul class="feats">
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>WhatsApp broadcasts</b><span>Send approved WhatsApp templates to your customers — Diwali wishes, new arrivals, exclusive previews.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Target by tier</b><span>Send to everyone, or just VVIP / VIP — the right message reaches the right customer.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Delivery history</b><span>See who received each campaign so you always know your broadcast reached home.</span></div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="pfoot"><span><b>SWARNIX</b><span class="dot">◆</span>Offers &amp; Marketing</span><span>swarnixai.in · support@nelishkaai.in</span></div>
+</section>
+
+<!-- ============================================================
+     PAGE 14 — TEACH AI YOUR STYLE + ASK SWARNIX
+     ============================================================ -->
+<section class="page">
+  <div class="frame"></div>
+  <div class="corner tl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+
+  <div class="inner">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+      <div><div class="eyebrow">Screen 09</div><h2 class="title">Teach AI <em>Your Style</em></h2></div>
+      <div class="scr-no">09</div>
+    </div>
+    <p class="subtitle">Upload one of your real WhatsApp chats and the AI learns to reply the way you do — your tone, your words — so customers feel they're talking to you.</p>
+    <div class="rule"></div>
+
+    <div class="stack">
+      <div class="shot" data-drop="teach-ai-style" style="flex:1.3">
+        <div class="ph-tag">Screenshot · 2 captures · landscape</div>
+        <div class="ph-icn">&#127911;</div>
+        <div class="ph-lbl">Teach AI Your Style &amp; Ask Swarnix</div>
+        <div class="ph-hint">Place: (1) the chat-upload screen with style profile, (2) the in-app "Ask Swarnix" helper bubble</div>
+      </div>
+      <div class="feat-grid">
+        <div>
+          <div class="feat-head" style="margin-bottom:2.4mm"><span class="gem">&#10022;</span> Teach AI Your Style</div>
+          <ul class="feats">
+            <li><span class="bullet">&#10003;</span><div class="ft"><b>Upload a real WhatsApp chat</b><span>Export a chat and drop in the file — the AI studies how you naturally talk to customers.</span></div></li>
+            <li><span class="bullet">&#10003;</span><div class="ft"><b>Replies in your voice</b><span>Your AI agent sounds like your store, not a generic robot — warm, familiar, on-brand.</span></div></li>
+            <li><span class="bullet">&#10003;</span><div class="ft"><b>Gets better over time</b><span>Add more chats whenever you like to keep refining the style.</span></div></li>
+          </ul>
+        </div>
+        <div>
+          <div class="feat-head" style="margin-bottom:2.4mm"><span class="gem">&#10022;</span> Ask Swarnix — your built-in helper</div>
+          <ul class="feats">
+            <li><span class="bullet">&#10003;</span><div class="ft"><b>Stuck on something? Just ask</b><span>A friendly in-app assistant answers "how do I…" questions about any screen, in plain language.</span></div></li>
+            <li><span class="bullet">&#10003;</span><div class="ft"><b>Always one tap away</b><span>No manuals, no waiting — guidance whenever you or your staff need it.</span></div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pfoot"><span><b>SWARNIX</b><span class="dot">◆</span>Teach AI Your Style · Ask Swarnix</span><span>swarnixai.in · support@nelishkaai.in</span></div>
+</section>
+
+<!-- ============================================================
+     PAGE 15 — TEAM + REVIEWS + FAQ
+     ============================================================ -->
+<section class="page">
+  <div class="frame"></div>
+  <div class="corner tl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+
+  <div class="inner">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+      <div><div class="eyebrow">Screen 10</div><h2 class="title">Run It With <em>Your People</em></h2></div>
+      <div class="scr-no">10</div>
+    </div>
+    <p class="subtitle">Add staff with the right access, keep your storefront reviews polished, and let the AI answer common questions for you.</p>
+    <div class="rule"></div>
+
+    <div class="stack">
+      <div class="shot" style="flex:.95" data-drop="team-reviews-faq">
+        <div class="ph-tag">Screenshot · 3 captures</div>
+        <div class="ph-icn">&#128101;</div>
+        <div class="ph-lbl">Team · Review Moderation · FAQ</div>
+        <div class="ph-hint">Place three captures: (1) Team list with roles, (2) Review moderation queue, (3) FAQ editor</div>
+      </div>
+      <div class="feat-grid" style="grid-template-columns:1fr 1fr 1fr; gap:3mm 7mm;">
+        <div>
+          <div class="feat-head" style="margin-bottom:2.4mm"><span class="gem">&#10022;</span> Team</div>
+          <ul class="feats" style="gap:2.6mm">
+            <li><span class="bullet">&#10003;</span><div class="ft"><b>Add staff &amp; family</b><span>Each with their own login.</span></div></li>
+            <li><span class="bullet">&#10003;</span><div class="ft"><b>Control access</b><span>Admin, Read &amp; Write, or View-only.</span></div></li>
+            <li><span class="bullet">&#10003;</span><div class="ft"><b>Pause anytime</b><span>Deactivate access in one tap.</span></div></li>
+          </ul>
+        </div>
+        <div>
+          <div class="feat-head" style="margin-bottom:2.4mm"><span class="gem">&#10022;</span> Reviews</div>
+          <ul class="feats" style="gap:2.6mm">
+            <li><span class="bullet">&#10003;</span><div class="ft"><b>You decide</b><span>Nothing goes public until you approve.</span></div></li>
+            <li><span class="bullet">&#10003;</span><div class="ft"><b>Approve / reject</b><span>One tap each, or do them in bulk.</span></div></li>
+            <li><span class="bullet">&#10003;</span><div class="ft"><b>Protect your name</b><span>Only your best reviews show.</span></div></li>
+          </ul>
+        </div>
+        <div>
+          <div class="feat-head" style="margin-bottom:2.4mm"><span class="gem">&#10022;</span> FAQ</div>
+          <ul class="feats" style="gap:2.6mm">
+            <li><span class="bullet">&#10003;</span><div class="ft"><b>10 ready samples</b><span>Edit them to match your store.</span></div></li>
+            <li><span class="bullet">&#10003;</span><div class="ft"><b>AI answers them</b><span>Customers get instant replies.</span></div></li>
+            <li><span class="bullet">&#10003;</span><div class="ft"><b>Your policies</b><span>Buyback, hallmark, timings &amp; more.</span></div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pfoot"><span><b>SWARNIX</b><span class="dot">◆</span>Team · Reviews · FAQ</span><span>swarnixai.in · support@nelishkaai.in</span></div>
+</section>
+
+<!-- ============================================================
+     PAGE 16 — PROFILE / PLAN
+     ============================================================ -->
+<section class="page">
+  <div class="frame"></div>
+  <div class="corner tl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+
+  <div class="inner">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+      <div><div class="eyebrow">Screen 11</div><h2 class="title">Your Plan &amp; <em>WhatsApp Connection</em></h2></div>
+      <div class="scr-no">11</div>
+    </div>
+    <p class="subtitle">See your plan and usage at a glance, edit your store details, and connect your official WhatsApp Business number — securely, in a few taps.</p>
+    <div class="rule"></div>
+
+    <div class="stack">
+      <div class="shot" data-drop="profile-plan" style="flex:1.3">
+        <div class="ph-tag">Screenshot · landscape</div>
+        <div class="ph-icn">&#128081;</div>
+        <div class="ph-lbl">My Profile &amp; Plan</div>
+        <div class="ph-hint">Capture the profile page — plan card, usage bars &amp; WhatsApp Business connect card</div>
+      </div>
+      <div class="feat-grid">
+        <ul class="feats">
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Your plan &amp; validity</b><span>See your current plan, price and renewal date at the top of the page.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Usage you can see</b><span>Friendly bars show credits, products &amp; try-ons used — amber and red warn you before any limit.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Connect WhatsApp Business</b><span>Link your official number through a secure Facebook login — no passwords ever stored.</span></div></li>
+        </ul>
+        <ul class="feats">
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Edit store details</b><span>Update store name, address and try-on settings, and control who can use selfie try-on.</span></div></li>
+          <li><span class="bullet">&#10003;</span><div class="ft"><b>Upgrade in a tap</b><span>Outgrown your plan? Request an upgrade right from the page.</span></div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="pfoot"><span><b>SWARNIX</b><span class="dot">◆</span>My Profile &amp; Plan</span><span>swarnixai.in · support@nelishkaai.in</span></div>
+</section>
+
+<!-- ============================================================
+     PAGE 17 — PLAN MATRIX / PRICING
+     ============================================================ -->
+<section class="page">
+  <div class="frame"></div>
+  <div class="corner tl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+
+  <div class="inner">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;">
+      <div><div class="eyebrow">Choose Your Plan</div><h2 class="title">Plans &amp; <em>Pricing</em></h2></div>
+      <div class="scr-no" style="color:var(--gold-light)">★</div>
+    </div>
+    <p class="subtitle">Start free, upgrade when you grow. Every plan includes your WhatsApp AI agent, your own website &amp; full inventory management.</p>
+    <div class="rule"></div>
+
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th>What you get</th>
+          <th><span class="plan-name">Trial</span><span class="plan-price">Free<br><small>evaluation</small></span></th>
+          <th><span class="plan-name">Starter</span><span class="plan-price">₹3,999<small>/mo</small></span></th>
+          <th class="pop"><span class="pop-tag">Most Popular</span><span class="plan-name">Professional</span><span class="plan-price">₹8,999<small>/mo</small></span></th>
+          <th><span class="plan-name">Enterprise</span><span class="plan-price">₹17,999<small>/mo</small></span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><th>WhatsApp AI conversations / mo</th><td class="val">200</td><td class="val">1,000</td><td class="col-pop val">3,000</td><td class="val">10,000</td></tr>
+        <tr><th>Products in catalogue</th><td class="val">100</td><td class="val">500</td><td class="col-pop val">1,000</td><td class="val">5,000</td></tr>
+        <tr><th>Photo storage</th><td class="val">1 GB</td><td class="val">5 GB</td><td class="col-pop val">25 GB</td><td><span class="inf">∞</span></td></tr>
+        <tr><th>AI model photos / mo</th><td class="val">20</td><td class="val">50</td><td class="col-pop val">200</td><td class="val">500</td></tr>
+        <tr><th>Selfie Try-Ons / mo</th><td class="val">10</td><td class="val">30</td><td class="col-pop val">100</td><td class="val">300</td></tr>
+        <tr><th>WhatsApp AI agent</th><td><span class="yes">✓</span></td><td><span class="yes">✓</span></td><td class="col-pop"><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
+        <tr><th>Your own website storefront</th><td><span class="yes">✓</span></td><td><span class="yes">✓</span></td><td class="col-pop"><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
+        <tr><th>Inventory &amp; dynamic pricing</th><td><span class="yes">✓</span></td><td><span class="yes">✓</span></td><td class="col-pop"><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
+        <tr><th>AI model photos &amp; Selfie Try-On</th><td><span class="yes">✓</span></td><td><span class="yes">✓</span></td><td class="col-pop"><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
+        <tr><th>Voice search on WhatsApp</th><td><span class="yes">✓</span></td><td><span class="no">—</span></td><td class="col-pop"><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
+        <tr><th>Photo / image search</th><td><span class="no">—</span></td><td><span class="no">—</span></td><td class="col-pop"><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
+        <tr><th>Customer tiers (VIP / VVIP)</th><td><span class="no">—</span></td><td><span class="no">—</span></td><td class="col-pop"><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
+        <tr><th>WhatsApp marketing broadcasts</th><td><span class="no">—</span></td><td><span class="no">—</span></td><td class="col-pop"><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
+        <tr><th>Teach AI your style</th><td><span class="no">—</span></td><td><span class="no">—</span></td><td class="col-pop"><span class="yes">✓</span></td><td><span class="yes">✓</span></td></tr>
+        <tr><th>Analytics &amp; chat summaries</th><td class="val">Pro</td><td class="val">Starter</td><td class="col-pop val">Pro</td><td class="val">Enterprise</td></tr>
+      </tbody>
+    </table>
+
+    <p class="matrix-note">
+      <b>Trial unlocks Professional-level features</b> — so you can try everything before you pay. Prices exclude GST. Limits can be tailored for your store on request.
+    </p>
+  </div>
+
+  <div class="pfoot"><span><b>SWARNIX</b><span class="dot">◆</span>Plans &amp; Pricing</span><span>swarnixai.in/pricing · support@nelishkaai.in</span></div>
+</section>
+
+<!-- ============================================================
+     PAGE 18 — CLOSING / CALL TO ACTION
+     ============================================================ -->
+<section class="page close">
+  <div class="frame"></div>
+  <div class="corner tl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><path d="M16 16 l6 -6 M16 16 l-6 6" stroke="#C9A84C" stroke-width="1"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner tr"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner bl"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+  <div class="corner br"><svg viewBox="0 0 60 60" fill="none"><path d="M2 30 V8 a6 6 0 0 1 6-6 H30" stroke="#C9A84C" stroke-width="1.4"/><circle cx="8" cy="8" r="2.4" fill="#C9A84C"/></svg></div>
+
+  <div class="inner">
+    <div class="logo-badge"><img src="assets/swarnix-logo.png" alt="Swarnix" /></div>
+    <h2>Let Your Store <em>Shine</em></h2>
+    <div class="divider"></div>
+    <p>
+      Swarnix brings your inventory, your customers and your WhatsApp sales together
+      in one elegant place — built for Indian jewellers, ready the day you sign up.
+      See it live, with your own pieces, on a quick walkthrough.
+    </p>
+    <div class="cta-row">
+      <div class="cta"><div class="lbl">Visit</div><div class="val">swarnixai.in</div></div>
+      <div class="cta"><div class="lbl">Support</div><div class="val">support@nelishkaai.in</div></div>
+    </div>
+    <div class="divider" style="margin-top:8mm"></div>
+    <p style="font-size:9pt;color:rgba(255,255,255,.55);max-width:120mm">
+      Smart Inventory &nbsp;•&nbsp; WhatsApp AI Agent &nbsp;•&nbsp; Live Gold Pricing &nbsp;•&nbsp; AI Model Photos
+    </p>
+  </div>
+</section>
+
+<div id="editor-toolbar">
+  <b>📷 Drag &amp; drop mode</b>
+  Drag an image file from your folder onto any dashed gold box or storefront tile to drop it in.
+  Hover a filled tile and click the ✕ to remove it.
+  <button onclick="window.print()">Print / Save as PDF</button>
+</div>
+
+<script>
+(function () {
+  function handleFile(target, file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      // Clear placeholder content (ph-tag/ph-icn/ph-lbl/ph-hint) but keep the tag node structure.
+      Array.from(target.children).forEach(function (child) {
+        if (!child.classList.contains('drop-img') && !child.classList.contains('drop-remove') && !child.classList.contains('shot-tag')) {
+          child.remove();
+        }
+      });
+      var img = target.querySelector('.drop-img');
+      if (!img) {
+        img = document.createElement('img');
+        img.className = 'drop-img';
+        target.insertBefore(img, target.firstChild);
+      }
+      img.src = e.target.result;
+
+      var removeBtn = target.querySelector('.drop-remove');
+      if (!removeBtn) {
+        removeBtn = document.createElement('button');
+        removeBtn.className = 'drop-remove';
+        removeBtn.type = 'button';
+        removeBtn.title = 'Remove image';
+        removeBtn.textContent = '✕';
+        removeBtn.addEventListener('click', function (ev) {
+          ev.stopPropagation();
+          img.remove();
+          removeBtn.remove();
+          target.classList.remove('has-img');
+        });
+        target.appendChild(removeBtn);
+      }
+      target.classList.add('has-img');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  document.querySelectorAll('[data-drop]').forEach(function (zone) {
+    zone.addEventListener('dragover', function (e) {
+      e.preventDefault();
+      zone.classList.add('drag-over');
+    });
+    zone.addEventListener('dragleave', function () {
+      zone.classList.remove('drag-over');
+    });
+    zone.addEventListener('drop', function (e) {
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+      var file = e.dataTransfer.files && e.dataTransfer.files[0];
+      handleFile(zone, file);
+    });
+
+    // Click-to-browse fallback (some browsers/file managers don't drag well).
+    zone.addEventListener('click', function (e) {
+      if (e.target.classList.contains('drop-remove')) return;
+      var input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = function () {
+        if (input.files && input.files[0]) handleFile(zone, input.files[0]);
+      };
+      input.click();
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

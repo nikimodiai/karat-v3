@@ -533,3 +533,347 @@ Note: your Email ID, WhatsApp Business Number, and Owner WhatsApp (for alerts) a
 - **Approved review isn't showing on the website** — double check you tapped Approve (not Reject), and give it a moment to refresh on the storefront.
 - **Accidentally rejected a good review** — there's no undo button in the admin screen for individual actions, so for now you'd need the customer to repost if you want to reconsider.
 - **Can't see the Review Moderation option at all** — check your team access level; only Owner and Admin roles can use this feature.
+
+---
+
+## How the AI Studio Suite Works (and How Studio Credits Are Shared) in Swarnix
+
+**In short:** The AI Studio Suite is a single tab that bundles six AI tools for your jewellery photos and designs — Studio Photo, Metal Swap, Jewellery Design, AI Model, Generate Reels, and a Library of everything you've made. They all draw from one shared monthly pool called "Studio Credits."
+
+**Who can do this:** Any logged-in team member can open the Studio Suite tab and use the tools. Some tools hand their result to Inventory (Add Product / publish to catalogue), and saving a product there still follows the normal Inventory access rules (Read & Write or higher). Studio Suite itself is unlocked on every current plan.
+
+**Before you start:** Nothing special — just open the tab. Keep an eye on your Studio Credits meter at the top right of the hub.
+
+**Steps:**
+1. From the top menu, open the **Studio** (AI Studio Suite) tab.
+2. At the top you'll see your **Studio Credits** meter — e.g. "42/150 Studio credits this month" — shared across all six tools. The bar fills as you use any of them.
+3. Tap any of the six tiles to open that tool: **Studio Photo**, **Metal Swap**, **Jewellery Design**, **AI Model**, **Generate Reels**, or **Library**.
+4. Use the tool (each has its own SOP below). When it successfully generates something, it deducts from your shared Studio Credits.
+5. Use the **"AI Studio Suite"** back button (top left inside any tool) to return to the hub and pick another tool.
+
+**Good to know:**
+- One shared meter: there aren't separate credit pools per tool — every image or reel you generate across the suite comes out of the same monthly Studio Credits number.
+- How credits are counted: image tools (Studio Photo, Metal Swap, Jewellery Design, AI Model) charge 1 credit per image actually produced. Reels charge more than 1 — the cost scales with the video's length and resolution.
+- Credits are only charged **after** a successful generation — a failed attempt shouldn't cost you.
+- The meter resets each month. When you're out, tools stop generating and show an upgrade/limit message.
+- Everything you generate across the suite is saved into the shared Studio Library tool.
+
+**Common questions:**
+- **Why did generating a reel use up more credits than a photo?** Reels cost more because they're heavier to produce — longer and higher-resolution reels cost more credits than a single photo.
+- **Do Studio Photo, Metal Swap, etc. each have their own limit?** No — they all share the one Studio Credits pool.
+- **Where do my generated photos and videos go?** Into the Library tool inside the Studio Suite, grouped by type (Designs, AI Models, Studio Photos, Metal Swaps, Reels).
+- **Can my Read Only staff use these tools?** They can open and generate in the suite, but publishing a result into Inventory as a product still needs Read & Write access on Inventory.
+
+**If something goes wrong:**
+- **Tools greyed out or showing a limit message** — you've likely run out of Studio Credits for the month, or your plan doesn't unlock the suite.
+- **Credit counter didn't go down after a failed generation** — that's expected; only successful generations are charged.
+
+---
+
+## How to Use Studio Photo (Turn a Plain Photo into a Studio Shot) in Swarnix
+
+**In short:** Studio Photo takes a plain counter or phone photo of a piece and turns it into a clean, studio-lit product shot on a professional background — no photographer needed.
+
+**Who can do this:** Any logged-in team member can use it from the AI Studio Suite. It draws from your shared Studio Credits.
+
+**Before you start:** Have a clear photo of just the jewellery piece (under 5 MB, JPEG/PNG/WebP). You can either upload a fresh photo, take one with the camera, or pick an image you already generated from your Studio Library.
+
+**Steps:**
+1. Open the **Studio** (AI Studio Suite) tab and tap the **Studio Photo** tile.
+2. Add your source photo — drag it in, tap Upload, use the Camera button, or tap to pick one from your Studio Library.
+3. Choose a background/style option for the finished look.
+4. Tap to generate. Wait a few moments while the AI relights and cleans up the shot.
+5. Review the result. Not happy? Regenerate to try again. You can open it full-screen (lightbox) to inspect it.
+6. Download it, or leave it — it's automatically saved into your Studio Library for later use.
+
+**Good to know:**
+- Each successful studio photo uses 1 Studio Credit from your shared monthly pool.
+- Source images must be under 5 MB and be a real image file.
+- The result is saved to your Studio Library under "Studio Photos."
+
+**Common questions:**
+- **Does this change my original photo?** No — it produces a new studio version; your original stays as-is.
+- **Can I use a photo I already made in another Studio tool?** Yes — pick it from the Library instead of uploading.
+- **Where does the finished photo go?** Into your Studio Library, and you can download or share it from there.
+
+**If something goes wrong:**
+- **Image rejected** — check it's a real image file under 5 MB.
+- **Generation failed** — try again; if it keeps failing you may be out of Studio Credits.
+
+---
+
+## How to Use Metal Swap (Preview a Piece in Another Gold Colour) in Swarnix
+
+**In short:** Metal Swap recolours a piece of jewellery into a different metal — yellow, white, or rose gold — keeping the same design and stones, so you can show a customer the same style in the colour they want without a second shoot.
+
+**Who can do this:** Any logged-in team member can use it from the AI Studio Suite. It draws from your shared Studio Credits.
+
+**Before you start:** Have a clear photo of the piece (under 5 MB), or pick one from your Studio Library.
+
+**Steps:**
+1. Open the **Studio** (AI Studio Suite) tab and tap the **Metal Swap** tile.
+2. Add your source photo — upload, use the camera, or choose one from your Studio Library.
+3. Pick the **target metal** you want to see it in (e.g. Yellow Gold, White Gold, Rose Gold).
+4. Optionally pick a background/style for the shot.
+5. Tap to generate and wait a few moments.
+6. Review the recoloured result — regenerate if needed, view full-screen, or download. It's also saved to your Studio Library.
+
+**Good to know:**
+- Each successful metal swap uses 1 Studio Credit from your shared monthly pool.
+- Same design, same stones — only the metal colour changes.
+- Results are saved to your Studio Library under "Metal Swaps."
+
+**Common questions:**
+- **Will the stones or design change?** No — Metal Swap is meant to change only the metal colour.
+- **Can I swap the same piece into two colours?** Yes — run it once per target metal.
+- **Is this an exact manufacturing preview?** It's an AI visual preview to help customers decide — always confirm the real piece before quoting.
+
+**If something goes wrong:**
+- **Odd colour result** — regenerate, or try a cleaner source photo.
+- **Nothing generates** — you may be out of Studio Credits for the month.
+
+---
+
+## How to Use Jewellery Design (Design a Piece and Publish It to Your Catalogue) in Swarnix
+
+**In short:** Jewellery Design lets you describe a piece field by field — type, style, metal, purity, stones, motifs, dimensions — have the AI generate design images for it, get a price estimate, and publish the finished design straight into your Inventory catalogue.
+
+**Who can do this:** Any logged-in team member can design and generate in the tool. Publishing the finished design as a product into Inventory follows normal Inventory rules (Read & Write access or higher). It draws from your shared Studio Credits.
+
+**Before you start:** Have an idea of the piece — piece type (ring, earring, necklace, etc.), metal and purity, and any stones or motifs. Optionally a reference image to guide the AI.
+
+**Steps:**
+1. Open the **Studio** (AI Studio Suite) tab and tap the **Jewellery Design** tile.
+2. Fill in the design form: piece type, style, metal type and purity, metal weight, finish, hallmark, centre stone and accent stones, dimensions, motifs, occasion, and target wearer.
+3. (Optional) Add a reference image to steer the look.
+4. Generate the design — the AI produces design image(s). Regenerate if you want other options.
+5. Review the price estimate the tool calculates from the metal/purity/weight and stones you entered.
+6. When happy, use the **Publish** flow to add the design to your Inventory catalogue as a product — it carries over the image and spec details.
+
+**Good to know:**
+- Each successful design image uses 1 Studio Credit from your shared monthly pool.
+- Generated designs are saved to your Studio Library under "Designs."
+- Publishing creates a real product in Inventory, so it counts toward your product limit like any other product, and (like new products) it's registered for WhatsApp photo-search.
+- A spec sheet of your chosen details is built alongside the design.
+
+**Common questions:**
+- **Does designing something automatically list it for customers?** No — it only becomes a live product when you publish it to Inventory.
+- **Can I edit the price?** The tool estimates a price from your inputs; you can adjust product details in Inventory after publishing.
+- **Where do generated designs live before I publish?** In your Studio Library under "Designs."
+
+**If something goes wrong:**
+- **Can't publish** — check you have Read & Write access on Inventory and haven't hit your product limit.
+- **Generation failed** — try again; you may be out of Studio Credits.
+
+---
+
+## How to Use AI Model in the Studio Suite (and Add the Shot to Inventory) in Swarnix
+
+**In short:** This is the standalone AI Model tool inside the Studio Suite — it puts your jewellery onto a photorealistic model, and then lets you send that photo straight into Inventory as a new product, so nothing is duplicated.
+
+**Who can do this:** Any logged-in team member can generate here. "Add to Inventory" opens the Add Product screen, and saving that product follows Inventory access rules (Read & Write or higher). It draws from your shared Studio Credits.
+
+**Before you start:** Have a clear jewellery photo ready. Optionally know the jewellery category so the AI places the piece correctly.
+
+**Steps:**
+1. Open the **Studio** (AI Studio Suite) tab and tap the **AI Model** tile.
+2. Pick the **Jewellery category** (or leave it on "Auto (let AI decide)").
+3. Add your jewellery photo and generate — the AI produces a model wearing the piece. Regenerate for alternatives.
+4. On any generated photo, tap **"Add to Inventory"** — this opens the Add Product screen pre-filled with that photo and category, ready for you to complete and save.
+5. Alternatively, share or download the model photo directly.
+
+**Good to know:**
+- Each successful model image uses 1 Studio Credit from your shared monthly pool.
+- This is different from the AI Model Try-On inside the Add/Edit Product form: the in-product version adds the shot to that product's images; this Studio version can CREATE a new product from the shot via "Add to Inventory."
+- Generated model photos are saved to your Studio Library under "AI Models."
+- Set the category before generating so the piece is placed correctly (ring on hand, necklace on neck, etc.).
+
+**Common questions:**
+- **What's the difference between this and the AI Model Try-On in the product form?** The product-form one adds to an existing product; this Studio one can start a brand-new product with "Add to Inventory."
+- **Do I have to add it to Inventory?** No — you can just share or download it.
+- **Why is the piece placed wrong?** Set the correct jewellery category before generating.
+
+**If something goes wrong:**
+- **Add to Inventory didn't save a product** — remember it only opens a pre-filled Add Product form; you still need to complete and Save it.
+- **Nothing generates** — you may be out of Studio Credits.
+
+---
+
+## How to Generate a Reel (Turn Photos into a Shareable Video) in Swarnix
+
+**In short:** Generate Reels turns your jewellery photos into a short, shareable video — with motion, background music, and optional text overlays — ideal for Instagram, WhatsApp Status, and stories.
+
+**Who can do this:** Any logged-in team member can use it from the AI Studio Suite. It draws from your shared Studio Credits, and reels cost more credits than a single photo.
+
+**Before you start:** Have a few jewellery photos ready (upload, camera, or pick from your Studio Library). Decide your aspect ratio, length, and whether you want music or a text overlay.
+
+**Steps:**
+1. Open the **Studio** (AI Studio Suite) tab and tap the **Generate Reels** tile.
+2. Add your photos (up to the allowed maximum per reel) — upload, use the camera, or pick from your Studio Library.
+3. Choose the **aspect ratio** (e.g. vertical for stories), the **resolution/quality**, and the **length** in seconds.
+4. (Optional) Pick a background **music** track, preview tracks with play/pause, or upload your own music file.
+5. (Optional) Add a **text overlay** — type the text, choose where it appears (e.g. at the end), and pick a font and colour.
+6. (Optional) Add a **custom prompt** to guide the motion/feel.
+7. Tap **Generate**. The reel is produced in the background — you'll see progress, and the finished video appears when ready.
+8. Play it, download it, or share it. It's also saved to your Studio Library.
+
+**Good to know:**
+- Reels cost more Studio Credits than a photo — the cost scales with length and resolution, and you're charged when the reel completes.
+- There's a maximum number of images per reel and size limits on uploaded music.
+- Finished reels are saved to your Studio Library under "Reels."
+- The credit is charged once per completed reel (not per preview).
+
+**Common questions:**
+- **Why does a reel cost several credits?** Because it's heavier to generate — longer and higher-resolution reels cost more.
+- **Can I use my own music?** Yes — upload a track (within the size limit) instead of picking a provided one.
+- **Can I add my store name or an offer as text?** Yes — use the text overlay, and choose its position, font, and colour.
+- **Where's my finished reel?** In the Studio Library under "Reels," where you can download or share it.
+
+**If something goes wrong:**
+- **Reel seems stuck** — it generates in the background; give it time, and check your connection.
+- **Can't add more photos** — you've hit the per-reel image maximum.
+- **Music won't upload** — check the file is within the allowed size.
+
+---
+
+## How to Use the Studio Library (Find, Share, and Download Everything You Generated) in Swarnix
+
+**In short:** The Studio Library is where every photo and video you've created with the Studio Suite is collected — designs, AI models, studio photos, metal swaps, and reels — so you can find, reuse, share, download, or delete them anytime.
+
+**Who can do this:** Any logged-in team member can open the Library from the AI Studio Suite.
+
+**Before you start:** Nothing — just open it after you've generated something.
+
+**Steps:**
+1. Open the **Studio** (AI Studio Suite) tab and tap the **Library** tile.
+2. Use the filter tabs to narrow the view: **All**, **Designs**, **AI Models**, **Studio Photos**, **Metal Swaps**, or **Reels**.
+3. Tap any item to open it full-screen (images) or play it (reels).
+4. On an item, use **Share** to send it via WhatsApp or other apps, copy its link, or download it.
+5. To remove an item, use the delete/trash action.
+6. To act on several at once, turn on **select mode**, tick multiple items, and share or download them together.
+
+**Good to know:**
+- The Library pulls together output from all Studio tools plus your completed reels in one place.
+- Items are shown newest first.
+- Deleting an item here removes it from the Library.
+- You can pick Library images as the source inside Studio Photo and Metal Swap, so you can chain tools.
+
+**Common questions:**
+- **Does the Library show reels too?** Yes — completed reels appear under the Reels tab.
+- **Can I share several items at once?** Yes — use select mode to pick multiple, then share or download.
+- **Can I reuse a Library image in another tool?** Yes — Studio Photo and Metal Swap let you pick a source straight from the Library.
+
+**If something goes wrong:**
+- **An item is missing** — check the filter tab you're on; try "All."
+- **Share didn't open WhatsApp** — try the copy-link or download option instead.
+
+---
+
+## How to Set Your Own Metal Rates (Override the Daily IBJA Rate) in Swarnix
+
+**In short:** The Metal Rates card shows today's live IBJA gold, silver, and platinum rates. As the jeweller, you can override the gold and silver rates with your own rate or add a premium over IBJA — and Swarnix always prices at whichever is higher, so you never sell below market.
+
+**Who can do this:** Only the store **Owner** (the Google-authenticated login) can edit rates — staff logins can see the rates but the "Edit my rates" button won't appear for them. This is because the override records are tied to the Owner's secure identity.
+
+**Before you start:** Know the rates you want to charge (per 10g for gold, per 1kg for silver) or the premium percentage you want to add over IBJA. Only gold and silver can be overridden — platinum stays IBJA-only.
+
+**Steps:**
+1. On your Dashboard, find the **"Today's Metal Rates"** card (it shows the IBJA rates and their date).
+2. Tap **"Edit my rates"** (Owner only).
+3. For each gold/silver purity, either type your own rate in the **"My rate (₹)"** column, or enter a **"Premium %"** over IBJA — or both.
+4. Set **"Auto-switch to IBJA + premium if my rate is older than ___ days"** (1–30) — this protects you if you forget to refresh a rate.
+5. Tap **"Save & re-price."** Swarnix saves your rates and re-prices your dynamic-priced products in the background within a few seconds.
+6. Overridden purities show a small **"My rate"** tag on the card.
+
+**How the effective rate is chosen:**
+- If you entered your own rate recently (within your stale-days window): Swarnix prices at the **higher** of your rate and today's IBJA (so an accidentally-low rate never drags you below market).
+- If you only set a premium %: price = IBJA × (1 + premium%).
+- If your typed rate has gone stale (older than your chosen days) and you set a premium: it auto-switches to IBJA + your premium, protecting you from an old low number.
+- If you set nothing: the plain IBJA rate is used.
+
+**Good to know:**
+- Clearing a rate back to empty removes your override for that purity, so pricing reverts to IBJA.
+- This directly affects any product using **Dynamic Pricing** — its price recalculates from the effective rate.
+- The card caches the last-seen rates so it loads instantly, then refreshes from the database.
+- Platinum and other metals can't be overridden — only gold and silver.
+
+**Common questions:**
+- **Why is my product still priced at IBJA even though I typed a lower rate?** Because Swarnix always uses the higher of your rate and IBJA — a below-market rate is ignored in favour of IBJA.
+- **What happens if I forget to update my rate for a week?** Once it's older than your stale-days setting, Swarnix switches to IBJA + your premium (if any), so you're not stuck on an old low rate.
+- **Can my staff change the rates?** No — only the Owner's own login can edit rates.
+- **Do my overrides update prices immediately?** Saving fires a background re-pricing of your dynamic products; it completes within a few seconds.
+
+**If something goes wrong:**
+- **"Edit my rates" button missing** — you're likely logged in as staff; only the Owner can edit.
+- **Prices didn't change after saving** — only Dynamic Pricing products react to rate changes; fixed-price products don't.
+- **Rates card shows an error** — check the daily rates have loaded; the card will retry.
+
+---
+
+## How to Bulk Import Products from a Spreadsheet (AI Bulk Import) in Swarnix
+
+**In short:** AI Bulk Import lets you upload a spreadsheet of your existing stock and have the AI figure out which of your columns map to Swarnix's product fields — so you can add many products at once instead of one by one.
+
+**Who can do this:** This lives inside Inventory, so it follows Inventory access — team members with **Read & Write** access (or Admin/Owner) can import. Read Only staff won't have it.
+
+**Before you start:** Have your product list ready as a spreadsheet. It should at least have an SKU/item code column; other columns like name, category, weight, purity, price, stock, making charges, and stone values will be mapped if present.
+
+**Steps:**
+1. Go to the **Inventory** tab.
+2. Tap **"AI Bulk Import."**
+3. **Step 1 — Upload:** drop in or choose your spreadsheet file.
+4. **Step 2 — Map Columns:** the AI suggests how each of your columns maps to Swarnix fields (SKU/HUID, Item Name, Category, Weight, Purity, Price, Stock Qty, Making Charge Type/Value, Stone/Diamond Value, Wastage %, etc.). Review and correct any mapping. SKU is required.
+5. **Step 3 — Preview & Import:** check the preview of how the products will come in, then confirm to import them into your catalogue.
+6. When done, your Inventory list refreshes with the new products.
+
+**Good to know:**
+- The only strictly required field is SKU — but the more columns you map, the more complete each product is.
+- Imported products count toward your plan's product limit, same as manually added ones.
+- The AI only suggests the mapping — you stay in control and can fix any column before importing.
+
+**Common questions:**
+- **What if my column names don't match Swarnix's?** That's the point of the mapping step — the AI matches them and you adjust anything it got wrong.
+- **Do I need every field filled?** No — SKU is the only required one; the rest are optional but recommended.
+- **Will importing overwrite my existing products?** Review the preview before confirming so you know exactly what's being added.
+- **Can Read Only staff import?** No — importing needs Read & Write access.
+
+**If something goes wrong:**
+- **Import blocked at the end** — you may have hit your product limit; check your plan usage.
+- **A column mapped wrong** — go back to the Map Columns step and fix it before importing.
+- **File won't upload** — make sure it's a supported spreadsheet file.
+
+---
+
+## How to Send a WhatsApp Marketing Campaign to Your Customers in Swarnix
+
+**In short:** Marketing lets you broadcast an approved WhatsApp template message to a group of your customers — filtered by tier — straight from Swarnix, and see the delivery results.
+
+**Who can do this:** Sending a campaign needs **Read & Write** access (or Admin/Owner). This feature requires a plan that includes Marketing Messages, and your store's WhatsApp Business must be connected.
+
+**Before you start:** Connect your WhatsApp Business number first (Profile page). Have at least one approved WhatsApp message template in your WhatsApp Business account, and decide which customer tier you're targeting.
+
+**Steps:**
+1. Open the **Marketing** tab.
+2. Refresh/load your approved WhatsApp templates and pick the one you want to send.
+3. Give the campaign a **name**.
+4. Fill in any template **variables** ({{1}}, {{2}}, …) the template needs.
+5. Choose who receives it by **tier**: VVIP only, VVIP & VIP, or All customers. Swarnix shows how many customers match.
+6. Review, then confirm to send — you'll be asked to confirm since it messages real customers.
+7. Watch the results/logs to see which messages were delivered, are pending, or failed.
+
+**Good to know:**
+- You can only send WhatsApp-approved templates — you can't free-type a broadcast, because WhatsApp requires pre-approved templates for business-initiated messages.
+- Your WhatsApp Business connection must be active (access token, phone number ID, and WABA ID present).
+- Targeting is by customer tier (Regular/VIP/VVIP), so tiers must be assigned for tier filters to be meaningful.
+- Sending uses your WhatsApp Business number, so normal WhatsApp messaging rules and any per-message costs apply on WhatsApp's side.
+
+**Common questions:**
+- **Why can't I type my own message?** WhatsApp only allows pre-approved templates for outbound campaigns — create/approve templates in your WhatsApp Business account first.
+- **Why is the Marketing tab locked?** Either your plan doesn't include Marketing Messages, or WhatsApp Business isn't connected yet.
+- **How do I target only my best customers?** Set the tier filter to "VVIP only" or "VVIP & VIP."
+- **How do I know if messages went out?** Check the campaign logs — they show delivered, pending, and failed counts.
+
+**If something goes wrong:**
+- **No templates appear** — make sure you have approved templates in WhatsApp Business, then refresh.
+- **"Not connected" state** — connect WhatsApp Business on the Profile page first (Owner only).
+- **Some messages failed** — customers may have invalid numbers or haven't opted in; review the logs for which ones.

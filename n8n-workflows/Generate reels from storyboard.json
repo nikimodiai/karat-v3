@@ -1,0 +1,1097 @@
+{
+  "name": "Generate reels from storyboard",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "reel-storyboard",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "name": "Webhook Plan",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -6000,
+        200
+      ],
+      "webhookId": "swarnix-reel-storyboard",
+      "id": "sbn-0001-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inp = $input.first().json;\nconst body = inp.body || inp;\nconst image = body.image_url || body.image1_url;\nif (!image) throw new Error('image_url is required');\n\nlet length = parseInt(body.length_seconds, 10);\nif (!Number.isInteger(length) || length < 4 || length > 24) length = 12;\nlet ratio = String(body.ratio || '9:16').toLowerCase();\nif (ratio === 'smart') ratio = 'adaptive';\nlet resolution = String(body.resolution || '720p').toLowerCase();\n\n// Scene count from length: <8s -> 1, 8-12s -> 2, >12s -> 3. Each clip >= 4s\n// (Seedance minimum), capped at 6. Durations always sum to the reel length.\nconst byLength = length < 8 ? 1 : length <= 12 ? 2 : 3;\nconst maxByMin = Math.max(1, Math.floor(length / 4));\nconst numClips = Math.min(Math.max(byLength, 1), maxByMin, 6);\nconst base = Math.floor(length / numClips);\nlet rem = length - base * numClips;\nconst durations = Array.from({ length: numClips }, () => base);\nfor (let i = 0; i < rem; i++) durations[i] += 1;\n\nreturn [{ json: { image_url: image, length_seconds: length, ratio, resolution, num_clips: numClips, durations } }];"
+      },
+      "name": "Storyboard Setup",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5760,
+        200
+      ],
+      "id": "sbn-0002-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.image_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "name": "Fetch Storyboard Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -5520,
+        200
+      ],
+      "id": "sbn-0003-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "jsCode": "const setup = $('Storyboard Setup').first().json;\nconst binary = $input.first().binary || {};\nconst key = binary.data ? 'data' : Object.keys(binary)[0];\nif (!key) throw new Error('No image binary fetched for the storyboard');\nconst buf = await this.helpers.getBinaryDataBuffer(0, key);\nconst b64 = buf.toString('base64');\nconst mimeType = (binary[key] && binary[key].mimeType) || 'image/jpeg';\n\nconst N = setup.num_clips;\n\nconst lines = [\n  'You are a world-class creative director for luxury jewellery reels on Instagram. The attached photo shows ONE jewellery item, and it may or may not be worn by a model.',\n  '',\n  'STEP 1 - Look at the photo carefully and note: what the piece is (ring, necklace, earrings, bangle, etc.), its metal colour and its stones; AND whether the photo shows a MODEL wearing the piece, or the PRODUCT on its own.',\n  '',\n  'STEP 2 - Design EXACTLY ' + N + ' DIFFERENT, eye-catching scenes for a premium reel. Each scene must be a DISTINCT creative idea. Do NOT make every scene a zoom-in on the jewellery. Pick varied shots that fit the photo.',\n  'IMPORTANT: if the photo shows a MODEL wearing the jewellery, then the SAME model must appear in EVERY scene wearing the SAME piece - do NOT switch to product-only shots. Use model-based ideas like: she slowly turns her head or hand so the piece catches the light; her hand rises gracefully to touch or frame the necklace/earring; she walks forward in slow motion as the jewellery shines; a soft smile and glance to camera as the stones sparkle; wind gently moving her hair or dupatta while the piece stays in focus; a slow move from a wide shot of her to a close look at the jewellery she is wearing.',\n  'ONLY if the photo is the PRODUCT on its own (no person), use product ideas like: the ring or piece drops into water in slow motion with a gentle splash and ripples; the piece rests on flowing silk or velvet that ripples softly; warm golden light rays and sparkles sweep across the stones; soft petals, water droplets or tiny light particles drift around it; the piece turns slowly on a clean pedestal under a moving spotlight; a hand gently places the piece down on a marble surface.',\n  '',\n  'STEP 3 - For each scene, write in SIMPLE, PLAIN ENGLISH. Use short, clear sentences and everyday words - no fancy or poetic language. Provide:',\n  '- \"title\": 2 to 4 simple words.',\n  '- \"prompt\": describe what happens in the shot in plain English - the main action or effect, a smooth slow camera move, the lighting and mood, and the background. Keep the jewellery design exactly as in the photo, but you ARE allowed to add creative backgrounds and effects (water, a splash, silk, petals, sparkles, light rays). Keep the piece clearly in frame.',\n  '- \"caption\": a short on-screen line a jeweller could show (max 6 words), or an empty string.',\n  '',\n  'Make the ' + N + ' scenes feel varied, fresh and cinematic together, like a high-end advert a jeweller would be proud to post. Return STRICT JSON ONLY (no markdown, no code fences): {\"analysis\":\"one simple line about the piece\",\"style_name\":\"a short simple name for the overall look\",\"scenes\":[{\"title\":\"\",\"prompt\":\"\",\"caption\":\"\"}]}',\n  'The scenes array MUST contain exactly ' + N + ' item(s).'\n];\nconst instruction = lines.join('\\n');\n\nconst geminiBody = {\n  contents: [{ role: 'user', parts: [ { text: instruction }, { inlineData: { mimeType, data: b64 } } ] }],\n  generationConfig: { responseMimeType: 'application/json', temperature: 1.15 }\n};\n\nreturn [{ json: { ...setup, geminiBody }, binary: $input.first().binary }];"
+      },
+      "name": "Build Storyboard Body",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5280,
+        200
+      ],
+      "id": "sbn-0004-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://aiplatform.googleapis.com/v1/projects/gen-lang-client-0072450422/locations/global/publishers/google/models/gemini-2.5-flash:generateContent",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.geminiBody) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "name": "Gemini Storyboard",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -5040,
+        200
+      ],
+      "id": "sbn-0005-0000-4000-8000-000000000000",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "tnS5X86BK99WondH",
+          "name": "Google Gemini(PaLM) Api account"
+        },
+        "googleApi": {
+          "id": "k10NlYvp0Aas1XX4",
+          "name": "Vertex Service Account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const setup = $('Storyboard Setup').first().json;\nconst durations = setup.durations || [];\nconst N = setup.num_clips;\nconst resp = $input.first().json;\n\n// Pull the model's text out of the Vertex generateContent response.\nlet text = null;\ntry {\n  const cands = resp.candidates || (resp.data && resp.data.candidates) || [];\n  for (const c of cands) {\n    const parts = (c.content && c.content.parts) || [];\n    for (const p of parts) { if (typeof p.text === 'string' && p.text.trim()) { text = p.text; break; } }\n    if (text) break;\n  }\n} catch (e) {}\n\n// Parse the JSON object out of the text (tolerant of any stray wrapping).\nlet parsed = null;\nif (text) {\n  const a = text.indexOf('{');\n  const b = text.lastIndexOf('}');\n  if (a !== -1 && b !== -1 && b > a) {\n    try { parsed = JSON.parse(text.slice(a, b + 1)); } catch (e) { parsed = null; }\n  }\n}\n\n// Fallback storyboard (photo-agnostic) so the user always gets an editable script.\nconst FALLBACK = {\n  style_name: 'Luxury Mix',\n  analysis: 'Your jewellery piece',\n  scenes: [\n    { title: 'Silk Reveal', prompt: 'The jewellery rests on soft flowing silk that ripples gently in a light breeze. Warm light glows behind it. The camera slowly pushes in as the stones start to sparkle.', caption: '' },\n    { title: 'Water Splash', prompt: 'The piece is shown in slow motion as a few water droplets fall and splash near it, sending out soft ripples and tiny sparkles. Clean bright light. The camera holds steady and close.', caption: '' },\n    { title: 'Golden Glow', prompt: 'Warm golden light rays sweep across the jewellery and small sparkles drift in the air. The camera slowly pulls back to a soft, glowing hero shot.', caption: '' }\n  ]\n};\n\nconst sceneSrc = (parsed && Array.isArray(parsed.scenes) && parsed.scenes.length) ? parsed.scenes : FALLBACK.scenes;\n\nconst scenes = [];\nfor (let i = 0; i < N; i++) {\n  const s = sceneSrc[i] || sceneSrc[sceneSrc.length - 1] || FALLBACK.scenes[Math.min(i, FALLBACK.scenes.length - 1)];\n  const fb = FALLBACK.scenes[Math.min(i, FALLBACK.scenes.length - 1)];\n  scenes.push({\n    order: i,\n    title: String(s.title || ('Scene ' + (i + 1))).slice(0, 60),\n    duration: durations[i] || Math.max(4, Math.floor(setup.length_seconds / N)),\n    prompt: String(s.prompt || fb.prompt).slice(0, 600),\n    caption: String(s.caption || '').slice(0, 60)\n  });\n}\n\nreturn [{ json: {\n  ok: true,\n  analysis: String((parsed && parsed.analysis) || FALLBACK.analysis).slice(0, 200),\n  style_name: String((parsed && parsed.style_name) || FALLBACK.style_name).slice(0, 80),\n  length_seconds: setup.length_seconds,\n  ratio: setup.ratio,\n  resolution: setup.resolution,\n  num_scenes: N,\n  scenes\n}}];"
+      },
+      "name": "Parse Storyboard",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4800,
+        200
+      ],
+      "id": "sbn-0006-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "name": "Respond Storyboard",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -4560,
+        200
+      ],
+      "id": "sbn-0007-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "reel-storyboard-generate",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "name": "Webhook Generate",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -6000,
+        700
+      ],
+      "webhookId": "swarnix-reel-storyboard-generate",
+      "id": "sbn-0008-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "jsCode": "const inp = $input.first().json;\nconst body = inp.body || inp;\n\nconst allowedRatios = ['9:16','16:9','1:1','4:3','3:4','21:9','adaptive'];\nconst allowedRes = ['480p','720p','1080p'];\nconst ALLOW_1080 = false;\n\nconst userId = body.user_id;\n// Storyboard mode: ONE photo drives every scene/clip.\nconst image = body.image_url || body.image1_url;\nif (!userId) throw new Error('user_id is required');\nif (!image) throw new Error('image_url is required');\n\nlet length = parseInt(body.length_seconds, 10);\nlet ratio = String(body.ratio || '9:16').toLowerCase();\nif (ratio === 'smart') ratio = 'adaptive';\nlet resolution = String(body.resolution || '720p').toLowerCase();\nconst customPrompt = String(body.custom_prompt || '').trim();\nconst musicId = body.music_id || null;\nconst musicUrl = (typeof body.music_url === 'string' && body.music_url.trim()) ? body.music_url.trim() : null;\n\nconst overlayText = String(body.overlay_text || '').trim().slice(0, 80) || null;\nconst overlayPosition = overlayText ? (body.overlay_position === 'end' ? 'end' : 'whole') : null;\nconst FONT_KEYS = ['sans','serif','mono'];\nconst COLOR_KEYS = ['white','black','gold','navy','red','cream'];\nconst overlayFont = overlayText ? (FONT_KEYS.includes(String(body.overlay_font || '').toLowerCase()) ? String(body.overlay_font).toLowerCase() : 'sans') : null;\nconst overlayColor = overlayText ? (COLOR_KEYS.includes(String(body.overlay_color || '').toLowerCase()) ? String(body.overlay_color).toLowerCase() : 'white') : null;\n\nif (!allowedRatios.includes(ratio)) throw new Error('invalid ratio: ' + ratio);\nif (!allowedRes.includes(resolution)) throw new Error('invalid resolution: ' + resolution);\nif (!Number.isInteger(length) || length < 4 || length > 24) throw new Error('length_seconds must be an integer between 4 and 24');\n\nlet resolutionUsed = resolution;\nif (resolution === '1080p' && !ALLOW_1080) resolutionUsed = '720p';\n\n// Edited storyboard from the app. Each scene supplies its own prompt (and,\n// optionally, a duration). Keep only scenes with a real prompt.\nlet scenes = Array.isArray(body.scenes)\n  ? body.scenes.filter((s) => s && typeof s.prompt === 'string' && s.prompt.trim())\n  : [];\nif (!scenes.length) throw new Error('scenes[] is required - run the storyboard step first');\nconst maxByMin = Math.max(1, Math.floor(length / 4));\nconst cap = Math.min(6, maxByMin);\nif (scenes.length > cap) scenes = scenes.slice(0, cap);\nconst numClips = scenes.length;\n\n// Use the per-scene durations if they are valid and sum to the reel length;\n// otherwise split the length evenly (each clip >= 4s, remainder on the front).\nlet durations = scenes.map((s) => parseInt(s.duration, 10)).filter((n) => Number.isInteger(n) && n >= 4);\nconst sumOk = durations.length === numClips && durations.reduce((a, b) => a + b, 0) === length;\nif (!sumOk) {\n  const base = Math.floor(length / numClips);\n  let rem = length - base * numClips;\n  durations = Array.from({ length: numClips }, () => base);\n  for (let i = 0; i < rem; i++) durations[i] += 1;\n}\n\n// Guards appended to EVERY prompt server-side. They lock the PIECE's design and\n// keep the camera cinematic, but deliberately ALLOW creative backgrounds and\n// effects (water, silk, petals, light) so scenes don't all become the same zoom.\nconst PACING = 'Use smooth, cinematic slow-motion. The camera moves slowly and steadily - a gentle push-in, a soft arc, or a slow reveal - with no spinning and no full 360 rotation. Dynamic effects such as a water splash, rippling silk, drifting petals or floating light particles are welcome, but the jewellery always stays clearly in frame and in sharp focus.';\nconst FIDELITY = 'Keep the jewellery piece itself exactly as in the reference image - the same design, stones, metal colour, shape and proportions. Creative backgrounds, lighting and effects are encouraged. If a person is shown, keep her face and identity unchanged. No on-screen text, no logos, no watermarks.';\n\nconst endDur = Math.min(4, Math.max(1, Math.ceil(length / 2)));\nconst overlayStartAt = overlayPosition === 'end' ? length - endDur : 0;\n\n// Credits are charged ONLY when the reel completes (trg_reel_charge_on_complete).\n// Compute the cost server-side (never trust the client): the video render cost\n// (ceil(seconds x rate), min 1) plus +1 per scene for the AI first-frame. Rates\n// MUST match src/lib/plans.js REEL_UNITS_PER_SECOND.\nconst REEL_RATE = { '480p': 0.35, '720p': 0.75, '1080p': 1.6 };\nconst rate = REEL_RATE[resolution] || REEL_RATE['720p'];\nconst videoCost = Math.max(1, Math.ceil(length * rate));\nconst creditsCost = videoCost + numClips;\n\nconst clips = scenes.map((s, i) => {\n  const scene = String(s.prompt).trim();\n  // scene_prompt drives the per-scene first-frame image; prompt (with the guards)\n  // drives the Seedance motion. Both come from the same edited scene text.\n  let scenePrompt = scene;\n  if (customPrompt) scenePrompt += '. ' + customPrompt;\n  const motionPrompt = scenePrompt + '. ' + PACING + ' ' + FIDELITY;\n  return { order: i, duration: durations[i], first_frame_url: image, prompt: motionPrompt, scene_prompt: scenePrompt };\n});\n\nreturn [{ json: {\n  user_id: userId,\n  length_seconds: length, num_clips: numClips,\n  ratio, resolution, resolution_used: resolutionUsed,\n  input_images: [image], custom_prompt: customPrompt || null, music_id: musicId, music_url: musicUrl,\n  overlay_text: overlayText, overlay_position: overlayPosition, overlay_start_at: overlayStartAt,\n  overlay_font: overlayFont, overlay_color: overlayColor,\n  credits_cost: creditsCost,\n  style_pack: 'storyboard', style_name: String(body.style_name || 'Custom storyboard').slice(0, 80),\n  clips\n}}];"
+      },
+      "name": "Plan From Scenes",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5760,
+        700
+      ],
+      "id": "sbn-0009-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://bigmdvjrvqyqzyrijdum.supabase.co/rest/v1/reel_jobs",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ user_id: $json.user_id, status: 'processing', length_seconds: $json.length_seconds, num_clips: $json.num_clips, ratio: $json.ratio, resolution: $json.resolution, resolution_used: $json.resolution_used, input_images: $json.input_images, custom_prompt: $json.custom_prompt, music_id: $json.music_id, overlay_text: $json.overlay_text, overlay_position: $json.overlay_position, credits_cost: $json.credits_cost }) }}",
+        "options": {}
+      },
+      "name": "Create Job Row",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -5520,
+        700
+      ],
+      "id": "sbn-0010-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $input.first().json;\nconst id = Array.isArray(r) ? (r[0] && r[0].id) : (r.id ?? (r[0] && r[0].id));\nif (!id) throw new Error('Could not read job id from Supabase insert: ' + JSON.stringify(r).slice(0,300));\nconst plan = $('Plan From Scenes').first().json;\nreturn [{ json: { job_id: id, ...plan } }];"
+      },
+      "name": "Attach Job ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5280,
+        700
+      ],
+      "id": "sbn-0011-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { job_id: $json.job_id, status: 'processing', message: 'Reel submitted. Tap refresh to check status.' } }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      },
+      "name": "Respond Submitted",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        -5040,
+        700
+      ],
+      "id": "sbn-0012-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "jsCode": "const j = $json;\nreturn j.clips.map(c => ({ json: {\n  job_id: j.job_id,\n  order: c.order,\n  duration: c.duration,\n  first_frame_url: c.first_frame_url,\n  prompt: c.prompt,\n  scene_prompt: c.scene_prompt,\n  ratio: j.ratio,\n  resolution_used: j.resolution_used\n}}));"
+      },
+      "name": "Split Clips",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4800,
+        700
+      ],
+      "id": "sbn-0013-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.first_frame_url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          }
+        }
+      },
+      "name": "Fetch Ref Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -4680,
+        900
+      ],
+      "id": "sbn-0014-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst srcAll = $('Split Clips').all();\nconst out = [];\nfor (let i = 0; i < items.length; i++) {\n  const src = srcAll[i].json;\n  const binary = items[i].binary || {};\n  const key = binary.data ? 'data' : Object.keys(binary)[0];\n  if (!key) throw new Error('No reference image fetched for the scene frame');\n  const buf = await this.helpers.getBinaryDataBuffer(i, key);\n  const refB64 = buf.toString('base64');\n  const refMime = (binary[key] && binary[key].mimeType) || 'image/jpeg';\n\n  const ratio = src.ratio || '9:16';\n  const aspectHint = ratio === '9:16' ? 'Compose it as a tall vertical 9:16 image.'\n    : ratio === '1:1' ? 'Compose it as a square 1:1 image.'\n    : ratio === '16:9' ? 'Compose it as a wide 16:9 image.' : '';\n\n  const scene = String(src.scene_prompt || src.prompt || '').trim();\n  const framePrompt = 'Create ONE photorealistic still image (a single frame) for a premium luxury jewellery reel. The scene: ' + scene\n    + ' VERY IMPORTANT - look closely at the attached reference image: if it shows a person or model wearing the jewellery, you MUST keep that SAME model in the new image - the same face, skin tone, hair, makeup and body - still wearing the SAME jewellery, and build this scene around her (do not remove her and do not turn it into a product-only shot). If the reference image is the product on its own with no person, then keep it a product-only shot.'\n    + ' In every case the jewellery piece must stay EXACTLY as in the reference image - same design, stones, metal colour, shape and proportions - do not redesign it. Make it look like a high-end advert with beautiful lighting. ' + aspectHint + ' No text, no logos, no watermarks.';\n\n  const geminiImageBody = {\n    contents: [{ role: 'user', parts: [ { text: framePrompt }, { inlineData: { mimeType: refMime, data: refB64 } } ] }],\n    generationConfig: { responseModalities: ['TEXT','IMAGE'] }\n  };\n\n  out.push({ json: {\n    job_id: src.job_id, order: src.order, duration: src.duration,\n    prompt: src.prompt, ratio: src.ratio, resolution_used: src.resolution_used,\n    refB64, refMime, public_id: 'reel-frame_' + src.job_id + '_' + src.order,\n    geminiImageBody\n  }, binary: items[i].binary, pairedItem: { item: i } });\n}\nreturn out;"
+      },
+      "name": "Build Frame Body",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4560,
+        900
+      ],
+      "id": "sbn-0015-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://aiplatform.googleapis.com/v1/projects/gen-lang-client-0072450422/locations/global/publishers/google/models/gemini-2.5-flash-image:generateContent",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.geminiImageBody) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "name": "Gemini Frame",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -4440,
+        900
+      ],
+      "id": "sbn-0016-0000-4000-8000-000000000000",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "tnS5X86BK99WondH",
+          "name": "Google Gemini(PaLM) Api account"
+        },
+        "googleApi": {
+          "id": "k10NlYvp0Aas1XX4",
+          "name": "Vertex Service Account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst srcAll = $('Build Frame Body').all();\nconst out = [];\nfor (let i = 0; i < items.length; i++) {\n  const src = srcAll[i].json;\n  const resp = items[i].json;\n  let b64 = null, mime = 'image/png';\n  try {\n    const cands = resp.candidates || (resp.data && resp.data.candidates) || [];\n    for (const c of cands) {\n      const parts = (c.content && c.content.parts) || [];\n      for (const p of parts) {\n        const d = p.inlineData || p.inline_data;\n        if (d && d.data) { b64 = d.data; mime = d.mimeType || d.mime_type || 'image/png'; break; }\n      }\n      if (b64) break;\n    }\n  } catch (e) {}\n  // Fallback: if this scene's frame failed to generate, reuse the original photo.\n  if (!b64) { b64 = src.refB64; mime = src.refMime || 'image/jpeg'; }\n  const imageData = await this.helpers.prepareBinaryData(Buffer.from(b64, 'base64'), 'frame.png', mime);\n  out.push({ json: {\n    job_id: src.job_id, order: src.order, duration: src.duration,\n    prompt: src.prompt, ratio: src.ratio, resolution_used: src.resolution_used,\n    public_id: src.public_id\n  }, binary: { imageData }, pairedItem: { item: i } });\n}\nreturn out;"
+      },
+      "name": "Decode Frame",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4320,
+        900
+      ],
+      "id": "sbn-0017-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.cloudinary.com/v1_1/jewelleryinventory/image/upload",
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "upload_preset",
+              "value": "jewelleryupload"
+            },
+            {
+              "name": "public_id",
+              "value": "={{ $json.public_id }}"
+            },
+            {
+              "name": "folder",
+              "value": "swarnix-reel-frames"
+            },
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "imageData"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Upload Frame",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -4200,
+        900
+      ],
+      "id": "sbn-0018-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst srcAll = $('Decode Frame').all();\nconst out = [];\nfor (let i = 0; i < items.length; i++) {\n  const up = items[i].json;\n  const url = up.secure_url || up.url;\n  if (!url) throw new Error('Cloudinary returned no URL for the scene frame: ' + JSON.stringify(up).slice(0,200));\n  const src = srcAll[i].json;\n  out.push({ json: {\n    job_id: src.job_id, order: src.order, duration: src.duration,\n    first_frame_url: url, prompt: src.prompt,\n    ratio: src.ratio, resolution_used: src.resolution_used\n  }, pairedItem: { item: i } });\n}\nreturn out;"
+      },
+      "name": "Map Frame",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4080,
+        900
+      ],
+      "id": "sbn-0019-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.SEEDANCE_BASE_URL + '/contents/generations/tasks' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $env.SEEDANCE_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ model: $env.SEEDANCE_MODEL_ID, generate_audio: false, content: [ { type: 'text', text: $json.prompt + ' --resolution ' + $json.resolution_used + ' --ratio ' + $json.ratio + ' --duration ' + $json.duration + ' --camerafixed false --watermark false --audio false' }, { type: 'image_url', role: 'first_frame', image_url: { url: $json.first_frame_url } } ] }) }}",
+        "options": {}
+      },
+      "name": "Seedance Create",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -4560,
+        700
+      ],
+      "id": "sbn-0020-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "jsCode": "const resp = $json;\nconst taskId = resp.id || resp.task_id || (resp.data && resp.data.id);\nif (!taskId) throw new Error('Seedance create returned no task id: ' + JSON.stringify(resp).slice(0,300));\nconst src = $('Map Frame').item.json;\nreturn { json: { order: src.order, duration: src.duration, task_id: taskId } };",
+        "mode": "runOnceForEachItem"
+      },
+      "name": "Map Task",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4320,
+        700
+      ],
+      "id": "sbn-0021-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst tasks = items.map(it => ({\n  order: it.json.order, duration: it.json.duration, task_id: it.json.task_id,\n  status: 'queued', video_url: null\n}));\nconst meta = $('Attach Job ID').first().json;\nconst totalSeconds = tasks.reduce((s, t) => s + t.duration, 0);\nreturn [{ json: {\n  job_id: meta.job_id, user_id: meta.user_id, music_id: meta.music_id,\n  resolution_used: meta.resolution_used,\n  overlay_text: meta.overlay_text, overlay_position: meta.overlay_position, overlay_start_at: meta.overlay_start_at,\n  attempt: 0, totalSeconds, tasks\n}}];"
+      },
+      "name": "Collect Tasks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -4080,
+        700
+      ],
+      "id": "sbn-0022-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "amount": 15
+      },
+      "name": "Poll Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -3840,
+        700
+      ],
+      "webhookId": "swarnix-storyboard-poll",
+      "id": "sbn-0023-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "jsCode": "const c = $json;\nreturn c.tasks.map(t => ({ json: {\n  job_id: c.job_id, user_id: c.user_id, music_id: c.music_id,\n  resolution_used: c.resolution_used, attempt: c.attempt, totalSeconds: c.totalSeconds,\n  overlay_text: c.overlay_text, overlay_position: c.overlay_position, overlay_start_at: c.overlay_start_at,\n  order: t.order, duration: t.duration, task_id: t.task_id,\n  status: t.status, video_url: t.video_url\n}}));"
+      },
+      "name": "Split Tasks",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3600,
+        700
+      ],
+      "id": "sbn-0024-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.SEEDANCE_BASE_URL + '/contents/generations/tasks/' + $json.task_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $env.SEEDANCE_API_KEY }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Seedance Get",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -3360,
+        700
+      ],
+      "id": "sbn-0025-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "jsCode": "const resp = $json;\nconst src = $('Split Tasks').item.json;\nconst status = resp.status || (resp.data && resp.data.status) || src.status;\nlet url = src.video_url;\nif (resp.content && resp.content.video_url) url = resp.content.video_url;\nelse if (resp.data && resp.data.content && resp.data.content.video_url) url = resp.data.content.video_url;\nelse if (resp.video_url) url = resp.video_url;\nreturn { json: { ...src, status, video_url: url } };",
+        "mode": "runOnceForEachItem"
+      },
+      "name": "Map Poll",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -3120,
+        700
+      ],
+      "id": "sbn-0026-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all().map(i => i.json);\nconst MAX_ATTEMPTS = 20; // 20 x 15s = 5 min ceiling\nconst attempt = (items[0].attempt || 0) + 1;\nconst tasks = items.map(t => ({\n  order: t.order, duration: t.duration, task_id: t.task_id,\n  status: t.status, video_url: t.video_url\n})).sort((a, b) => a.order - b.order);\n\nconst done = tasks.every(t => String(t.status) === 'succeeded' && t.video_url);\nconst failed = tasks.some(t => ['failed','cancelled','expired','error'].includes(String(t.status)));\nconst timedOut = attempt >= MAX_ATTEMPTS;\nconst m = items[0];\nreturn [{ json: {\n  job_id: m.job_id, user_id: m.user_id, music_id: m.music_id,\n  resolution_used: m.resolution_used, totalSeconds: m.totalSeconds,\n  overlay_text: m.overlay_text, overlay_position: m.overlay_position, overlay_start_at: m.overlay_start_at,\n  attempt, tasks,\n  allDone: done, anyFailed: failed, timedOut, stop: (failed || timedOut)\n}}];"
+      },
+      "name": "Aggregate Poll",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2880,
+        700
+      ],
+      "id": "sbn-0027-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ String($json.allDone) }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "All Done?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -2640,
+        700
+      ],
+      "id": "sbn-0028-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ String($json.stop) }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Stop?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -2640,
+        900
+      ],
+      "id": "sbn-0029-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "jsCode": "const j = $json;\nconst clips = j.tasks.filter(t => t.video_url)\n  .sort((a, b) => a.order - b.order)\n  .map(t => ({ order: t.order, url: t.video_url }));\nconst totalSeconds = j.totalSeconds;\nconst costUsd = +(totalSeconds * 0.022).toFixed(4);  // Seedance 1.5 Pro Fast ~ $0.022/s\nconst costInr = +(costUsd * 94.4).toFixed(2);\n\n// music_url and overlay font/color aren't threaded through the poll loop - read\n// them straight from the original plan node.\nconst plan = $('Plan From Scenes').first().json;\nconst musicUrl = plan.music_url || null;\n\nconst overlay = j.overlay_text ? {\n  text: j.overlay_text,\n  position: j.overlay_position || 'whole',   // 'whole' | 'end'\n  start_at: j.overlay_position === 'end' ? (j.overlay_start_at || 0) : 0,\n  font: plan.overlay_font || 'sans',\n  color: plan.overlay_color || 'white'\n} : null;\n\nreturn [{ json: {\n  job_id: j.job_id, music_id: j.music_id, music_url: musicUrl, clips,\n  overlay,\n  totalSeconds, cost_usd: costUsd, cost_inr: costInr, clip_urls: clips\n}}];"
+      },
+      "name": "Build Render Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2400,
+        600
+      ],
+      "id": "sbn-0030-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.RENDER_SERVICE_URL + '/render' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-render-key",
+              "value": "={{ $env.RENDER_API_KEY }}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify({ job_id: $json.job_id, clips: $json.clips, music_id: $json.music_id, music_url: $json.music_url, overlay: $json.overlay }) }}",
+        "options": {
+          "timeout": 600000
+        }
+      },
+      "name": "Render Service",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -2160,
+        600
+      ],
+      "id": "sbn-0031-0000-4000-8000-000000000000",
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "const r = $json; // render response { url, bytes, duration }\nconst p = $('Build Render Payload').first().json;\nreturn [{ json: {\n  job_id: p.job_id,\n  patch: {\n    status: 'completed',\n    output_url: r.url,\n    output_bytes: r.bytes || null,\n    clip_urls: p.clip_urls,\n    cost_usd: p.cost_usd,\n    cost_inr: p.cost_inr,\n    completed_at: new Date().toISOString()\n  }\n}}];"
+      },
+      "name": "Compose Success",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1920,
+        520
+      ],
+      "id": "sbn-0032-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "jsCode": "let jobId = $json.job_id;\nif (!jobId) { try { jobId = $('Build Render Payload').first().json.job_id; } catch (e) {} }\nif (!jobId) { try { jobId = $('Aggregate Poll').first().json.job_id; } catch (e) {} }\nlet msg = 'Reel generation failed';\nif ($json.anyFailed) msg = 'One or more Seedance clips failed to generate';\nelse if ($json.timedOut) msg = 'Generation timed out';\nelse if ($json.error) msg = 'Render failed: ' + String(typeof $json.error === 'string' ? $json.error : JSON.stringify($json.error)).slice(0, 400);\nreturn [{ json: {\n  job_id: jobId,\n  patch: { status: 'failed', error_message: msg, completed_at: new Date().toISOString() }\n}}];"
+      },
+      "name": "Compose Failure",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2160,
+        900
+      ],
+      "id": "sbn-0033-0000-4000-8000-000000000000"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "={{ 'https://bigmdvjrvqyqzyrijdum.supabase.co/rest/v1/reel_jobs?id=eq.' + $json.job_id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "={{ $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Authorization",
+              "value": "={{ 'Bearer ' + $env.SUPABASE_SERVICE_KEY }}"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=minimal"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "raw",
+        "rawContentType": "application/json",
+        "body": "={{ JSON.stringify($json.patch) }}",
+        "options": {}
+      },
+      "name": "Update Job",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1920,
+        700
+      ],
+      "id": "sbn-0034-0000-4000-8000-000000000000"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook Plan": {
+      "main": [
+        [
+          {
+            "node": "Storyboard Setup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Storyboard Setup": {
+      "main": [
+        [
+          {
+            "node": "Fetch Storyboard Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Storyboard Image": {
+      "main": [
+        [
+          {
+            "node": "Build Storyboard Body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Storyboard Body": {
+      "main": [
+        [
+          {
+            "node": "Gemini Storyboard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Storyboard": {
+      "main": [
+        [
+          {
+            "node": "Parse Storyboard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Storyboard": {
+      "main": [
+        [
+          {
+            "node": "Respond Storyboard",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Generate": {
+      "main": [
+        [
+          {
+            "node": "Plan From Scenes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Plan From Scenes": {
+      "main": [
+        [
+          {
+            "node": "Create Job Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Job Row": {
+      "main": [
+        [
+          {
+            "node": "Attach Job ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Attach Job ID": {
+      "main": [
+        [
+          {
+            "node": "Respond Submitted",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond Submitted": {
+      "main": [
+        [
+          {
+            "node": "Split Clips",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Clips": {
+      "main": [
+        [
+          {
+            "node": "Fetch Ref Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Ref Image": {
+      "main": [
+        [
+          {
+            "node": "Build Frame Body",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Frame Body": {
+      "main": [
+        [
+          {
+            "node": "Gemini Frame",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Frame": {
+      "main": [
+        [
+          {
+            "node": "Decode Frame",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decode Frame": {
+      "main": [
+        [
+          {
+            "node": "Upload Frame",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Frame": {
+      "main": [
+        [
+          {
+            "node": "Map Frame",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Frame": {
+      "main": [
+        [
+          {
+            "node": "Seedance Create",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Seedance Create": {
+      "main": [
+        [
+          {
+            "node": "Map Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Task": {
+      "main": [
+        [
+          {
+            "node": "Collect Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect Tasks": {
+      "main": [
+        [
+          {
+            "node": "Poll Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Poll Wait": {
+      "main": [
+        [
+          {
+            "node": "Split Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Tasks": {
+      "main": [
+        [
+          {
+            "node": "Seedance Get",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Seedance Get": {
+      "main": [
+        [
+          {
+            "node": "Map Poll",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Poll": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Poll",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Poll": {
+      "main": [
+        [
+          {
+            "node": "All Done?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "All Done?": {
+      "main": [
+        [
+          {
+            "node": "Build Render Payload",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Stop?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Stop?": {
+      "main": [
+        [
+          {
+            "node": "Compose Failure",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Poll Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Render Payload": {
+      "main": [
+        [
+          {
+            "node": "Render Service",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Render Service": {
+      "main": [
+        [
+          {
+            "node": "Compose Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Compose Failure",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compose Success": {
+      "main": [
+        [
+          {
+            "node": "Update Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compose Failure": {
+      "main": [
+        [
+          {
+            "node": "Update Job",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": true
+  },
+  "meta": {
+    "instanceId": "926af9fe819bfca9c65f4c36d0a89dfa16c4f674f94393a7444d2e6d8385c53e"
+  },
+  "nodeGroups": [],
+  "tags": []
+}
